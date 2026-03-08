@@ -52,48 +52,98 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background grid-bg scanline">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Header */}
-        <div className="glass-panel hud-border p-4 mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <img src={helicopterIcon} alt="Helicopter" className="h-12 w-auto opacity-80 drop-shadow-[0_0_8px_hsl(38_95%_55%/0.3)]" />
-              <div>
+        <div className="glass-panel hud-border p-3 md:p-4 mb-6 md:mb-8">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 md:gap-4 shrink min-w-0 md:min-w-fit">
+              <img src={helicopterIcon} alt="Helicopter" className="h-8 md:h-12 w-auto opacity-80 drop-shadow-[0_0_8px_hsl(38_95%_55%/0.3)] flex-shrink-0" />
+              <div className="min-w-0 md:min-w-fit">
                 <div className="flex items-center gap-2">
-                  <h1 className="font-mono text-2xl font-bold text-primary tracking-wider">
+                  <h1 className="font-mono text-base md:text-2xl font-bold text-primary tracking-wider truncate md:overflow-visible md:text-clip md:whitespace-nowrap">
                     HELI PILOT LOGBOOK
                   </h1>
-                  <div className="status-dot" />
+                  <div className="status-dot flex-shrink-0" />
                 </div>
-                <div className="flex items-center gap-3 mt-1">
-                  <p className="font-mono text-xs text-muted-foreground tracking-widest">
+                <div className="flex items-center gap-3 mt-0.5 md:mt-1">
+                  <p className="font-mono text-[10px] md:text-xs text-muted-foreground tracking-widest truncate">
                     PILOT: {user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
                   </p>
-                  <span className="font-mono text-[9px] text-accent/60">▸ ACTIVE</span>
+                  <span className="font-mono text-[9px] text-accent/60 flex-shrink-0">▸ ACTIVE</span>
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">{canInstall && (
-              <Button variant="outline" onClick={install} className="font-mono gap-2 border-primary text-primary">
-                <MonitorSmartphone className="h-4 w-4" />
+            {/* Desktop buttons */}
+            <div className="hidden md:flex gap-2">
+              {canInstall && (
+                <Button variant="outline" onClick={install} className="font-mono gap-2 border-primary text-primary">
+                  <MonitorSmartphone className="h-4 w-4" />
+                  INSTALL
+                </Button>
+              )}
+              <SpreadsheetImport onEntriesImported={addMultipleEntries} />
+              <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
+                <Clock className="h-4 w-4" />
+                F&D CALC
+              </Button>
+              <Button variant="outline" onClick={() => setSummaryOpen(true)} disabled={entries.length === 0} className="font-mono gap-2">
+                <BarChart3 className="h-4 w-4" />
+                12M SUMMARY
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" disabled={entries.length === 0} className="font-mono gap-2">
+                    <Download className="h-4 w-4" />
+                    EXPORT
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="font-mono">
+                  <DropdownMenuItem onClick={() => exportToNumbers(entries)}>
+                    EXPORT ALL ({entries.length} entries)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportToNumbers([...entries].sort((a, b) => a.date > b.date ? -1 : 1).slice(0, 72))}>
+                    LAST 3 PAGES (72 entries)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button onClick={handleNew} className="font-mono gap-2">
+                <Plus className="h-4 w-4" />
+                NEW ENTRY
+              </Button>
+              <Button variant="ghost" onClick={signOut} className="font-mono gap-2 text-muted-foreground">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+            {/* Mobile: sign out only */}
+            <div className="flex md:hidden gap-1">
+              <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          {/* Mobile action bar */}
+          <div className="flex md:hidden gap-1.5 mt-3 flex-wrap">
+            {canInstall && (
+              <Button variant="outline" size="sm" onClick={install} className="font-mono text-[10px] gap-1 h-7 border-primary text-primary">
+                <MonitorSmartphone className="h-3 w-3" />
                 INSTALL
               </Button>
             )}
             <SpreadsheetImport onEntriesImported={addMultipleEntries} />
-            <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
-              <Clock className="h-4 w-4" />
-              F&D CALC
+            <Button variant="outline" size="sm" onClick={() => setDutyCalcOpen(true)} className="font-mono text-[10px] gap-1 h-7">
+              <Clock className="h-3 w-3" />
+              F&D
             </Button>
-            <Button variant="outline" onClick={() => setSummaryOpen(true)} disabled={entries.length === 0} className="font-mono gap-2">
-              <BarChart3 className="h-4 w-4" />
-              12M SUMMARY
+            <Button variant="outline" size="sm" onClick={() => setSummaryOpen(true)} disabled={entries.length === 0} className="font-mono text-[10px] gap-1 h-7">
+              <BarChart3 className="h-3 w-3" />
+              12M
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" disabled={entries.length === 0} className="font-mono gap-2">
-                  <Download className="h-4 w-4" />
+                <Button variant="outline" size="sm" disabled={entries.length === 0} className="font-mono text-[10px] gap-1 h-7">
+                  <Download className="h-3 w-3" />
                   EXPORT
-                  <ChevronDown className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="font-mono">
@@ -105,14 +155,10 @@ const Index = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button onClick={handleNew} className="font-mono gap-2">
-              <Plus className="h-4 w-4" />
-              NEW ENTRY
+            <Button size="sm" onClick={handleNew} className="font-mono text-[10px] gap-1 h-7">
+              <Plus className="h-3 w-3" />
+              NEW
             </Button>
-            <Button variant="ghost" onClick={signOut} className="font-mono gap-2 text-muted-foreground">
-              <LogOut className="h-4 w-4" />
-            </Button>
-            </div>
           </div>
         </div>
 

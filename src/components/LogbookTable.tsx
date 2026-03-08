@@ -68,7 +68,7 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
   }
 
   return (
-    <div className="bg-card/80 backdrop-blur-sm border border-border rounded-lg">
+    <div className="bg-card/80 backdrop-blur-sm border border-border rounded-lg overflow-x-auto">
       <div className="flex justify-end p-2 border-b border-border/50">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
