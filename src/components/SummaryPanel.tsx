@@ -13,8 +13,7 @@ function getTypeTotals(entries: LogbookEntry[]) {
     if (!map[type]) map[type] = { hours: 0, flights: 0 };
     map[type].flights += 1;
     map[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0)
-      + (e.instrumentNavAids || 0) + (e.instrumentPlace || 0) + (e.instrumentTime || 0)
-      + (e.instructorDay || 0) + (e.instructorNight || 0);
+      + (e.instrumentTime || 0) + (e.instructorDay || 0) + (e.instructorNight || 0);
   }
   return Object.entries(map).sort((a, b) => b[1].hours - a[1].hours);
 }
@@ -23,7 +22,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
   const groups = [
     { title: 'Single Engine — Day', fields: ['seDayDual', 'seDayPilot'] as NumericField[] },
     { title: 'Single Engine — Night', fields: ['seNightDual', 'seNightPilot'] as NumericField[] },
-    { title: 'Instrument', fields: ['instrumentNavAids', 'instrumentPlace', 'instrumentTime'] as NumericField[] },
+    { title: 'Instrument', fields: ['instrumentTime'] as NumericField[] },
     { title: 'Instructor', fields: ['instructorDay', 'instructorNight'] as NumericField[] },
   ];
 

@@ -15,8 +15,6 @@ export interface LogbookEntry {
   seNightPilot: number; // Col 4
 
   // Instrument Flying
-  instrumentNavAids: number; // Col 11
-  instrumentPlace: number;   // Col 12
   instrumentTime: number;    // Col 13
 
   // Flying as Instructor
@@ -34,8 +32,6 @@ export const emptyEntry: Omit<LogbookEntry, 'id'> = {
   seDayPilot: 0,
   seNightDual: 0,
   seNightPilot: 0,
-  instrumentNavAids: 0,
-  instrumentPlace: 0,
   instrumentTime: 0,
   instructorDay: 0,
   instructorNight: 0,
@@ -44,7 +40,7 @@ export const emptyEntry: Omit<LogbookEntry, 'id'> = {
 export type NumericField =
   | 'seDayDual' | 'seDayPilot'
   | 'seNightDual' | 'seNightPilot'
-  | 'instrumentNavAids' | 'instrumentPlace' | 'instrumentTime'
+  | 'instrumentTime'
   | 'instructorDay' | 'instructorNight';
 
 export const numericFieldLabels: Record<NumericField, string> = {
@@ -52,8 +48,6 @@ export const numericFieldLabels: Record<NumericField, string> = {
   seDayPilot: 'SE Day Pilot',
   seNightDual: 'SE Night Dual',
   seNightPilot: 'SE Night Pilot',
-  instrumentNavAids: 'Instr Nav Aids',
-  instrumentPlace: 'Instr Place',
   instrumentTime: 'Instr Time',
   instructorDay: 'Instructor Day',
   instructorNight: 'Instructor Night',

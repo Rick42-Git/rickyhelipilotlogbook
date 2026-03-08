@@ -28,7 +28,7 @@ Extract as many flight entries as you can identify. For each flight, populate th
 - flightDetails (route, remarks, exercise numbers, any notes)
 - Single Engine Day: seDayDual (dual instruction received), seDayPilot (solo/PIC)
 - Single Engine Night: seNightDual, seNightPilot
-- Instrument Flying: instrumentNavAids (col 11), instrumentPlace (col 12), instrumentTime (col 13)
+- Instrument Flying: instrumentTime (col 13)
 - Flying as Instructor: instructorDay (col 14), instructorNight (col 15)
 
 All numeric values are decimal hours (e.g. 1.3 = 1 hour 18 min). If a value is unreadable, missing, or not applicable, use 0.
@@ -53,8 +53,6 @@ Be thorough — extract partial data rather than skipping a row. Even a date and
         meNightDual: { type: "number" },
         meNightPilot: { type: "number" },
         meNightCoPilot: { type: "number" },
-        instrumentNavAids: { type: "number" },
-        instrumentPlace: { type: "number" },
         instrumentTime: { type: "number" },
         instructorDay: { type: "number" },
         instructorNight: { type: "number" },
@@ -131,7 +129,7 @@ Be thorough — extract partial data rather than skipping a row. Even a date and
       'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
       'meDayDual', 'meDayPilot', 'meDayCoPilot',
       'meNightDual', 'meNightPilot', 'meNightCoPilot',
-      'instrumentNavAids', 'instrumentPlace', 'instrumentTime',
+      'instrumentTime',
       'instructorDay', 'instructorNight',
     ];
 

@@ -8,8 +8,7 @@ const headers = [
 
 const numericKeys: NumericField[] = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
-  'instrumentNavAids', 'instrumentPlace', 'instrumentTime',
-  'instructorDay', 'instructorNight',
+  'instrumentTime', 'instructorDay', 'instructorNight',
 ];
 
 export function exportToNumbers(entries: LogbookEntry[]) {

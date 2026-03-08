@@ -17,7 +17,7 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
 
   const totalDual = filtered.reduce((s, e) => s + (e.seDayDual || 0) + (e.seNightDual || 0), 0);
   const totalPilot = filtered.reduce((s, e) => s + (e.seDayPilot || 0) + (e.seNightPilot || 0), 0);
-  const totalInstrument = filtered.reduce((s, e) => s + (e.instrumentNavAids || 0) + (e.instrumentPlace || 0) + (e.instrumentTime || 0), 0);
+  const totalInstrument = filtered.reduce((s, e) => s + (e.instrumentTime || 0), 0);
   const totalInstructor = filtered.reduce((s, e) => s + (e.instructorDay || 0) + (e.instructorNight || 0), 0);
   const grandTotal = totalDual + totalPilot + totalInstrument + totalInstructor;
 
@@ -39,8 +39,6 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
     {
       title: 'Instrument Flying',
       rows: [
-        { label: 'Nav Aids', value: filtered.reduce((s, e) => s + (e.instrumentNavAids || 0), 0) },
-        { label: 'Place', value: filtered.reduce((s, e) => s + (e.instrumentPlace || 0), 0) },
         { label: 'Time', value: filtered.reduce((s, e) => s + (e.instrumentTime || 0), 0) },
       ],
     },
@@ -60,8 +58,7 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
     if (!typeMap[type]) typeMap[type] = { hours: 0, flights: 0 };
     typeMap[type].flights += 1;
     typeMap[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0)
-      + (e.instrumentNavAids || 0) + (e.instrumentPlace || 0) + (e.instrumentTime || 0)
-      + (e.instructorDay || 0) + (e.instructorNight || 0);
+      + (e.instrumentTime || 0) + (e.instructorDay || 0) + (e.instructorNight || 0);
   }
   const typeTotals = Object.entries(typeMap).sort((a, b) => b[1].hours - a[1].hours);
 

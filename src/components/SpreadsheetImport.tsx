@@ -33,11 +33,6 @@ const HEADER_MAP: Record<string, keyof Omit<LogbookEntry, 'id'>> = {
   'se day pilot': 'seDayPilot',
   'se night dual': 'seNightDual',
   'se night pilot': 'seNightPilot',
-  'instr nav aids': 'instrumentNavAids',
-  'instrument nav aids': 'instrumentNavAids',
-  'nav aids': 'instrumentNavAids',
-  'instr place': 'instrumentPlace',
-  'instrument place': 'instrumentPlace',
   'instr time': 'instrumentTime',
   'instrument time': 'instrumentTime',
   'instructor day': 'instructorDay',
@@ -46,8 +41,7 @@ const HEADER_MAP: Record<string, keyof Omit<LogbookEntry, 'id'>> = {
 
 const NUMERIC_FIELDS: NumericField[] = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
-  'instrumentNavAids', 'instrumentPlace', 'instrumentTime',
-  'instructorDay', 'instructorNight',
+  'instrumentTime', 'instructorDay', 'instructorNight',
 ];
 
 function parseRow(row: Record<string, unknown>, columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>): Omit<LogbookEntry, 'id'> | null {
@@ -61,8 +55,6 @@ function parseRow(row: Record<string, unknown>, columnMap: Record<string, keyof 
     seDayPilot: 0,
     seNightDual: 0,
     seNightPilot: 0,
-    instrumentNavAids: 0,
-    instrumentPlace: 0,
     instrumentTime: 0,
     instructorDay: 0,
     instructorNight: 0,
