@@ -156,7 +156,39 @@ function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<L
 
   for (const h of headers) {
     if (!usedHeaders.has(h) && normalizeHeader(h)) unmapped.push(h);
+}
+
+function mapHeadersWithTemplate(
+  headers: string[],
+  templateMapping: { sourceHeader: string; mappedField: string }[],
+): { columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>; unmapped: string[] } | null {
+  const validFields = new Set([
+    'date', 'aircraftType', 'aircraftReg', 'pilotInCommand', 'flightDetails',
+    'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
+    'instrumentTime', 'instructorDay', 'instructorNight',
+  ]);
+  const columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>> = {};
+  const unmapped: string[] = [];
+  let matchCount = 0;
+
+  for (const h of headers) {
+    const normH = normalizeHeader(h);
+    const match = templateMapping.find(m => {
+      const normT = normalizeHeader(m.sourceHeader);
+      return normT === normH || normH.includes(normT) || normT.includes(normH);
+    });
+
+    if (match && validFields.has(match.mappedField)) {
+      columnMap[h] = match.mappedField as keyof Omit<LogbookEntry, 'id'>;
+      matchCount++;
+    } else if (normalizeHeader(h)) {
+      unmapped.push(h);
+    }
   }
+
+  // Only use template if it matched at least 3 columns
+  return matchCount >= 3 ? { columnMap, unmapped } : null;
+}
 
   return { columnMap, unmapped };
 }
