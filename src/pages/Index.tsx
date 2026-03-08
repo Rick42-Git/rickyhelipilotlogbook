@@ -31,6 +31,8 @@ import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { FlightDutyCalculator } from '@/components/FlightDutyCalculator';
+import { ColumnTemplateManager } from '@/components/ColumnTemplateManager';
+import { useColumnTemplates } from '@/hooks/useColumnTemplates';
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -40,6 +42,7 @@ const Index = () => {
   const [dutyCalcOpen, setDutyCalcOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
   const { canInstall, install } = useInstallPrompt();
+  const { templates } = useColumnTemplates();
 
   const handleEdit = (entry: LogbookEntry) => {
     setEditingEntry(entry);
@@ -92,7 +95,8 @@ const Index = () => {
                   INSTALL
                 </Button>
               )}
-              <SpreadsheetImport onEntriesImported={addMultipleEntries} />
+              <ColumnTemplateManager />
+              <SpreadsheetImport onEntriesImported={addMultipleEntries} templates={templates} />
               {lastImportIds && lastImportIds.length > 0 && (
                 <Button variant="outline" onClick={undoLastImport} className="font-mono gap-2 border-destructive text-destructive hover:bg-destructive/10">
                   <Undo2 className="h-4 w-4" />
@@ -171,7 +175,8 @@ const Index = () => {
                 INSTALL
               </Button>
             )}
-            <SpreadsheetImport onEntriesImported={addMultipleEntries} />
+            <ColumnTemplateManager />
+            <SpreadsheetImport onEntriesImported={addMultipleEntries} templates={templates} />
             {lastImportIds && lastImportIds.length > 0 && (
               <Button variant="outline" size="sm" onClick={undoLastImport} className="font-mono text-[10px] gap-1 h-7 border-destructive text-destructive hover:bg-destructive/10">
                 <Undo2 className="h-3 w-3" />

@@ -9,8 +9,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 
+import { ColumnTemplate } from '@/hooks/useColumnTemplates';
+
 interface SpreadsheetImportProps {
   onEntriesImported: (entries: Omit<LogbookEntry, 'id'>[]) => void;
+  templates?: ColumnTemplate[];
 }
 
 const FIELD_KEYWORDS: { field: keyof Omit<LogbookEntry, 'id'>; keywords: string[]; priority: number }[] = [
@@ -158,6 +161,37 @@ function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<L
   return { columnMap, unmapped };
 }
 
+function mapHeadersWithTemplate(
+  headers: string[],
+  templateMapping: { sourceHeader: string; mappedField: string }[],
+): { columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>; unmapped: string[] } | null {
+  const validFields = new Set([
+    'date', 'aircraftType', 'aircraftReg', 'pilotInCommand', 'flightDetails',
+    'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
+    'instrumentTime', 'instructorDay', 'instructorNight',
+  ]);
+  const columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>> = {};
+  const unmapped: string[] = [];
+  let matchCount = 0;
+
+  for (const h of headers) {
+    const normH = normalizeHeader(h);
+    const match = templateMapping.find(m => {
+      const normT = normalizeHeader(m.sourceHeader);
+      return normT === normH || normH.includes(normT) || normT.includes(normH);
+    });
+
+    if (match && validFields.has(match.mappedField)) {
+      columnMap[h] = match.mappedField as keyof Omit<LogbookEntry, 'id'>;
+      matchCount++;
+    } else if (normalizeHeader(h)) {
+      unmapped.push(h);
+    }
+  }
+
+  return matchCount >= 3 ? { columnMap, unmapped } : null;
+}
+
 function parseLocalizedNumber(value: unknown): number {
   if (value === null || value === undefined || value === '') return 0;
   if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
@@ -253,7 +287,7 @@ function matrixToText(matrix: (string | number | null)[][]): string {
     .join('\n');
 }
 
-export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps) {
+export function SpreadsheetImport({ onEntriesImported, templates = [] }: SpreadsheetImportProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [parsedEntries, setParsedEntries] = useState<Omit<LogbookEntry, 'id'>[]>([]);
@@ -387,7 +421,23 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
         return;
       }
 
-      const { columnMap, unmapped } = mapHeaders(headers);
+      // Try template-based mapping first
+      let mappingResult: { columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>; unmapped: string[] } | null = null;
+
+      for (const template of templates) {
+        mappingResult = mapHeadersWithTemplate(headers, template.columnMapping);
+        if (mappingResult) {
+          toast.info(`Using template "${template.name}"`);
+          break;
+        }
+      }
+
+      // Fall back to keyword-based mapping
+      if (!mappingResult) {
+        mappingResult = mapHeaders(headers);
+      }
+
+      const { columnMap, unmapped } = mappingResult;
       setUnmappedCols(unmapped);
 
       const entries = rows

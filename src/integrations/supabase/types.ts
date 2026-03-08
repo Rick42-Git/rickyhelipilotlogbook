@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      column_templates: {
+        Row: {
+          column_mapping: Json
+          created_at: string
+          id: string
+          name: string
+          source_headers: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          column_mapping?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          source_headers?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          column_mapping?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          source_headers?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       logbook_entries: {
         Row: {
           aircraft_reg: string
