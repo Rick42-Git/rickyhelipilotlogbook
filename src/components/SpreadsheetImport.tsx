@@ -66,8 +66,10 @@ function scoreMatch(normalizedHeader: string, keywords: string[]): number {
 }
 
 const SECONDARY_HEADER_TOKENS = new Set([
-  'day', 'night', 'dual', 'pic', 'picus', 'co pilot', 'co-pilot', 'actual tme', 'actual time',
-  'fstd time', 'nav aids', 'place', 'se', 'me', 'remarks', 'date', 'dd mm yyyy',
+  'day', 'night', 'dual', 'pic', 'picus', 'co pilot', 'co-pilot',
+  'single engine aircraft', 'multi engine aircraft', 'instrument time', 'instructor time',
+  'actual tme', 'actual time', 'fstd time', 'nav aids', 'place', 'se', 'me', 'remarks',
+  'date', 'dd mm yyyy', 'class or type', 'registration marks', 'plt in command', 'details of flight',
 ]);
 
 function isHeaderContinuationRow(row: (string | number | null)[]): boolean {
@@ -78,10 +80,23 @@ function isHeaderContinuationRow(row: (string | number | null)[]): boolean {
   if (values.length < 3) return false;
 
   const tokenHits = values.filter((v) => SECONDARY_HEADER_TOKENS.has(v)).length;
-  const hasOnlyTinyStrings = values.every((v) => v.length <= 14);
+  const hasMostlyShortLabels = values.filter((v) => v.length <= 22).length >= Math.ceil(values.length * 0.7);
   const numericLike = row.filter((cell) => parseLocalizedNumber(cell) > 0).length;
 
-  return tokenHits >= 3 && hasOnlyTinyStrings && numericLike === 0;
+  return tokenHits >= 3 && hasMostlyShortLabels && numericLike === 0;
+}
+
+function expandMergedRowValues(row: (string | number | null)[], maxCols: number): string[] {
+  const expanded: string[] = [];
+  let carry = '';
+
+  for (let colIdx = 0; colIdx < maxCols; colIdx++) {
+    const value = String(row[colIdx] ?? '').trim();
+    if (value) carry = value;
+    expanded.push(value || carry);
+  }
+
+  return expanded;
 }
 
 function buildCompositeHeaders(
@@ -89,9 +104,11 @@ function buildCompositeHeaders(
   headerRows: number[],
   maxCols: number,
 ): string[] {
+  const expandedRows = headerRows.map((rowIdx) => expandMergedRowValues(matrix[rowIdx] || [], maxCols));
+
   return Array.from({ length: maxCols }, (_, colIdx) => {
-    const parts = headerRows
-      .map((rowIdx) => String(matrix[rowIdx]?.[colIdx] ?? '').trim())
+    const parts = expandedRows
+      .map((row) => row[colIdx] || '')
       .filter(Boolean);
 
     const unique: string[] = [];
