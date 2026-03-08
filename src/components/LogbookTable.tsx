@@ -91,7 +91,7 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto relative">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
