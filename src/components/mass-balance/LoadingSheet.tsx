@@ -34,7 +34,7 @@ export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, t
           return (
             <div key={i} className="grid grid-cols-[1fr_100px_50px_90px] gap-2 items-center px-1 py-1.5 rounded hover:bg-muted/20 transition-colors">
               <div className="flex items-center gap-2 min-w-0">
-                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${weights[i] > 0 ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${weights[i] > 0 ? 'bg-success' : 'bg-muted-foreground/30'}`} />
                 <div className="min-w-0">
                   <span className="font-mono text-xs text-foreground truncate block">{s.label}</span>
                   <span className="font-mono text-[9px] text-muted-foreground">STA {s.station}"</span>
@@ -54,21 +54,21 @@ export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, t
                 )}
               </div>
               <div className="font-mono text-[10px] text-muted-foreground text-center">lbs</div>
-              <div className="font-mono text-xs text-right text-primary/80">{Math.round(moment).toLocaleString()}</div>
+              <div className="font-mono text-xs text-right text-primary">{Math.round(moment).toLocaleString()}</div>
             </div>
           );
         })}
       </div>
 
       {/* Total */}
-      <div className="grid grid-cols-[1fr_100px_50px_90px] gap-2 items-center mt-3 px-1 py-2 bg-primary/10 border border-primary/20 rounded">
+      <div className="grid grid-cols-[1fr_100px_50px_90px] gap-2 items-center mt-3 px-1 py-2 bg-success/10 border border-success/20 rounded">
         <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-          <span className="font-mono text-sm font-bold text-primary">TOTAL</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-success" />
+          <span className="font-mono text-sm font-bold text-success">TOTAL</span>
         </div>
-        <div className="font-mono text-sm text-center font-bold text-primary">{totalWeight.toLocaleString()}</div>
+        <div className="font-mono text-sm text-center font-bold text-success">{totalWeight.toLocaleString()}</div>
         <div className="font-mono text-[10px] text-muted-foreground text-center">lbs</div>
-        <div className="font-mono text-sm text-right font-bold text-primary">{Math.round(totalMoment).toLocaleString()}</div>
+        <div className="font-mono text-sm text-right font-bold text-success">{Math.round(totalMoment).toLocaleString()}</div>
       </div>
 
       {/* Gross Weight Bar */}
@@ -80,7 +80,7 @@ export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, t
         <div className="relative h-3 rounded-full bg-muted/30 overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-300 ${
-              weightPercent > 100 ? 'bg-destructive' : weightPercent > 85 ? 'bg-amber-500' : 'bg-primary'
+              weightPercent > 100 ? 'bg-destructive' : weightPercent > 85 ? 'bg-amber-500' : 'bg-success'
             }`}
             style={{ width: `${Math.min(weightPercent, 100)}%` }}
           />
