@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LogbookEntry } from '@/types/logbook';
 import { Pencil, Trash2, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import helicopterWatermark from '@/assets/helicopter-icon.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
