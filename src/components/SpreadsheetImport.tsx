@@ -164,17 +164,7 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
 
       // Build column mapping from headers
       const headers = Object.keys(rows[0]);
-      const columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>> = {};
-      const unmapped: string[] = [];
-
-      for (const h of headers) {
-        const normalized = h.toLowerCase().trim();
-        if (HEADER_MAP[normalized]) {
-          columnMap[h] = HEADER_MAP[normalized];
-        } else {
-          unmapped.push(h);
-        }
-      }
+      const { columnMap, unmapped } = mapHeaders(headers);
 
       setUnmappedCols(unmapped);
 
