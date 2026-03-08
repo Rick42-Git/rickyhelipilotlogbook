@@ -65,6 +65,49 @@ function scoreMatch(normalizedHeader: string, keywords: string[]): number {
   return bestScore;
 }
 
+const SECONDARY_HEADER_TOKENS = new Set([
+  'day', 'night', 'dual', 'pic', 'picus', 'co pilot', 'co-pilot', 'actual tme', 'actual time',
+  'fstd time', 'nav aids', 'place', 'se', 'me', 'remarks', 'date', 'dd mm yyyy',
+]);
+
+function isHeaderContinuationRow(row: (string | number | null)[]): boolean {
+  const values = row
+    .map((cell) => normalizeHeader(String(cell ?? '').trim()))
+    .filter(Boolean);
+
+  if (values.length < 3) return false;
+
+  const tokenHits = values.filter((v) => SECONDARY_HEADER_TOKENS.has(v)).length;
+  const hasOnlyTinyStrings = values.every((v) => v.length <= 14);
+  const numericLike = row.filter((cell) => parseLocalizedNumber(cell) > 0).length;
+
+  return tokenHits >= 3 && hasOnlyTinyStrings && numericLike === 0;
+}
+
+function buildCompositeHeaders(
+  matrix: (string | number | null)[][],
+  headerRows: number[],
+  maxCols: number,
+): string[] {
+  return Array.from({ length: maxCols }, (_, colIdx) => {
+    const parts = headerRows
+      .map((rowIdx) => String(matrix[rowIdx]?.[colIdx] ?? '').trim())
+      .filter(Boolean);
+
+    const unique: string[] = [];
+    const seen = new Set<string>();
+
+    for (const part of parts) {
+      const norm = normalizeHeader(part);
+      if (!norm || seen.has(norm)) continue;
+      seen.add(norm);
+      unique.push(part);
+    }
+
+    return unique.join(' ').trim() || `Column ${colIdx + 1}`;
+  });
+}
+
 function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>; unmapped: string[] } {
   const columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>> = {};
   const unmapped: string[] = [];
