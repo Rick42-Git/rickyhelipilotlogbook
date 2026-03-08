@@ -69,8 +69,7 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
   }
 
   return (
-    <div className="glass-panel" style={{ overflow: 'visible' }}>
-      <div className="flex justify-end p-2 border-b border-border/50">
+    <div className="glass-panel" style={{ overflow: 'visible' }}lassName="flex justify-end p-2 border-b border-border/50">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="font-mono text-xs gap-1.5">
@@ -94,8 +93,7 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
       <div className="relative">
         <img src={helicopterWatermark} alt="" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-auto opacity-[0.04] pointer-events-none select-none" />
         <table className="w-full text-sm relative z-10">
-          <thead clasz-30" style={{ top: '37px' }}p-37px] z-320">
-            <tr className="border-b border-border bg-card">
+          <thead clasz-30" style={{sName="sticky z-30" style={{ top: '37px' }}<tr className="border-b border-border bg-card">
               {activeCols.map(col => (
                 <th key={col.key} className="px-2 py-2 text-left font-mono text-[10px] text-primary uppercase tracking-wider whitespace-nowrap">{col.shortLabel}</th>
               ))}
