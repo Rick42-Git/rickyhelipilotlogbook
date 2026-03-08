@@ -70,6 +70,7 @@ const SECONDARY_HEADER_TOKENS = new Set([
   'single engine aircraft', 'multi engine aircraft', 'instrument time', 'instructor time',
   'actual tme', 'actual time', 'fstd time', 'nav aids', 'place', 'se', 'me', 'remarks',
   'date', 'dd mm yyyy', 'class or type', 'registration marks', 'plt in command', 'details of flight',
+  'fstd', 'fstd actual time', 'multi engine', 'single engine',
 ]);
 
 function isHeaderContinuationRow(row: (string | number | null)[]): boolean {
