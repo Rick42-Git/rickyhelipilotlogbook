@@ -6,7 +6,8 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Download } from 'lucide-react';
+import { exportToNumbers } from '@/lib/exportLogbook';
 
 const Index = () => {
   const { entries, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
@@ -46,10 +47,16 @@ const Index = () => {
               DIGITAL FLIGHT RECORD SYSTEM
             </p>
           </div>
-          <Button onClick={handleNew} className="font-mono gap-2">
-            <Plus className="h-4 w-4" />
-            NEW ENTRY
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => exportToNumbers(entries)} disabled={entries.length === 0} className="font-mono gap-2">
+              <Download className="h-4 w-4" />
+              EXPORT
+            </Button>
+            <Button onClick={handleNew} className="font-mono gap-2">
+              <Plus className="h-4 w-4" />
+              NEW ENTRY
+            </Button>
+          </div>
         </div>
 
         {/* Summary */}
