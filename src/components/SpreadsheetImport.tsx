@@ -113,6 +113,35 @@ const NUMERIC_FIELDS: NumericField[] = [
   'instrumentTime', 'instructorDay', 'instructorNight',
 ];
 
+function parseLocalizedNumber(value: unknown): number {
+  if (value === null || value === undefined || value === '') return 0;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+
+  let cleaned = String(value)
+    .trim()
+    .replace(/\s+/g, '')
+    .replace(/[^0-9,.-]/g, '');
+
+  if (!cleaned) return 0;
+
+  const lastDot = cleaned.lastIndexOf('.');
+  const lastComma = cleaned.lastIndexOf(',');
+
+  if (lastComma > lastDot) {
+    // EU style: 1.234,56
+    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (lastDot > lastComma) {
+    // US style: 1,234.56
+    cleaned = cleaned.replace(/,/g, '');
+  } else if (lastComma !== -1) {
+    // 1,5 -> 1.5
+    cleaned = cleaned.replace(',', '.');
+  }
+
+  const num = Number.parseFloat(cleaned);
+  return Number.isFinite(num) ? num : 0;
+}
+
 function parseRow(row: Record<string, unknown>, columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>): Omit<LogbookEntry, 'id'> | null {
   const entry: Record<string, unknown> = {
     date: '',
@@ -134,13 +163,14 @@ function parseRow(row: Record<string, unknown>, columnMap: Record<string, keyof 
     if (val === undefined || val === null || val === '') continue;
 
     if (NUMERIC_FIELDS.includes(field as NumericField)) {
-      const num = typeof val === 'number' ? val : parseFloat(String(val));
-      entry[field] = isNaN(num) ? 0 : num;
+      entry[field] = parseLocalizedNumber(val);
     } else if (field === 'date') {
       if (typeof val === 'number') {
         // Excel serial date
         const d = XLSX.SSF.parse_date_code(val);
-        entry[field] = `${d.y}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}`;
+        if (d?.y && d?.m && d?.d) {
+          entry[field] = `${d.y}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}`;
+        }
       } else {
         entry[field] = String(val).trim();
       }
@@ -173,18 +203,62 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
       const data = await file.arrayBuffer();
       const wb = XLSX.read(data, { type: 'array', cellDates: false });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws);
+      const matrix = XLSX.utils.sheet_to_json<(string | number | null)[]>(ws, {
+        header: 1,
+        raw: true,
+        defval: '',
+      });
 
-      if (rows.length === 0) {
+      if (matrix.length === 0) {
         toast.error('No data found in spreadsheet');
         setLoading(false);
         return;
       }
 
-      // Build column mapping from headers
-      const headers = Object.keys(rows[0]);
-      const { columnMap, unmapped } = mapHeaders(headers);
+      // Detect likely header row from first rows by best field match score
+      const scanRows = matrix.slice(0, Math.min(8, matrix.length));
+      let headerRowIndex = 0;
+      let bestScore = -1;
 
+      scanRows.forEach((row, idx) => {
+        const candidateHeaders = row.map(cell => String(cell ?? '').trim()).filter(Boolean);
+        if (candidateHeaders.length < 2) return;
+        const { columnMap } = mapHeaders(candidateHeaders);
+        const score = Object.keys(columnMap).length;
+        if (score > bestScore) {
+          bestScore = score;
+          headerRowIndex = idx;
+        }
+      });
+
+      const rawHeaders = (matrix[headerRowIndex] || []).map(cell => String(cell ?? '').trim());
+      const maxCols = Math.max(rawHeaders.length, ...matrix.slice(headerRowIndex + 1, headerRowIndex + 20).map(r => r.length));
+
+      // Ensure unique/fallback header names
+      const seen = new Map<string, number>();
+      const headers = Array.from({ length: maxCols }, (_, i) => {
+        const base = rawHeaders[i] || `Column ${i + 1}`;
+        const count = (seen.get(base) || 0) + 1;
+        seen.set(base, count);
+        return count === 1 ? base : `${base} (${count})`;
+      });
+
+      const rows = matrix.slice(headerRowIndex + 1).map((row) => {
+        const obj: Record<string, unknown> = {};
+        headers.forEach((h, i) => {
+          obj[h] = row[i] ?? '';
+        });
+        return obj;
+      });
+
+      if (rows.length === 0) {
+        toast.error('No data rows found in spreadsheet');
+        setLoading(false);
+        return;
+      }
+
+      // Build column mapping from detected headers
+      const { columnMap, unmapped } = mapHeaders(headers);
       setUnmappedCols(unmapped);
 
       // Parse rows
