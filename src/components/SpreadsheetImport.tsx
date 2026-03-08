@@ -11,20 +11,20 @@ interface SpreadsheetImportProps {
   onEntriesImported: (entries: Omit<LogbookEntry, 'id'>[]) => void;
 }
 
-// Field aliases for flexible matching — order matters (first match wins)
-const FIELD_ALIASES: { field: keyof Omit<LogbookEntry, 'id'>; aliases: string[] }[] = [
-  { field: 'date', aliases: ['date', 'flight date', 'day', 'dat'] },
-  { field: 'aircraftType', aliases: ['aircraft type', 'a/c type', 'ac type', 'type', 'helicopter type', 'heli type', 'acft type'] },
-  { field: 'aircraftReg', aliases: ['aircraft reg', 'a/c reg', 'ac reg', 'registration', 'reg', 'tail', 'tail number', 'rego', 'acft reg'] },
-  { field: 'pilotInCommand', aliases: ['pilot in command', 'pic', 'captain', 'pilot', 'commander', 'p1', 'pilot name'] },
-  { field: 'flightDetails', aliases: ['flight details', 'details', 'route', 'remarks', 'from/to', 'from - to', 'sector', 'sectors', 'notes', 'description'] },
-  { field: 'seDayDual', aliases: ['se day dual', 'day dual', 'single engine day dual', 'se dual day', 'col 1', 'dual day'] },
-  { field: 'seDayPilot', aliases: ['se day pilot', 'day pilot', 'single engine day pilot', 'se pilot day', 'day p1', 'col 2', 'pilot day', 'day pic'] },
-  { field: 'seNightDual', aliases: ['se night dual', 'night dual', 'single engine night dual', 'se dual night', 'col 3', 'dual night'] },
-  { field: 'seNightPilot', aliases: ['se night pilot', 'night pilot', 'single engine night pilot', 'se pilot night', 'night p1', 'col 4', 'pilot night', 'night pic'] },
-  { field: 'instrumentTime', aliases: ['instrument time', 'instr time', 'instrument', 'ifr', 'ifr time', 'instruments', 'inst time', 'actual instrument', 'sim instrument', 'col 13'] },
-  { field: 'instructorDay', aliases: ['instructor day', 'instr day', 'instructing day', 'col 14', 'day instructor'] },
-  { field: 'instructorNight', aliases: ['instructor night', 'instr night', 'instructing night', 'col 15', 'night instructor'] },
+// Keywords that identify each field — scored by word overlap
+const FIELD_KEYWORDS: { field: keyof Omit<LogbookEntry, 'id'>; keywords: string[]; priority: number }[] = [
+  { field: 'date', keywords: ['date', 'flight date', 'day'], priority: 10 },
+  { field: 'aircraftType', keywords: ['aircraft type', 'a/c type', 'ac type', 'type', 'helicopter type', 'heli type', 'acft type', 'machine'], priority: 5 },
+  { field: 'aircraftReg', keywords: ['aircraft reg', 'a/c reg', 'ac reg', 'registration', 'reg', 'tail', 'tail number', 'rego', 'acft reg', 'call sign'], priority: 6 },
+  { field: 'pilotInCommand', keywords: ['pilot in command', 'pic', 'captain', 'pilot', 'commander', 'p1', 'pilot name', 'crew', 'name'], priority: 4 },
+  { field: 'flightDetails', keywords: ['flight details', 'details', 'route', 'remarks', 'from to', 'sector', 'notes', 'description', 'dep arr', 'departure arrival', 'place'], priority: 3 },
+  { field: 'seDayDual', keywords: ['se day dual', 'day dual', 'single engine day dual', 'dual day'], priority: 8 },
+  { field: 'seDayPilot', keywords: ['se day pilot', 'day pilot', 'single engine day pilot', 'day p1', 'pilot day', 'day pic', 'day command'], priority: 8 },
+  { field: 'seNightDual', keywords: ['se night dual', 'night dual', 'single engine night dual', 'dual night'], priority: 8 },
+  { field: 'seNightPilot', keywords: ['se night pilot', 'night pilot', 'single engine night pilot', 'night p1', 'pilot night', 'night pic', 'night command'], priority: 8 },
+  { field: 'instrumentTime', keywords: ['instrument time', 'instr time', 'instrument', 'ifr', 'ifr time', 'inst time', 'actual instrument', 'sim instrument'], priority: 7 },
+  { field: 'instructorDay', keywords: ['instructor day', 'instr day', 'instructing day', 'day instructor'], priority: 8 },
+  { field: 'instructorNight', keywords: ['instructor night', 'instr night', 'instructing night', 'night instructor'], priority: 8 },
 ];
 
 function normalizeHeader(name: string): string {
@@ -32,9 +32,42 @@ function normalizeHeader(name: string): string {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[_\-/]+/g, ' ')
+    .replace(/[_\-/().]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+/** Calculate how well a header matches a set of keywords — returns 0-1 score */
+function scoreMatch(normalizedHeader: string, keywords: string[]): number {
+  let bestScore = 0;
+
+  for (const kw of keywords) {
+    // Exact match is perfect
+    if (normalizedHeader === kw) return 1;
+
+    // Check if header contains the keyword or vice versa
+    if (normalizedHeader.includes(kw)) {
+      const score = kw.length / normalizedHeader.length;
+      bestScore = Math.max(bestScore, Math.max(score, 0.7));
+      continue;
+    }
+    if (kw.includes(normalizedHeader)) {
+      const score = normalizedHeader.length / kw.length;
+      bestScore = Math.max(bestScore, Math.max(score, 0.6));
+      continue;
+    }
+
+    // Word overlap scoring
+    const headerWords = normalizedHeader.split(' ');
+    const kwWords = kw.split(' ');
+    const matchingWords = kwWords.filter(w => headerWords.includes(w));
+    if (matchingWords.length > 0) {
+      const score = matchingWords.length / Math.max(headerWords.length, kwWords.length);
+      bestScore = Math.max(bestScore, score);
+    }
+  }
+
+  return bestScore;
 }
 
 function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>; unmapped: string[] } {
@@ -42,48 +75,34 @@ function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<L
   const unmapped: string[] = [];
   const usedFields = new Set<string>();
 
+  // Score every header against every field, then greedily assign best matches
+  const candidates: { header: string; field: keyof Omit<LogbookEntry, 'id'>; score: number; priority: number }[] = [];
+
   for (const h of headers) {
     const norm = normalizeHeader(h);
-    let matched = false;
+    if (!norm) { unmapped.push(h); continue; }
 
-    // Exact match
-    for (const { field, aliases } of FIELD_ALIASES) {
-      if (usedFields.has(field)) continue;
-      if (aliases.includes(norm)) {
-        columnMap[h] = field;
-        usedFields.add(field);
-        matched = true;
-        break;
+    for (const { field, keywords, priority } of FIELD_KEYWORDS) {
+      const score = scoreMatch(norm, keywords);
+      if (score >= 0.3) {
+        candidates.push({ header: h, field, score, priority });
       }
     }
+  }
 
-    // Starts-with match
-    if (!matched) {
-      for (const { field, aliases } of FIELD_ALIASES) {
-        if (usedFields.has(field)) continue;
-        if (aliases.some(a => norm.startsWith(a) || a.startsWith(norm))) {
-          columnMap[h] = field;
-          usedFields.add(field);
-          matched = true;
-          break;
-        }
-      }
-    }
+  // Sort: highest score first, then highest priority for ties
+  candidates.sort((a, b) => b.score - a.score || b.priority - a.priority);
 
-    // Contains match
-    if (!matched) {
-      for (const { field, aliases } of FIELD_ALIASES) {
-        if (usedFields.has(field)) continue;
-        if (aliases.some(a => norm.includes(a) || a.includes(norm))) {
-          columnMap[h] = field;
-          usedFields.add(field);
-          matched = true;
-          break;
-        }
-      }
-    }
+  const usedHeaders = new Set<string>();
+  for (const { header, field } of candidates) {
+    if (usedFields.has(field) || usedHeaders.has(header)) continue;
+    columnMap[header] = field;
+    usedFields.add(field);
+    usedHeaders.add(header);
+  }
 
-    if (!matched) unmapped.push(h);
+  for (const h of headers) {
+    if (!usedHeaders.has(h) && normalizeHeader(h)) unmapped.push(h);
   }
 
   return { columnMap, unmapped };
