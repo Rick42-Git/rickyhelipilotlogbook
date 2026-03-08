@@ -137,6 +137,23 @@ export function useLogbook() {
     setLastImportIds(null);
   }, [user, lastImportIds]);
 
+  const clearAllEntries = useCallback(async () => {
+    if (!user || entries.length === 0) return;
+    const ids = entries.map(e => e.id);
+    // Delete in batches of 100 to avoid query limits
+    for (let i = 0; i < ids.length; i += 100) {
+      const batch = ids.slice(i, i + 100);
+      const { error } = await supabase
+        .from('logbook_entries')
+        .delete()
+        .in('id', batch);
+      if (error) { toast.error('Failed to clear entries'); return; }
+    }
+    setEntries([]);
+    setLastImportIds(null);
+    toast.success(`Cleared ${ids.length} entries`);
+  }, [user, entries]);
+
   const getTotals = useCallback(() => {
     const initial = Object.fromEntries(numericFields.map(f => [f, 0])) as Record<NumericField, number>;
     return entries.reduce((acc, e) => {
@@ -145,5 +162,5 @@ export function useLogbook() {
     }, initial);
   }, [entries]);
 
-  return { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, getTotals };
+  return { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, clearAllEntries, getTotals };
 }
