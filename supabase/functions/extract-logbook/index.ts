@@ -142,6 +142,7 @@ Be thorough — extract partial data rather than skipping a row. Even a date and
         aircraftReg: e.aircraftReg || "",
         pilotInCommand: e.pilotInCommand || "",
         flightDetails: e.flightDetails || "",
+        confidence: Math.min(100, Math.max(0, Number(e.confidence) || 0)),
       };
       for (const f of numFields) {
         entry[f] = Number(e[f]) || 0;
