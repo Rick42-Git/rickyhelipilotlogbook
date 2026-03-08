@@ -44,9 +44,9 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
 
   const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-    if (imageFiles.length === 0) {
-      toast.error('Please select image files only');
+    const validFiles = Array.from(files).filter(f => f.type.startsWith('image/') || f.type === 'application/pdf');
+    if (validFiles.length === 0) {
+      toast.error('Please select image or PDF files');
       return;
     }
 
