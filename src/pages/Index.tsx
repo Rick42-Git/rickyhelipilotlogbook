@@ -19,6 +19,7 @@ const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
+  const { canInstall, install } = useInstallPrompt();
 
   const handleEdit = (entry: LogbookEntry) => {
     setEditingEntry(entry);
