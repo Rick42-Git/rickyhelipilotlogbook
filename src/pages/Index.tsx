@@ -126,7 +126,7 @@ const Index = () => {
 
         {/* Summary */}
         <div className="mb-6">
-          <SummaryPanel totals={totals} entryCount={entries.length} />
+          <SummaryPanel totals={totals} entryCount={entries.length} entries={entries} />
         </div>
 
         <div className="flex items-center gap-3 my-6">
