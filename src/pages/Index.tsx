@@ -11,6 +11,7 @@ import { exportToNumbers } from '@/lib/exportLogbook';
 import { useAuth } from '@/hooks/useAuth';
 import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 
 const Index = () => {
   const { user, signOut } = useAuth();
