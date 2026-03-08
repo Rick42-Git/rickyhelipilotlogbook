@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { LogbookEntry } from '@/types/logbook';
-import { Pencil, Trash2, SlidersHorizontal } from 'lucide-react';
+import { Pencil, Trash2, SlidersHorizontal, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import helicopterWatermark from '@/assets/helicopter-icon.png';
 import {
   DropdownMenu,
@@ -44,6 +45,7 @@ const defaultVisible = new Set(columns.map(c => c.key));
 
 export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
   const [visibleCols, setVisibleCols] = useState<Set<string>>(defaultVisible);
+  const [search, setSearch] = useState('');
 
   const toggleCol = (key: string) => {
     setVisibleCols(prev => {
@@ -56,6 +58,18 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
 
   const activeCols = columns.filter(c => visibleCols.has(c.key));
 
+  const filteredEntries = useMemo(() => {
+    if (!search.trim()) return entries;
+    const q = search.toLowerCase();
+    return entries.filter(e =>
+      e.date.toLowerCase().includes(q) ||
+      e.aircraftType.toLowerCase().includes(q) ||
+      e.aircraftReg.toLowerCase().includes(q) ||
+      e.pilotInCommand.toLowerCase().includes(q) ||
+      e.flightDetails.toLowerCase().includes(q)
+    );
+  }, [entries, search]);
+
   if (entries.length === 0) {
     return (
       <div className="glass-panel p-12 text-center">
@@ -67,7 +81,16 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
 
   return (
     <div className="bg-card/80 backdrop-blur-sm border border-border rounded-lg">
-      <div className="flex justify-end p-2 border-b border-border/50">
+      <div className="flex items-center justify-between gap-2 p-2 border-b border-border/50">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search entries..."
+            className="h-8 pl-8 font-mono text-xs bg-background/50"
+          />
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="font-mono text-xs gap-1.5">
@@ -100,7 +123,7 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
             </tr>
           </thead>
           <tbody>
-            {entries
+            {filteredEntries
               .sort((a, b) => (a.date > b.date ? -1 : 1))
               .map(entry => (
                 <tr key={entry.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
