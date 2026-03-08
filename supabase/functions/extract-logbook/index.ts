@@ -20,26 +20,47 @@ serve(async (req) => {
 
     const systemPrompt = `You are a helicopter pilot logbook OCR specialist. Extract ALL flight entries from this logbook page image.
 
-For each row/entry you can identify, return a JSON object with these fields:
-- date (string, YYYY-MM-DD format)
-- aircraftType (string, e.g. "R22", "R44", "Bell 206")
-- aircraftReg (string, registration/tail number)
-- from (string, departure airport/helipad ICAO or name)
-- to (string, arrival airport/helipad ICAO or name)
-- departureTime (string, HH:MM 24hr format, or empty string)
-- arrivalTime (string, HH:MM 24hr format, or empty string)
-- totalTime (number, decimal hours)
-- picTime (number, pilot-in-command hours)
-- sicTime (number, second-in-command hours)
-- dualTime (number, dual instruction hours)
-- nightTime (number, night flying hours)
-- ifrTime (number, instrument flight hours)
-- crossCountry (number, cross-country hours)
-- landings (number, integer)
-- remarks (string, any notes/remarks)
+The logbook has these columns matching standard aviation logbook format:
+- date (YYYY-MM-DD)
+- aircraftType (e.g. "RH-22", "R44", "Bell 206")
+- aircraftReg (registration)
+- pilotInCommand (name)
+- flightDetails (remarks/exercises)
+- Single Engine Day: seDayDual (col 1), seDayPilot (col 2)
+- Single Engine Night: seNightDual (col 3), seNightPilot (col 4)
+- Multi Engine Day: meDayDual (col 5), meDayPilot (col 6), meDayCoPilot (col 7)
+- Multi Engine Night: meNightDual (col 8), meNightPilot (col 9), meNightCoPilot (col 10)
+- Instrument Flying: instrumentNavAids (col 11), instrumentPlace (col 12), instrumentTime (col 13)
+- Flying as Instructor: instructorDay (col 14), instructorNight (col 15)
 
-If a field is unreadable or not present, use sensible defaults (0 for numbers, empty string for text).
-Return ONLY valid entries you can identify.`;
+All numeric values are decimal hours. If unreadable or blank, use 0.`;
+
+    const entrySchema = {
+      type: "object",
+      properties: {
+        date: { type: "string" },
+        aircraftType: { type: "string" },
+        aircraftReg: { type: "string" },
+        pilotInCommand: { type: "string" },
+        flightDetails: { type: "string" },
+        seDayDual: { type: "number" },
+        seDayPilot: { type: "number" },
+        seNightDual: { type: "number" },
+        seNightPilot: { type: "number" },
+        meDayDual: { type: "number" },
+        meDayPilot: { type: "number" },
+        meDayCoPilot: { type: "number" },
+        meNightDual: { type: "number" },
+        meNightPilot: { type: "number" },
+        meNightCoPilot: { type: "number" },
+        instrumentNavAids: { type: "number" },
+        instrumentPlace: { type: "number" },
+        instrumentTime: { type: "number" },
+        instructorDay: { type: "number" },
+        instructorNight: { type: "number" },
+      },
+      required: ["date", "aircraftType", "aircraftReg"],
+    };
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -56,14 +77,8 @@ Return ONLY valid entries you can identify.`;
             {
               role: "user",
               content: [
-                {
-                  type: "text",
-                  text: "Extract all flight entries from this helicopter logbook page.",
-                },
-                {
-                  type: "image_url",
-                  image_url: { url: imageBase64 },
-                },
+                { type: "text", text: "Extract all flight entries from this helicopter logbook page." },
+                { type: "image_url", image_url: { url: imageBase64 } },
               ],
             },
           ],
@@ -72,53 +87,18 @@ Return ONLY valid entries you can identify.`;
               type: "function",
               function: {
                 name: "extract_entries",
-                description: "Return extracted logbook entries from the image",
+                description: "Return extracted logbook entries",
                 parameters: {
                   type: "object",
                   properties: {
-                    entries: {
-                      type: "array",
-                      items: {
-                        type: "object",
-                        properties: {
-                          date: { type: "string" },
-                          aircraftType: { type: "string" },
-                          aircraftReg: { type: "string" },
-                          from: { type: "string" },
-                          to: { type: "string" },
-                          departureTime: { type: "string" },
-                          arrivalTime: { type: "string" },
-                          totalTime: { type: "number" },
-                          picTime: { type: "number" },
-                          sicTime: { type: "number" },
-                          dualTime: { type: "number" },
-                          nightTime: { type: "number" },
-                          ifrTime: { type: "number" },
-                          crossCountry: { type: "number" },
-                          landings: { type: "number" },
-                          remarks: { type: "string" },
-                        },
-                        required: [
-                          "date",
-                          "aircraftType",
-                          "aircraftReg",
-                          "from",
-                          "to",
-                          "totalTime",
-                          "landings",
-                        ],
-                      },
-                    },
+                    entries: { type: "array", items: entrySchema },
                   },
                   required: ["entries"],
                 },
               },
             },
           ],
-          tool_choice: {
-            type: "function",
-            function: { name: "extract_entries" },
-          },
+          tool_choice: { type: "function", function: { name: "extract_entries" } },
         }),
       }
     );
@@ -143,30 +123,30 @@ Return ONLY valid entries you can identify.`;
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-
-    if (!toolCall) {
-      throw new Error("No structured response from AI");
-    }
+    if (!toolCall) throw new Error("No structured response from AI");
 
     const parsed = JSON.parse(toolCall.function.arguments);
-    const entries = (parsed.entries || []).map((e: Record<string, unknown>) => ({
-      date: e.date || "",
-      aircraftType: e.aircraftType || "",
-      aircraftReg: e.aircraftReg || "",
-      from: e.from || "",
-      to: e.to || "",
-      departureTime: e.departureTime || "",
-      arrivalTime: e.arrivalTime || "",
-      totalTime: Number(e.totalTime) || 0,
-      picTime: Number(e.picTime) || 0,
-      sicTime: Number(e.sicTime) || 0,
-      dualTime: Number(e.dualTime) || 0,
-      nightTime: Number(e.nightTime) || 0,
-      ifrTime: Number(e.ifrTime) || 0,
-      crossCountry: Number(e.crossCountry) || 0,
-      landings: Number(e.landings) || 0,
-      remarks: e.remarks || "",
-    }));
+    const numFields = [
+      'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
+      'meDayDual', 'meDayPilot', 'meDayCoPilot',
+      'meNightDual', 'meNightPilot', 'meNightCoPilot',
+      'instrumentNavAids', 'instrumentPlace', 'instrumentTime',
+      'instructorDay', 'instructorNight',
+    ];
+
+    const entries = (parsed.entries || []).map((e: Record<string, unknown>) => {
+      const entry: Record<string, unknown> = {
+        date: e.date || "",
+        aircraftType: e.aircraftType || "",
+        aircraftReg: e.aircraftReg || "",
+        pilotInCommand: e.pilotInCommand || "",
+        flightDetails: e.flightDetails || "",
+      };
+      for (const f of numFields) {
+        entry[f] = Number(e[f]) || 0;
+      }
+      return entry;
+    });
 
     return new Response(JSON.stringify({ entries }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
