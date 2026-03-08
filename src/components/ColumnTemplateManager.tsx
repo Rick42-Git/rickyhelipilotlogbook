@@ -164,8 +164,8 @@ export function ColumnTemplateManager() {
                 />
               </div>
 
-              <ScrollArea className="flex-1 max-h-[50vh]">
-                <div className="space-y-2 pr-3">
+              <div className="flex-1 max-h-[50vh] overflow-y-auto pr-1">
+                <div className="space-y-2 pr-2">
                   {columns.map((col, i) => (
                     <div key={i} className="flex items-center gap-2 p-2 rounded border border-border/50 bg-muted/20">
                       <div className="flex-1 min-w-0">
@@ -194,7 +194,7 @@ export function ColumnTemplateManager() {
                     </div>
                   ))}
                 </div>
-              </ScrollArea>
+              </div>
 
               <DialogFooter className="mt-3">
                 <Button variant="outline" onClick={() => setSetupOpen(false)} className="font-mono text-xs">
