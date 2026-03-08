@@ -54,7 +54,7 @@ export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, t
                 )}
               </div>
               <div className="font-mono text-[10px] text-muted-foreground text-center">lbs</div>
-              <div className="font-mono text-xs text-right text-primary/80">{Math.round(moment).toLocaleString()}</div>
+              <div className="font-mono text-xs text-right text-primary">{Math.round(moment).toLocaleString()}</div>
             </div>
           );
         })}
