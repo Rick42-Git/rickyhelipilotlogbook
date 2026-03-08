@@ -95,36 +95,7 @@ const Index = () => {
                   INSTALL
                 </Button>
               )}
-              {lastImportIds && lastImportIds.length > 0 && (
-                <Button variant="outline" onClick={undoLastImport} className="font-mono gap-2 border-destructive text-destructive hover:bg-destructive/10">
-                  <Undo2 className="h-4 w-4" />
-                  UNDO ({lastImportIds.length})
-                </Button>
-              )}
-              {entries.length > 0 && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" className="font-mono gap-2 border-destructive text-destructive hover:bg-destructive/10">
-                      <Trash2 className="h-4 w-4" />
-                      CLEAR ALL
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="font-mono">CLEAR ALL ENTRIES?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will permanently delete all {entries.length} flight entries. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel className="font-mono">CANCEL</AlertDialogCancel>
-                      <AlertDialogAction onClick={clearAllEntries} className="font-mono bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                        DELETE ALL
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
+              
               <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
                 <Clock className="h-4 w-4" />
                 F&D CALC
