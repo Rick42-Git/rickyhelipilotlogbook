@@ -15,8 +15,6 @@ export interface LogbookEntry {
   seNightPilot: number; // Col 4
 
   // Instrument Flying
-  instrumentNavAids: number; // Col 11
-  instrumentPlace: number;   // Col 12
   instrumentTime: number;    // Col 13
 
   // Flying as Instructor
