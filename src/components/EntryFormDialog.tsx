@@ -42,6 +42,10 @@ const numericKeys = [
 export function EntryFormDialog({ open, onOpenChange, entry, onSave }: EntryFormDialogProps) {
   const [form, setForm] = useState<Omit<LogbookEntry, 'id'>>(entry ? { ...entry } : { ...emptyEntry });
 
+  useEffect(() => {
+    if (open) setForm(entry ? { ...entry } : { ...emptyEntry });
+  }, [entry, open]);
+
   const handleOpen = (o: boolean) => {
     if (o) setForm(entry ? { ...entry } : { ...emptyEntry });
     onOpenChange(o);
