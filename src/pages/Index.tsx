@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Download, BarChart3 } from 'lucide-react';
 import { exportToNumbers } from '@/lib/exportLogbook';
 import { Last12MonthSummary } from '@/components/Last12MonthSummary';
+import { SpreadsheetImport } from '@/components/SpreadsheetImport';
 
 const Index = () => {
   const { entries, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
