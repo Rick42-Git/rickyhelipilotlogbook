@@ -137,6 +137,24 @@ export function useLogbook() {
     setLastImportIds(null);
   }, [user, lastImportIds]);
 
+  const deleteUnknownEntries = useCallback(async () => {
+    if (!user) return;
+    const unknownEntries = entries.filter(e => {
+      const textFields = [e.date, e.aircraftType, e.aircraftReg, e.pilotInCommand, e.flightDetails];
+      return textFields.some(f => f.toLowerCase().includes('unknown'));
+    });
+    if (unknownEntries.length === 0) { toast.info('No unknown entries found'); return; }
+    const ids = unknownEntries.map(e => e.id);
+    for (let i = 0; i < ids.length; i += 100) {
+      const batch = ids.slice(i, i + 100);
+      const { error } = await supabase.from('logbook_entries').delete().in('id', batch);
+      if (error) { toast.error('Failed to delete unknown entries'); return; }
+    }
+    const idSet = new Set(ids);
+    setEntries(prev => prev.filter(e => !idSet.has(e.id)));
+    toast.success(`Removed ${ids.length} unknown entries`);
+  }, [user, entries]);
+
   const clearAllEntries = useCallback(async () => {
     if (!user || entries.length === 0) return;
     const ids = entries.map(e => e.id);
@@ -162,5 +180,5 @@ export function useLogbook() {
     }, initial);
   }, [entries]);
 
-  return { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, clearAllEntries, getTotals };
+  return { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, clearAllEntries, deleteUnknownEntries, getTotals };
 }
