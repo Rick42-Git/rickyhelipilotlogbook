@@ -11,33 +11,83 @@ interface SpreadsheetImportProps {
   onEntriesImported: (entries: Omit<LogbookEntry, 'id'>[]) => void;
 }
 
-// Map common header variations to our field names
-const HEADER_MAP: Record<string, keyof Omit<LogbookEntry, 'id'>> = {
-  'date': 'date',
-  'aircraft type': 'aircraftType',
-  'type': 'aircraftType',
-  'a/c type': 'aircraftType',
-  'registration': 'aircraftReg',
-  'reg': 'aircraftReg',
-  'a/c reg': 'aircraftReg',
-  'aircraft reg': 'aircraftReg',
-  'pilot in command': 'pilotInCommand',
-  'pic': 'pilotInCommand',
-  'captain': 'pilotInCommand',
-  'pilot': 'pilotInCommand',
-  'flight details': 'flightDetails',
-  'details': 'flightDetails',
-  'route': 'flightDetails',
-  'remarks': 'flightDetails',
-  'se day dual': 'seDayDual',
-  'se day pilot': 'seDayPilot',
-  'se night dual': 'seNightDual',
-  'se night pilot': 'seNightPilot',
-  'instr time': 'instrumentTime',
-  'instrument time': 'instrumentTime',
-  'instructor day': 'instructorDay',
-  'instructor night': 'instructorNight',
-};
+// Field aliases for flexible matching — order matters (first match wins)
+const FIELD_ALIASES: { field: keyof Omit<LogbookEntry, 'id'>; aliases: string[] }[] = [
+  { field: 'date', aliases: ['date', 'flight date', 'day', 'dat'] },
+  { field: 'aircraftType', aliases: ['aircraft type', 'a/c type', 'ac type', 'type', 'helicopter type', 'heli type', 'acft type'] },
+  { field: 'aircraftReg', aliases: ['aircraft reg', 'a/c reg', 'ac reg', 'registration', 'reg', 'tail', 'tail number', 'rego', 'acft reg'] },
+  { field: 'pilotInCommand', aliases: ['pilot in command', 'pic', 'captain', 'pilot', 'commander', 'p1', 'pilot name'] },
+  { field: 'flightDetails', aliases: ['flight details', 'details', 'route', 'remarks', 'from/to', 'from - to', 'sector', 'sectors', 'notes', 'description'] },
+  { field: 'seDayDual', aliases: ['se day dual', 'day dual', 'single engine day dual', 'se dual day', 'col 1', 'dual day'] },
+  { field: 'seDayPilot', aliases: ['se day pilot', 'day pilot', 'single engine day pilot', 'se pilot day', 'day p1', 'col 2', 'pilot day', 'day pic'] },
+  { field: 'seNightDual', aliases: ['se night dual', 'night dual', 'single engine night dual', 'se dual night', 'col 3', 'dual night'] },
+  { field: 'seNightPilot', aliases: ['se night pilot', 'night pilot', 'single engine night pilot', 'se pilot night', 'night p1', 'col 4', 'pilot night', 'night pic'] },
+  { field: 'instrumentTime', aliases: ['instrument time', 'instr time', 'instrument', 'ifr', 'ifr time', 'instruments', 'inst time', 'actual instrument', 'sim instrument', 'col 13'] },
+  { field: 'instructorDay', aliases: ['instructor day', 'instr day', 'instructing day', 'col 14', 'day instructor'] },
+  { field: 'instructorNight', aliases: ['instructor night', 'instr night', 'instructing night', 'col 15', 'night instructor'] },
+];
+
+function normalizeHeader(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[_\-/]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>; unmapped: string[] } {
+  const columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>> = {};
+  const unmapped: string[] = [];
+  const usedFields = new Set<string>();
+
+  for (const h of headers) {
+    const norm = normalizeHeader(h);
+    let matched = false;
+
+    // Exact match
+    for (const { field, aliases } of FIELD_ALIASES) {
+      if (usedFields.has(field)) continue;
+      if (aliases.includes(norm)) {
+        columnMap[h] = field;
+        usedFields.add(field);
+        matched = true;
+        break;
+      }
+    }
+
+    // Starts-with match
+    if (!matched) {
+      for (const { field, aliases } of FIELD_ALIASES) {
+        if (usedFields.has(field)) continue;
+        if (aliases.some(a => norm.startsWith(a) || a.startsWith(norm))) {
+          columnMap[h] = field;
+          usedFields.add(field);
+          matched = true;
+          break;
+        }
+      }
+    }
+
+    // Contains match
+    if (!matched) {
+      for (const { field, aliases } of FIELD_ALIASES) {
+        if (usedFields.has(field)) continue;
+        if (aliases.some(a => norm.includes(a) || a.includes(norm))) {
+          columnMap[h] = field;
+          usedFields.add(field);
+          matched = true;
+          break;
+        }
+      }
+    }
+
+    if (!matched) unmapped.push(h);
+  }
+
+  return { columnMap, unmapped };
+}
 
 const NUMERIC_FIELDS: NumericField[] = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
