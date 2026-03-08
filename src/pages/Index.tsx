@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
 const Index = () => {
-  const { entries, addEntry, updateEntry, deleteEntry, getTotals } = useLogbook();
+  const { entries, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
 
@@ -59,9 +59,8 @@ const Index = () => {
 
         {/* Photo Upload */}
         <div className="mb-6">
-          <PhotoUpload onPhotosSelected={(files) => {
-            // OCR placeholder - would process with Cloud/AI
-            console.log('Photos selected:', files.length);
+          <PhotoUpload onEntriesExtracted={(extracted) => {
+            addMultipleEntries(extracted);
           }} />
         </div>
 
