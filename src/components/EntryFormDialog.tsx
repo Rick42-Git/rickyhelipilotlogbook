@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LogbookEntry, emptyEntry } from '@/types/logbook';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,10 @@ const numericKeys = [
 
 export function EntryFormDialog({ open, onOpenChange, entry, onSave }: EntryFormDialogProps) {
   const [form, setForm] = useState<Omit<LogbookEntry, 'id'>>(entry ? { ...entry } : { ...emptyEntry });
+
+  useEffect(() => {
+    if (open) setForm(entry ? { ...entry } : { ...emptyEntry });
+  }, [entry, open]);
 
   const handleOpen = (o: boolean) => {
     if (o) setForm(entry ? { ...entry } : { ...emptyEntry });
