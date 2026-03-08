@@ -87,6 +87,8 @@ const Index = () => {
           entry={editingEntry}
           onSave={handleSave}
         />
+
+        <Last12MonthSummary entries={entries} open={summaryOpen} onOpenChange={setSummaryOpen} />
       </div>
     </div>
   );
