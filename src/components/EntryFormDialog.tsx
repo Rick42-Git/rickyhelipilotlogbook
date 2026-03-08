@@ -33,8 +33,7 @@ const fields: { key: keyof Omit<LogbookEntry, 'id'>; label: string; type: string
 
 const numericKeys = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
-  'instrumentNavAids', 'instrumentPlace', 'instrumentTime',
-  'instructorDay', 'instructorNight',
+  'instrumentTime', 'instructorDay', 'instructorNight',
 ];
 
 export function EntryFormDialog({ open, onOpenChange, entry, onSave }: EntryFormDialogProps) {

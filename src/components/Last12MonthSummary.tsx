@@ -39,8 +39,6 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
     {
       title: 'Instrument Flying',
       rows: [
-        { label: 'Nav Aids', value: filtered.reduce((s, e) => s + (e.instrumentNavAids || 0), 0) },
-        { label: 'Place', value: filtered.reduce((s, e) => s + (e.instrumentPlace || 0), 0) },
         { label: 'Time', value: filtered.reduce((s, e) => s + (e.instrumentTime || 0), 0) },
       ],
     },

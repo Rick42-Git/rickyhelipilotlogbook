@@ -22,7 +22,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
   const groups = [
     { title: 'Single Engine — Day', fields: ['seDayDual', 'seDayPilot'] as NumericField[] },
     { title: 'Single Engine — Night', fields: ['seNightDual', 'seNightPilot'] as NumericField[] },
-    { title: 'Instrument', fields: ['instrumentNavAids', 'instrumentPlace', 'instrumentTime'] as NumericField[] },
+    { title: 'Instrument', fields: ['instrumentTime'] as NumericField[] },
     { title: 'Instructor', fields: ['instructorDay', 'instructorNight'] as NumericField[] },
   ];
 

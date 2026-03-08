@@ -48,8 +48,6 @@ export const numericFieldLabels: Record<NumericField, string> = {
   seDayPilot: 'SE Day Pilot',
   seNightDual: 'SE Night Dual',
   seNightPilot: 'SE Night Pilot',
-  instrumentNavAids: 'Instr Nav Aids',
-  instrumentPlace: 'Instr Place',
   instrumentTime: 'Instr Time',
   instructorDay: 'Instructor Day',
   instructorNight: 'Instructor Night',

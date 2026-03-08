@@ -129,7 +129,7 @@ Be thorough — extract partial data rather than skipping a row. Even a date and
       'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
       'meDayDual', 'meDayPilot', 'meDayCoPilot',
       'meNightDual', 'meNightPilot', 'meNightCoPilot',
-      'instrumentNavAids', 'instrumentPlace', 'instrumentTime',
+      'instrumentTime',
       'instructorDay', 'instructorNight',
     ];
 

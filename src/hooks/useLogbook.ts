@@ -40,8 +40,6 @@ function fromDbEntry(row: any): LogbookEntry {
     seDayPilot: Number(row.se_day_pilot) || 0,
     seNightDual: Number(row.se_night_dual) || 0,
     seNightPilot: Number(row.se_night_pilot) || 0,
-    instrumentNavAids: Number(row.instrument_nav_aids) || 0,
-    instrumentPlace: Number(row.instrument_place) || 0,
     instrumentTime: Number(row.instrument_time) || 0,
     instructorDay: Number(row.instructor_day) || 0,
     instructorNight: Number(row.instructor_night) || 0,
