@@ -14,18 +14,18 @@ interface SpreadsheetImportProps {
 }
 
 const FIELD_KEYWORDS: { field: keyof Omit<LogbookEntry, 'id'>; keywords: string[]; priority: number }[] = [
-  { field: 'date', keywords: ['date', 'flight date', 'day', 'datum'], priority: 3 },
-  { field: 'aircraftType', keywords: ['aircraft type', 'a/c type', 'ac type', 'type', 'helicopter type', 'heli type', 'acft type', 'machine'], priority: 5 },
-  { field: 'aircraftReg', keywords: ['aircraft reg', 'a/c reg', 'ac reg', 'registration', 'reg', 'tail', 'tail number', 'rego', 'acft reg', 'call sign'], priority: 6 },
-  { field: 'pilotInCommand', keywords: ['pilot in command', 'pic', 'captain', 'pilot', 'commander', 'p1', 'pilot name', 'crew', 'name'], priority: 4 },
-  { field: 'flightDetails', keywords: ['flight details', 'details', 'route', 'remarks', 'from to', 'sector', 'notes', 'description', 'dep arr', 'departure arrival', 'place'], priority: 3 },
-  { field: 'seDayDual', keywords: ['se day dual', 'day dual', 'single engine day dual', 'dual day', 'dual'], priority: 8 },
-  { field: 'seDayPilot', keywords: ['se day pilot', 'day pilot', 'single engine day pilot', 'day p1', 'pilot day', 'day pic', 'day command', 'command', 'p1 day'], priority: 8 },
-  { field: 'seNightDual', keywords: ['se night dual', 'night dual', 'single engine night dual', 'dual night'], priority: 8 },
-  { field: 'seNightPilot', keywords: ['se night pilot', 'night pilot', 'single engine night pilot', 'night p1', 'pilot night', 'night pic', 'night command'], priority: 8 },
-  { field: 'instrumentTime', keywords: ['instrument time', 'instr time', 'instrument', 'ifr', 'ifr time', 'inst time', 'actual instrument', 'sim instrument', 'instrument flying'], priority: 7 },
-  { field: 'instructorDay', keywords: ['instructor day', 'instr day', 'instructing day', 'day instructor'], priority: 8 },
-  { field: 'instructorNight', keywords: ['instructor night', 'instr night', 'instructing night', 'night instructor'], priority: 8 },
+  { field: 'date', keywords: ['date', 'flight date', 'day', 'datum', 'dd/mm/yyyy', 'dd mm yyyy'], priority: 3 },
+  { field: 'aircraftType', keywords: ['aircraft type', 'a/c type', 'ac type', 'class or type', 'class type', 'type', 'helicopter type', 'heli type', 'acft type', 'machine'], priority: 5 },
+  { field: 'aircraftReg', keywords: ['aircraft reg', 'a/c reg', 'ac reg', 'registration', 'registration marks', 'reg marks', 'reg', 'tail', 'tail number', 'rego', 'acft reg', 'call sign'], priority: 6 },
+  { field: 'pilotInCommand', keywords: ['pilot in command', 'plt in command', 'plt command', 'pic', 'captain', 'pilot', 'commander', 'p1', 'pilot name', 'crew', 'name'], priority: 4 },
+  { field: 'flightDetails', keywords: ['flight details', 'details of flight', 'details', 'route', 'remarks', 'from to', 'sector', 'notes', 'description', 'dep arr', 'departure arrival', 'place'], priority: 3 },
+  { field: 'seDayDual', keywords: ['se day dual', 'single engine aircraft day dual', 'single engine day dual', 'day dual', 'dual day', 'dual'], priority: 8 },
+  { field: 'seDayPilot', keywords: ['se day pilot', 'single engine aircraft day pic', 'single engine day pic', 'day pilot', 'day p1', 'pilot day', 'day pic', 'day command', 'command', 'p1 day'], priority: 8 },
+  { field: 'seNightDual', keywords: ['se night dual', 'single engine aircraft night dual', 'single engine night dual', 'night dual', 'dual night'], priority: 8 },
+  { field: 'seNightPilot', keywords: ['se night pilot', 'single engine aircraft night pic', 'single engine night pic', 'night pilot', 'night p1', 'pilot night', 'night pic', 'night command'], priority: 8 },
+  { field: 'instrumentTime', keywords: ['instrument time', 'instr time', 'instrument actual time', 'actual tme', 'actual time', 'instrument', 'ifr', 'ifr time', 'inst time', 'actual instrument', 'sim instrument', 'instrument flying'], priority: 7 },
+  { field: 'instructorDay', keywords: ['instructor day', 'instructor time se', 'instructor se', 'instr day', 'instr se', 'instructing day', 'day instructor'], priority: 8 },
+  { field: 'instructorNight', keywords: ['instructor night', 'instructor time me', 'instructor me', 'instr night', 'instr me', 'instructing night', 'night instructor'], priority: 8 },
 ];
 
 const NUMERIC_FIELDS: NumericField[] = [
@@ -63,6 +63,49 @@ function scoreMatch(normalizedHeader: string, keywords: string[]): number {
     }
   }
   return bestScore;
+}
+
+const SECONDARY_HEADER_TOKENS = new Set([
+  'day', 'night', 'dual', 'pic', 'picus', 'co pilot', 'co-pilot', 'actual tme', 'actual time',
+  'fstd time', 'nav aids', 'place', 'se', 'me', 'remarks', 'date', 'dd mm yyyy',
+]);
+
+function isHeaderContinuationRow(row: (string | number | null)[]): boolean {
+  const values = row
+    .map((cell) => normalizeHeader(String(cell ?? '').trim()))
+    .filter(Boolean);
+
+  if (values.length < 3) return false;
+
+  const tokenHits = values.filter((v) => SECONDARY_HEADER_TOKENS.has(v)).length;
+  const hasOnlyTinyStrings = values.every((v) => v.length <= 14);
+  const numericLike = row.filter((cell) => parseLocalizedNumber(cell) > 0).length;
+
+  return tokenHits >= 3 && hasOnlyTinyStrings && numericLike === 0;
+}
+
+function buildCompositeHeaders(
+  matrix: (string | number | null)[][],
+  headerRows: number[],
+  maxCols: number,
+): string[] {
+  return Array.from({ length: maxCols }, (_, colIdx) => {
+    const parts = headerRows
+      .map((rowIdx) => String(matrix[rowIdx]?.[colIdx] ?? '').trim())
+      .filter(Boolean);
+
+    const unique: string[] = [];
+    const seen = new Set<string>();
+
+    for (const part of parts) {
+      const norm = normalizeHeader(part);
+      if (!norm || seen.has(norm)) continue;
+      seen.add(norm);
+      unique.push(part);
+    }
+
+    return unique.join(' ').trim() || `Column ${colIdx + 1}`;
+  });
 }
 
 function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>; unmapped: string[] } {
@@ -276,15 +319,26 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
       const rawHeaders = (matrix[headerRowIndex] || []).map(cell => String(cell ?? '').trim());
       const maxCols = Math.max(rawHeaders.length, ...matrix.slice(headerRowIndex + 1, headerRowIndex + 20).map(r => r.length));
 
+      const candidateHeaderRows = [headerRowIndex];
+      if (headerRowIndex > 0) candidateHeaderRows.unshift(headerRowIndex - 1);
+
+      const nextRow = matrix[headerRowIndex + 1] || [];
+      const hasSecondaryHeader = isHeaderContinuationRow(nextRow);
+      if (hasSecondaryHeader) {
+        candidateHeaderRows.push(headerRowIndex + 1);
+      }
+
+      const compositeHeaders = buildCompositeHeaders(matrix, candidateHeaderRows, maxCols);
       const seen = new Map<string, number>();
-      const headers = Array.from({ length: maxCols }, (_, i) => {
-        const base = rawHeaders[i] || `Column ${i + 1}`;
+      const headers = compositeHeaders.map((header, i) => {
+        const base = header || `Column ${i + 1}`;
         const count = (seen.get(base) || 0) + 1;
         seen.set(base, count);
         return count === 1 ? base : `${base} (${count})`;
       });
 
-      const rows = matrix.slice(headerRowIndex + 1).map((row) => {
+      const dataStartRow = hasSecondaryHeader ? headerRowIndex + 2 : headerRowIndex + 1;
+      const rows = matrix.slice(dataStartRow).map((row) => {
         const obj: Record<string, unknown> = {};
         headers.forEach((h, i) => {
           obj[h] = row[i] ?? '';
