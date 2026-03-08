@@ -80,7 +80,7 @@ export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, t
         <div className="relative h-3 rounded-full bg-muted/30 overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-300 ${
-              weightPercent > 100 ? 'bg-destructive' : weightPercent > 85 ? 'bg-amber-500' : 'bg-primary'
+              weightPercent > 100 ? 'bg-destructive' : weightPercent > 85 ? 'bg-amber-500' : 'bg-success'
             }`}
             style={{ width: `${Math.min(weightPercent, 100)}%` }}
           />
