@@ -23,7 +23,13 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
   const [entries, setEntries] = useState<(ExtractedEntry & { accepted?: boolean })[]>(initialEntries);
 
   useEffect(() => {
-    setEntries(initialEntries.map(e => ({ ...e, accepted: false })));
+    setEntries(initialEntries.map(e => ({
+      ...e,
+      // Fix common OCR misreads
+      aircraftReg: e.aircraftReg?.replace(/RH-ZZ/gi, 'RH-22') ?? e.aircraftReg,
+      aircraftType: e.aircraftType?.replace(/R-ZZ/gi, 'R22').replace(/RH-ZZ/gi, 'R22') ?? e.aircraftType,
+      accepted: false,
+    })));
   }, [initialEntries]);
 
   const updateField = (index: number, field: string, value: string | number) => {
