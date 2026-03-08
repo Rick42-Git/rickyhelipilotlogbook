@@ -56,7 +56,7 @@ const columns: ColumnDef[] = [
   { key: 'seNightPilot', label: 'SE Night Pilot', shortLabel: 'SE N-Pilot', render: e => <span className="text-destructive font-semibold">{fmt(e.seNightPilot)}</span> },
   { key: 'instrTm', label: 'Instrument Time', shortLabel: 'Instr Tm', render: e => fmt(e.instrumentTime) },
   { key: 'instDay', label: 'Instructor Day', shortLabel: 'Inst Day', render: e => fmt(e.instructorDay) },
-  { key: 'instNgt', label: 'Instructor Night', shortLabel: 'Inst Ngt', render: e => fmt(e.instructorNight) },
+  { key: 'instNgt', label: 'Instructor Night', shortLabel: 'Inst Ngt', render: e => <span className="text-destructive font-semibold">{fmt(e.instructorNight)}</span> },
 ];
 
 const defaultVisible = new Set(columns.map(c => c.key));
