@@ -55,13 +55,16 @@ const Index = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="font-mono text-2xl font-bold text-primary tracking-wider">
-              ◈ HELI PILOT LOGBOOK
-            </h1>
-            <p className="font-mono text-xs text-muted-foreground mt-1 tracking-widest">
-              PILOT: {user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
-            </p>
+          <div className="flex items-center gap-3">
+            <img src={helicopterIcon} alt="Helicopter" className="h-10 w-auto opacity-80" />
+            <div>
+              <h1 className="font-mono text-2xl font-bold text-primary tracking-wider">
+                HELI PILOT LOGBOOK
+              </h1>
+              <p className="font-mono text-xs text-muted-foreground mt-1 tracking-widest">
+                PILOT: {user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
+              </p>
+            </div>
           </div>
           <div className="flex gap-2">
             {canInstall && (
