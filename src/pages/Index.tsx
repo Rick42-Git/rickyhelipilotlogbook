@@ -31,6 +31,8 @@ import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { FlightDutyCalculator } from '@/components/FlightDutyCalculator';
+import { ColumnTemplateManager } from '@/components/ColumnTemplateManager';
+import { useColumnTemplates } from '@/hooks/useColumnTemplates';
 
 const Index = () => {
   const { user, signOut } = useAuth();
