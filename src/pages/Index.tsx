@@ -145,9 +145,11 @@ const Index = () => {
         </div>
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-border/40" />
-          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em]">entries</span>
-          <div className="flex-1 h-px bg-border/40" />
+          <div className="flex-1 alt-line" />
+          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2">
+            <span>entries</span>
+          </span>
+          <div className="flex-1 alt-line" />
         </div>
 
         {/* Table */}
