@@ -6,8 +6,9 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download } from 'lucide-react';
+import { Plus, Download, BarChart3 } from 'lucide-react';
 import { exportToNumbers } from '@/lib/exportLogbook';
+import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 
 const Index = () => {
   const { entries, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
