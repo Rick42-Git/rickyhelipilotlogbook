@@ -18,12 +18,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
+import { FlightDutyCalculator } from '@/components/FlightDutyCalculator';
 
 const Index = () => {
   const { user, signOut } = useAuth();
   const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [dutyCalcOpen, setDutyCalcOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
   const { canInstall, install } = useInstallPrompt();
 
