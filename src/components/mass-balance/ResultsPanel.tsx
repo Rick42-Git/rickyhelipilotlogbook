@@ -29,7 +29,7 @@ export function ResultsPanel({ withinLimits, cgStation, weightMargin, grossWeigh
         </div>
         <div className="glass-panel hud-border p-3 text-center">
           <div className="font-mono text-[9px] text-muted-foreground tracking-widest uppercase mb-1">Weight Margin</div>
-          <div className={`font-mono text-xl font-bold ${weightMargin >= 0 ? 'text-primary' : 'text-destructive'}`}>
+          <div className={`font-mono text-xl font-bold ${weightMargin >= 0 ? 'text-success' : 'text-destructive'}`}>
             {weightMargin >= 0 ? '+' : ''}{weightMargin.toLocaleString()}<span className="text-xs text-muted-foreground ml-0.5">lb</span>
           </div>
         </div>
