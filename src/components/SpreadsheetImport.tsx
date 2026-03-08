@@ -129,6 +129,19 @@ function buildCompositeHeaders(
   });
 }
 
+// Known columns from EASA logbooks that we intentionally don't track
+const KNOWN_SKIP_PATTERNS = [
+  'multi engine', 'co pilot', 'co-pilot', 'copilot', 'picus',
+  'nav aids', 'fstd', 'remarks', 'instrument time place',
+  'instrument time actual time', 'instrument time fstd',
+  'instructor time se', 'instructor time me', 'instructor time fstd',
+];
+
+function isKnownSkippableColumn(header: string): boolean {
+  const norm = normalizeHeader(header);
+  return KNOWN_SKIP_PATTERNS.some(pattern => norm.includes(pattern));
+}
+
 function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>; unmapped: string[] } {
   const columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>> = {};
   const unmapped: string[] = [];
@@ -155,7 +168,9 @@ function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<L
   }
 
   for (const h of headers) {
-    if (!usedHeaders.has(h) && normalizeHeader(h)) unmapped.push(h);
+    if (!usedHeaders.has(h) && normalizeHeader(h) && !isKnownSkippableColumn(h)) {
+      unmapped.push(h);
+    }
   }
 
   return { columnMap, unmapped };
