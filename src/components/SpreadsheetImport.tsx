@@ -319,15 +319,26 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
       const rawHeaders = (matrix[headerRowIndex] || []).map(cell => String(cell ?? '').trim());
       const maxCols = Math.max(rawHeaders.length, ...matrix.slice(headerRowIndex + 1, headerRowIndex + 20).map(r => r.length));
 
+      const candidateHeaderRows = [headerRowIndex];
+      if (headerRowIndex > 0) candidateHeaderRows.unshift(headerRowIndex - 1);
+
+      const nextRow = matrix[headerRowIndex + 1] || [];
+      const hasSecondaryHeader = isHeaderContinuationRow(nextRow);
+      if (hasSecondaryHeader) {
+        candidateHeaderRows.push(headerRowIndex + 1);
+      }
+
+      const compositeHeaders = buildCompositeHeaders(matrix, candidateHeaderRows, maxCols);
       const seen = new Map<string, number>();
-      const headers = Array.from({ length: maxCols }, (_, i) => {
-        const base = rawHeaders[i] || `Column ${i + 1}`;
+      const headers = compositeHeaders.map((header, i) => {
+        const base = header || `Column ${i + 1}`;
         const count = (seen.get(base) || 0) + 1;
         seen.set(base, count);
         return count === 1 ? base : `${base} (${count})`;
       });
 
-      const rows = matrix.slice(headerRowIndex + 1).map((row) => {
+      const dataStartRow = hasSecondaryHeader ? headerRowIndex + 2 : headerRowIndex + 1;
+      const rows = matrix.slice(dataStartRow).map((row) => {
         const obj: Record<string, unknown> = {};
         headers.forEach((h, i) => {
           obj[h] = row[i] ?? '';
