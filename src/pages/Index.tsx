@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLogbook } from '@/hooks/useLogbook';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import helicopterIcon from '@/assets/helicopter-icon.png';
 import { LogbookEntry } from '@/types/logbook';
 import { LogbookTable } from '@/components/LogbookTable';
@@ -7,7 +9,7 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2 } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +38,8 @@ import { useColumnTemplates } from '@/hooks/useColumnTemplates';
 
 const Index = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { isAdmin } = useIsAdmin();
   const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, clearAllEntries, deleteUnknownEntries, getTotals } = useLogbook();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -125,12 +129,23 @@ const Index = () => {
                 <Plus className="h-4 w-4" />
                 NEW ENTRY
               </Button>
+              {isAdmin && (
+                <Button variant="outline" onClick={() => navigate('/admin')} className="font-mono gap-2 border-accent text-accent">
+                  <Shield className="h-4 w-4" />
+                  ADMIN
+                </Button>
+              )}
               <Button variant="ghost" onClick={signOut} className="font-mono gap-2 text-muted-foreground">
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
             {/* Mobile: sign out only */}
             <div className="flex md:hidden gap-1">
+              {isAdmin && (
+                <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="h-8 w-8 text-accent">
+                  <Shield className="h-4 w-4" />
+                </Button>
+              )}
               <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground">
                 <LogOut className="h-4 w-4" />
               </Button>
