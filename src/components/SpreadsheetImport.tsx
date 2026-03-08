@@ -19,12 +19,12 @@ const FIELD_KEYWORDS: { field: keyof Omit<LogbookEntry, 'id'>; keywords: string[
   { field: 'aircraftReg', keywords: ['aircraft reg', 'a/c reg', 'ac reg', 'registration', 'registration marks', 'reg marks', 'reg', 'tail', 'tail number', 'rego', 'acft reg', 'call sign'], priority: 6 },
   { field: 'pilotInCommand', keywords: ['pilot in command', 'plt in command', 'plt command', 'pic', 'captain', 'pilot', 'commander', 'p1', 'pilot name', 'crew', 'name'], priority: 4 },
   { field: 'flightDetails', keywords: ['flight details', 'details of flight', 'details', 'route', 'remarks', 'from to', 'sector', 'notes', 'description', 'dep arr', 'departure arrival', 'place'], priority: 3 },
-  { field: 'seDayDual', keywords: ['se day dual', 'single engine aircraft day dual', 'single engine day dual', 'day dual', 'dual day', 'dual'], priority: 8 },
-  { field: 'seDayPilot', keywords: ['se day pilot', 'single engine aircraft day pic', 'single engine day pic', 'day pilot', 'day p1', 'pilot day', 'day pic', 'day command', 'command', 'p1 day'], priority: 8 },
-  { field: 'seNightDual', keywords: ['se night dual', 'single engine aircraft night dual', 'single engine night dual', 'night dual', 'dual night'], priority: 8 },
-  { field: 'seNightPilot', keywords: ['se night pilot', 'single engine aircraft night pic', 'single engine night pic', 'night pilot', 'night p1', 'pilot night', 'night pic', 'night command'], priority: 8 },
-  { field: 'instrumentTime', keywords: ['instrument time', 'instr time', 'instrument actual time', 'actual tme', 'actual time', 'instrument', 'ifr', 'ifr time', 'inst time', 'actual instrument', 'sim instrument', 'instrument flying'], priority: 7 },
-  { field: 'instructorDay', keywords: ['instructor day', 'instructor time se', 'instructor se', 'instr day', 'instr se', 'instructing day', 'day instructor'], priority: 8 },
+  { field: 'seDayDual', keywords: ['se day dual', 'single engine aircraft day dual', 'single engine day dual', 'single engine aircraft day co pilot', 'single engine day co pilot', 'multi engine aircraft day dual', 'multi engine day dual', 'day dual', 'dual day', 'dual', 'day co pilot', 'co pilot day'], priority: 8 },
+  { field: 'seDayPilot', keywords: ['se day pilot', 'single engine aircraft day pic', 'single engine day pic', 'single engine aircraft day picus', 'single engine day picus', 'multi engine aircraft day pic', 'multi engine aircraft day picus', 'multi engine day pic', 'multi engine day picus', 'multi engine aircraft day co pilot', 'day pilot', 'day p1', 'pilot day', 'day pic', 'day picus', 'day command', 'command', 'p1 day', 'picus day'], priority: 8 },
+  { field: 'seNightDual', keywords: ['se night dual', 'single engine aircraft night dual', 'single engine night dual', 'single engine aircraft night co pilot', 'single engine night co pilot', 'multi engine aircraft night dual', 'multi engine night dual', 'night dual', 'dual night', 'night co pilot', 'co pilot night'], priority: 8 },
+  { field: 'seNightPilot', keywords: ['se night pilot', 'single engine aircraft night pic', 'single engine night pic', 'single engine aircraft night picus', 'single engine night picus', 'multi engine aircraft night pic', 'multi engine aircraft night picus', 'multi engine night pic', 'multi engine night picus', 'multi engine aircraft night co pilot', 'night pilot', 'night p1', 'pilot night', 'night pic', 'night picus', 'night command', 'picus night'], priority: 8 },
+  { field: 'instrumentTime', keywords: ['instrument time', 'instr time', 'instrument actual time', 'actual tme', 'actual time', 'instrument time place co pilot', 'instrument time actual time co pilot', 'instrument time fstd time co pilot', 'instrument', 'ifr', 'ifr time', 'inst time', 'actual instrument', 'sim instrument', 'instrument flying', 'fstd time', 'fstd actual time', 'fstd actual time fstd time co pilot'], priority: 7 },
+  { field: 'instructorDay', keywords: ['instructor day', 'instructor time se', 'instructor se', 'instr day', 'instr se', 'instructing day', 'day instructor', 'instructor time fstd time co pilot'], priority: 8 },
   { field: 'instructorNight', keywords: ['instructor night', 'instructor time me', 'instructor me', 'instr night', 'instr me', 'instructing night', 'night instructor'], priority: 8 },
 ];
 
@@ -70,6 +70,7 @@ const SECONDARY_HEADER_TOKENS = new Set([
   'single engine aircraft', 'multi engine aircraft', 'instrument time', 'instructor time',
   'actual tme', 'actual time', 'fstd time', 'nav aids', 'place', 'se', 'me', 'remarks',
   'date', 'dd mm yyyy', 'class or type', 'registration marks', 'plt in command', 'details of flight',
+  'fstd', 'fstd actual time', 'multi engine', 'single engine',
 ]);
 
 function isHeaderContinuationRow(row: (string | number | null)[]): boolean {
