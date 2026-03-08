@@ -178,6 +178,30 @@ const Index = () => {
                 UNDO ({lastImportIds.length})
               </Button>
             )}
+            {entries.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="font-mono text-[10px] gap-1 h-7 border-destructive text-destructive hover:bg-destructive/10">
+                    <Trash2 className="h-3 w-3" />
+                    CLEAR
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="font-mono">CLEAR ALL ENTRIES?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete all {entries.length} flight entries. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="font-mono">CANCEL</AlertDialogCancel>
+                    <AlertDialogAction onClick={clearAllEntries} className="font-mono bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      DELETE ALL
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
             <Button variant="outline" size="sm" onClick={() => setDutyCalcOpen(true)} className="font-mono text-[10px] gap-1 h-7">
               <Clock className="h-3 w-3" />
               F&D
