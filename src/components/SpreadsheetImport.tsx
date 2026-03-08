@@ -261,6 +261,11 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
       const { columnMap, unmapped } = mapHeaders(headers);
       setUnmappedCols(unmapped);
 
+      // Parse rows
+      const entries = rows
+        .map(r => parseRow(r, columnMap))
+        .filter((e): e is Omit<LogbookEntry, 'id'> => e !== null);
+
       if (entries.length === 0) {
         toast.error('No valid entries found. Check that column headers match expected format.');
         setLoading(false);
