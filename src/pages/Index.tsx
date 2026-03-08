@@ -144,7 +144,7 @@ const Index = () => {
           }} />
         </div>
 
-        <div className="flex items-center gap-3 my-6">
+        <div className="flex items-center gap-3 my-6 sticky top-0 z-30 bg-background py-3 -mx-4 px-4">
           <div className="flex-1 alt-line" />
           <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2">
             <span>entries</span>
