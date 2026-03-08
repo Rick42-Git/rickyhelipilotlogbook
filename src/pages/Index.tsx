@@ -227,8 +227,30 @@ const Index = () => {
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
-              </AlertDialog>
+            </AlertDialog>
             )}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="font-mono text-[10px] gap-1 h-7 border-orange-500 text-orange-500 hover:bg-orange-500/10">
+                  <Trash2 className="h-3 w-3" />
+                  DEL UNKNOWN
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="font-mono">DELETE UNKNOWN ENTRIES?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will delete all entries containing "unknown" in any text field. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="font-mono">CANCEL</AlertDialogCancel>
+                  <AlertDialogAction onClick={deleteUnknownEntries} className="font-mono bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    DELETE UNKNOWN
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button variant="outline" size="sm" onClick={() => setDutyCalcOpen(true)} className="font-mono text-[10px] gap-1 h-7">
               <Clock className="h-3 w-3" />
               F&D
