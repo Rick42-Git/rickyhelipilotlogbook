@@ -61,14 +61,14 @@ export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, t
       </div>
 
       {/* Total */}
-      <div className="grid grid-cols-[1fr_100px_50px_90px] gap-2 items-center mt-3 px-1 py-2 bg-primary/10 border border-primary/20 rounded">
+      <div className="grid grid-cols-[1fr_100px_50px_90px] gap-2 items-center mt-3 px-1 py-2 bg-success/10 border border-success/20 rounded">
         <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-          <span className="font-mono text-sm font-bold text-primary">TOTAL</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-success" />
+          <span className="font-mono text-sm font-bold text-success">TOTAL</span>
         </div>
-        <div className="font-mono text-sm text-center font-bold text-primary">{totalWeight.toLocaleString()}</div>
+        <div className="font-mono text-sm text-center font-bold text-success">{totalWeight.toLocaleString()}</div>
         <div className="font-mono text-[10px] text-muted-foreground text-center">lbs</div>
-        <div className="font-mono text-sm text-right font-bold text-primary">{Math.round(totalMoment).toLocaleString()}</div>
+        <div className="font-mono text-sm text-right font-bold text-success">{Math.round(totalMoment).toLocaleString()}</div>
       </div>
 
       {/* Gross Weight Bar */}
