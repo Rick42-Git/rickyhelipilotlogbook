@@ -34,7 +34,7 @@ export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, t
           return (
             <div key={i} className="grid grid-cols-[1fr_100px_50px_90px] gap-2 items-center px-1 py-1.5 rounded hover:bg-muted/20 transition-colors">
               <div className="flex items-center gap-2 min-w-0">
-                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${weights[i] > 0 ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${weights[i] > 0 ? 'bg-success' : 'bg-muted-foreground/30'}`} />
                 <div className="min-w-0">
                   <span className="font-mono text-xs text-foreground truncate block">{s.label}</span>
                   <span className="font-mono text-[9px] text-muted-foreground">STA {s.station}"</span>
