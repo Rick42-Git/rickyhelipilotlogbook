@@ -10,11 +10,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface LogbookTableProps {
   entries: LogbookEntry[];
   onEdit: (entry: LogbookEntry) => void;
   onDelete: (id: string) => void;
+  onClearAll?: () => void;
 }
 
 type ColumnDef = {
@@ -43,7 +55,7 @@ const columns: ColumnDef[] = [
 
 const defaultVisible = new Set(columns.map(c => c.key));
 
-export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
+export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookTableProps) {
   const [visibleCols, setVisibleCols] = useState<Set<string>>(defaultVisible);
   const [search, setSearch] = useState('');
 
@@ -91,6 +103,30 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
             className="h-8 pl-8 font-mono text-xs bg-background/50"
           />
         </div>
+        {onClearAll && entries.length > 0 && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" className="font-mono text-xs gap-1.5 border-destructive text-destructive hover:bg-destructive/10">
+                <Trash2 className="h-3.5 w-3.5" />
+                CLEAR ALL
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="font-mono">CLEAR ALL ENTRIES?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete all {entries.length} flight entries. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="font-mono">CANCEL</AlertDialogCancel>
+                <AlertDialogAction onClick={onClearAll} className="font-mono bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  DELETE ALL
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="font-mono text-xs gap-1.5">
