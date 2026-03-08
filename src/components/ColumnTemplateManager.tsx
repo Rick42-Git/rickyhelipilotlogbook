@@ -170,11 +170,11 @@ export function ColumnTemplateManager() {
                     <div key={i} className="flex items-center gap-2 p-2 rounded border border-border/50 bg-muted/20">
                       <div className="flex-1 min-w-0">
                         <p className="font-mono text-xs truncate">{col.sourceHeader}</p>
-                        <div className="flex items-center gap-1 mt-0.5">
+                      <div className="flex items-center gap-1 mt-0.5">
                           {col.confidence >= 70 ? (
-                            <Check className="h-3 w-3 text-green-500" />
+                            <Check className="h-3 w-3 text-accent" />
                           ) : (
-                            <AlertTriangle className="h-3 w-3 text-amber-500" />
+                            <AlertTriangle className="h-3 w-3 text-primary" />
                           )}
                           <span className="text-[9px] text-muted-foreground">{col.confidence}% match</span>
                         </div>

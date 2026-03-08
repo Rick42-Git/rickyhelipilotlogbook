@@ -66,8 +66,8 @@ export function useColumnTemplates() {
     const template: ColumnTemplate = {
       id: data.id,
       name: data.name,
-      columnMapping: data.column_mapping as ColumnMapping[],
-      sourceHeaders: data.source_headers as string[],
+      columnMapping: data.column_mapping as unknown as ColumnMapping[],
+      sourceHeaders: data.source_headers as unknown as string[],
       createdAt: data.created_at,
     };
     setTemplates(prev => [template, ...prev]);
