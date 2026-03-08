@@ -45,6 +45,7 @@ const defaultVisible = new Set(columns.map(c => c.key));
 
 export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
   const [visibleCols, setVisibleCols] = useState<Set<string>>(defaultVisible);
+  const [search, setSearch] = useState('');
 
   const toggleCol = (key: string) => {
     setVisibleCols(prev => {
@@ -56,6 +57,18 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
   };
 
   const activeCols = columns.filter(c => visibleCols.has(c.key));
+
+  const filteredEntries = useMemo(() => {
+    if (!search.trim()) return entries;
+    const q = search.toLowerCase();
+    return entries.filter(e =>
+      e.date.toLowerCase().includes(q) ||
+      e.aircraftType.toLowerCase().includes(q) ||
+      e.aircraftReg.toLowerCase().includes(q) ||
+      e.pilotInCommand.toLowerCase().includes(q) ||
+      e.flightDetails.toLowerCase().includes(q)
+    );
+  }, [entries, search]);
 
   if (entries.length === 0) {
     return (
