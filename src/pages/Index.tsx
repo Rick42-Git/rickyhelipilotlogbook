@@ -13,6 +13,7 @@ import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 const Index = () => {
   const { entries, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
 
   const handleEdit = (entry: LogbookEntry) => {
