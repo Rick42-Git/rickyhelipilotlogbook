@@ -14,7 +14,7 @@ interface EntryFormDialogProps {
 
 const fields: { key: keyof Omit<LogbookEntry, 'id'>; label: string; type: string; half?: boolean; section?: string }[] = [
   { key: 'date', label: 'Date', type: 'date' },
-  { key: 'aircraftType', label: 'Aircraft Type', type: 'text', half: true },
+  { key: 'aircraftType', label: 'Class or Type', type: 'text', half: true },
   { key: 'aircraftReg', label: 'Registration', type: 'text', half: true },
   { key: 'pilotInCommand', label: 'Pilot in Command', type: 'text' },
   { key: 'flightDetails', label: 'Flight Details', type: 'text' },

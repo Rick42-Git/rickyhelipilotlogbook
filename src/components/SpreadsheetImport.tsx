@@ -517,7 +517,7 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
                               <Input type="date" value={e.date} onChange={ev => updateEntry(i, 'date', ev.target.value)} className="h-7 text-xs font-mono" />
                             </div>
                             <div>
-                              <label className="text-[10px] text-muted-foreground uppercase">Aircraft Type</label>
+                              <label className="text-[10px] text-muted-foreground uppercase">Class or Type</label>
                               <Input value={e.aircraftType} onChange={ev => updateEntry(i, 'aircraftType', ev.target.value)} className="h-7 text-xs font-mono" />
                             </div>
                             <div>

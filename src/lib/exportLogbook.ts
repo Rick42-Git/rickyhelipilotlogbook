@@ -2,7 +2,7 @@ import { LogbookEntry, numericFieldLabels, NumericField } from '@/types/logbook'
 import * as XLSX from 'xlsx';
 
 const headers = [
-  'Date', 'Aircraft Type', 'Registration', 'Pilot in Command', 'Flight Details',
+  'Date', 'Class or Type', 'Registration', 'Pilot in Command', 'Flight Details',
   ...Object.values(numericFieldLabels),
 ];
 
