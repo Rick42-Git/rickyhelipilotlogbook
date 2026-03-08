@@ -18,8 +18,6 @@ function saveEntries(entries: LogbookEntry[]) {
 
 const numericFields: NumericField[] = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
-  'meDayDual', 'meDayPilot', 'meDayCoPilot',
-  'meNightDual', 'meNightPilot', 'meNightCoPilot',
   'instrumentNavAids', 'instrumentPlace', 'instrumentTime',
   'instructorDay', 'instructorNight',
 ];
@@ -29,44 +27,26 @@ export function useLogbook() {
 
   const addEntry = useCallback((entry: Omit<LogbookEntry, 'id'>) => {
     const newEntry: LogbookEntry = { ...entry, id: crypto.randomUUID() };
-    setEntries(prev => {
-      const updated = [...prev, newEntry];
-      saveEntries(updated);
-      return updated;
-    });
+    setEntries(prev => { const updated = [...prev, newEntry]; saveEntries(updated); return updated; });
   }, []);
 
   const updateEntry = useCallback((id: string, entry: Omit<LogbookEntry, 'id'>) => {
-    setEntries(prev => {
-      const updated = prev.map(e => e.id === id ? { ...entry, id } : e);
-      saveEntries(updated);
-      return updated;
-    });
+    setEntries(prev => { const updated = prev.map(e => e.id === id ? { ...entry, id } : e); saveEntries(updated); return updated; });
   }, []);
 
   const deleteEntry = useCallback((id: string) => {
-    setEntries(prev => {
-      const updated = prev.filter(e => e.id !== id);
-      saveEntries(updated);
-      return updated;
-    });
+    setEntries(prev => { const updated = prev.filter(e => e.id !== id); saveEntries(updated); return updated; });
   }, []);
 
   const addMultipleEntries = useCallback((newEntries: Omit<LogbookEntry, 'id'>[]) => {
     const withIds = newEntries.map(e => ({ ...e, id: crypto.randomUUID() }));
-    setEntries(prev => {
-      const updated = [...prev, ...withIds];
-      saveEntries(updated);
-      return updated;
-    });
+    setEntries(prev => { const updated = [...prev, ...withIds]; saveEntries(updated); return updated; });
   }, []);
 
   const getTotals = useCallback(() => {
     const initial = Object.fromEntries(numericFields.map(f => [f, 0])) as Record<NumericField, number>;
     return entries.reduce((acc, e) => {
-      for (const f of numericFields) {
-        acc[f] += (e[f] || 0);
-      }
+      for (const f of numericFields) { acc[f] += (e[f] || 0); }
       return acc;
     }, initial);
   }, [entries]);
