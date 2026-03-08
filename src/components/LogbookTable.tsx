@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 
 interface LogbookTableProps {
   entries: LogbookEntry[];
@@ -69,7 +68,7 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
   }
 
   return (
-    <div className="glass-panel overflow-hidden">
+    <div className="bg-card/80 backdrop-blur-sm border border-border rounded-lg">
       <div className="flex justify-end p-2 border-b border-border/50">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -91,10 +90,10 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="overflow-x-auto relative">
+      <div className="relative">
         <img src={helicopterWatermark} alt="" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-auto opacity-[0.04] pointer-events-none select-none" />
         <table className="w-full text-sm relative z-10">
-          <thead className="sticky top-[40px] z-20">
+          <thead className="sticky z-30" style={{ top: 37 }}>
             <tr className="border-b border-border bg-card">
               {activeCols.map(col => (
                 <th key={col.key} className="px-2 py-2 text-left font-mono text-[10px] text-primary uppercase tracking-wider whitespace-nowrap">{col.shortLabel}</th>
