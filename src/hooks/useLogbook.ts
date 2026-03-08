@@ -22,8 +22,6 @@ function toDbEntry(e: Omit<LogbookEntry, 'id'>, userId: string) {
     se_day_pilot: e.seDayPilot,
     se_night_dual: e.seNightDual,
     se_night_pilot: e.seNightPilot,
-    instrument_nav_aids: e.instrumentNavAids,
-    instrument_place: e.instrumentPlace,
     instrument_time: e.instrumentTime,
     instructor_day: e.instructorDay,
     instructor_night: e.instructorNight,
