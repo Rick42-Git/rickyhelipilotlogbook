@@ -66,6 +66,9 @@ const Index = () => {
               <Plus className="h-4 w-4" />
               NEW ENTRY
             </Button>
+            <Button variant="ghost" onClick={signOut} className="font-mono gap-2 text-muted-foreground">
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
