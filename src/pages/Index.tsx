@@ -129,6 +129,12 @@ const Index = () => {
                 <Plus className="h-4 w-4" />
                 NEW ENTRY
               </Button>
+              {isAdmin && (
+                <Button variant="outline" onClick={() => navigate('/admin')} className="font-mono gap-2 border-accent text-accent">
+                  <Shield className="h-4 w-4" />
+                  ADMIN
+                </Button>
+              )}
               <Button variant="ghost" onClick={signOut} className="font-mono gap-2 text-muted-foreground">
                 <LogOut className="h-4 w-4" />
               </Button>
