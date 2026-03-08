@@ -105,7 +105,7 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
           ref={inputRef}
           type="file"
           multiple
-          accept="image/*"
+          accept="image/*,application/pdf"
           className="hidden"
           onChange={e => handleFiles(e.target.files)}
           disabled={processing}
