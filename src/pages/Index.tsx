@@ -13,7 +13,7 @@ import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
 
 const Index = () => {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
