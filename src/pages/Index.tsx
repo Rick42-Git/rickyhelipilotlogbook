@@ -6,7 +6,13 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3, LogOut, MonitorSmartphone } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { exportToNumbers } from '@/lib/exportLogbook';
 import { useAuth } from '@/hooks/useAuth';
 import { Last12MonthSummary } from '@/components/Last12MonthSummary';
@@ -66,10 +72,23 @@ const Index = () => {
               <BarChart3 className="h-4 w-4" />
               12M SUMMARY
             </Button>
-            <Button variant="outline" onClick={() => exportToNumbers(entries)} disabled={entries.length === 0} className="font-mono gap-2">
-              <Download className="h-4 w-4" />
-              EXPORT
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={entries.length === 0} className="font-mono gap-2">
+                  <Download className="h-4 w-4" />
+                  EXPORT
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="font-mono">
+                <DropdownMenuItem onClick={() => exportToNumbers(entries)}>
+                  EXPORT ALL ({entries.length} entries)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportToNumbers(entries.slice(-72))}>
+                  LAST 3 PAGES (72 entries)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button onClick={handleNew} className="font-mono gap-2">
               <Plus className="h-4 w-4" />
               NEW ENTRY
