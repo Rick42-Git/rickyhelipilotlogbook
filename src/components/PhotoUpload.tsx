@@ -44,9 +44,9 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
 
   const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-    if (imageFiles.length === 0) {
-      toast.error('Please select image files only');
+    const validFiles = Array.from(files).filter(f => f.type.startsWith('image/') || f.type === 'application/pdf');
+    if (validFiles.length === 0) {
+      toast.error('Please select image or PDF files');
       return;
     }
 
@@ -54,7 +54,7 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
     let totalEntries: ExtractedEntry[] = [];
 
     try {
-      for (const file of imageFiles) {
+      for (const file of validFiles) {
         toast.info(`Processing ${file.name}...`);
         const entries = await processFile(file);
         totalEntries = [...totalEntries, ...entries];
@@ -105,7 +105,7 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
           ref={inputRef}
           type="file"
           multiple
-          accept="image/*"
+          accept="image/*,application/pdf"
           className="hidden"
           onChange={e => handleFiles(e.target.files)}
           disabled={processing}
@@ -123,12 +123,12 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
           </div>
           <div>
             <p className="font-mono text-sm text-foreground">
-              {processing ? 'EXTRACTING FLIGHT DATA...' : 'UPLOAD LOGBOOK PHOTOS'}
+              {processing ? 'EXTRACTING FLIGHT DATA...' : 'UPLOAD LOGBOOK PHOTOS / PDF'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {processing
-                ? 'AI is reading your logbook page — this may take a moment'
-                : 'Drag & drop or click to select pages — AI will extract flight data'}
+                ? 'AI is reading your logbook — this may take a moment'
+                : 'Drag & drop or click — supports images and PDFs'}
             </p>
           </div>
         </div>

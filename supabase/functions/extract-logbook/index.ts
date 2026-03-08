@@ -98,13 +98,19 @@ Rules:
               String(spreadsheetText).slice(0, 180000),
           },
         ]
-      : [
-          {
-            type: "text",
-            text: "Extract all flight entries you can find from this aviation-related image.",
-          },
-          { type: "image_url", image_url: { url: imageBase64 } },
-        ];
+      : (() => {
+          // Detect if base64 is a PDF
+          const isPdf = imageBase64.startsWith("data:application/pdf");
+          return [
+            {
+              type: "text",
+              text: isPdf
+                ? "Extract all flight entries you can find from this PDF document containing logbook pages."
+                : "Extract all flight entries you can find from this aviation-related image.",
+            },
+            { type: "image_url", image_url: { url: imageBase64 } },
+          ];
+        })();
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
