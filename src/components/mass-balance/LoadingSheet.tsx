@@ -10,7 +10,8 @@ interface LoadingSheetProps {
   maxGrossWeight: number;
 }
 
-export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, totalMoment }: LoadingSheetProps) {
+export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, totalMoment, maxGrossWeight }: LoadingSheetProps) {
+  const weightPercent = (totalWeight / maxGrossWeight) * 100;
   return (
     <div className="glass-panel hud-border p-4">
       <div className="flex items-center gap-2 mb-4">
