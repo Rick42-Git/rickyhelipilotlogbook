@@ -58,8 +58,9 @@ Be thorough — extract partial data rather than skipping a row. Even a date and
         instrumentTime: { type: "number" },
         instructorDay: { type: "number" },
         instructorNight: { type: "number" },
+        confidence: { type: "number", description: "Overall confidence score from 0 to 100 for this entry. Consider handwriting legibility, smudges, ambiguous characters (e.g. 1 vs 7, 0 vs O), and date format clarity. Be strict — if any field required guesswork, lower the score." },
       },
-      required: ["date", "aircraftType", "aircraftReg"],
+      required: ["date", "aircraftType", "aircraftReg", "confidence"],
     };
 
     const response = await fetch(
