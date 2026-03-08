@@ -37,10 +37,10 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
           {entryCount} FLIGHTS
         </div>
       </div>
-      <div className="flex items-center justify-center mb-4 py-3 rounded border border-primary/20 bg-primary/5">
+      <div className="flex items-center justify-center mb-4 py-3 rounded border border-success/20 bg-success/5">
         <div className="text-center">
           <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.3em] mb-1">Total Flight Hours</p>
-          <span className="font-mono text-3xl font-bold text-primary tracking-wider drop-shadow-[0_0_10px_hsl(38_95%_55%/0.4)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <span className="font-mono text-3xl font-bold text-success tracking-wider drop-shadow-[0_0_10px_hsl(142_70%_45%/0.4)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {grandTotal.toFixed(1)}
           </span>
           <span className="font-mono text-xs text-primary/70 ml-1.5 uppercase tracking-widest">HRS</span>
