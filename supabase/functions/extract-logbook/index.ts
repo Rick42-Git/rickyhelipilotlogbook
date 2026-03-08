@@ -77,8 +77,7 @@ Be thorough — extract partial data rather than skipping a row. Even a date and
             {
               role: "user",
               content: [
-                { type: "text", text: "Extract all flight entries from this helicopter logbook page." },
-                { type: "image_url", image_url: { url: imageBase64 } },
+                { type: "text", text: "Extract all flight entries you can find from this image. It could be a logbook page, tech log, flight record, training sheet, or any aviation document." },
               ],
             },
           ],
