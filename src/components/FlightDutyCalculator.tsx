@@ -47,7 +47,10 @@ function calcActualFDP(reportTime: string, rotorStop: string): number {
 function getMonthOptions() {
   const options: { value: string; label: string }[] = [];
   const now = new Date();
-  for (let i = 0; i < 12; i++) {
+  const startYear = 2010;
+  const startMonth = 0; // January
+  const totalMonths = (now.getFullYear() - startYear) * 12 + now.getMonth() - startMonth + 1;
+  for (let i = 0; i < totalMonths; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     options.push({
       value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
