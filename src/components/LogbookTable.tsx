@@ -55,7 +55,7 @@ const columns: ColumnDef[] = [
 
 const defaultVisible = new Set(columns.map(c => c.key));
 
-export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
+export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookTableProps) {
   const [visibleCols, setVisibleCols] = useState<Set<string>>(defaultVisible);
   const [search, setSearch] = useState('');
 
