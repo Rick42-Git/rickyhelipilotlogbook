@@ -90,7 +90,7 @@ const Index = () => {
                 <DropdownMenuItem onClick={() => exportToNumbers(entries)}>
                   EXPORT ALL ({entries.length} entries)
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportToNumbers(entries.slice(-72))}>
+                <DropdownMenuItem onClick={() => exportToNumbers([...entries].sort((a, b) => a.date > b.date ? -1 : 1).slice(0, 72))}>
                   LAST 3 PAGES (72 entries)
                 </DropdownMenuItem>
               </DropdownMenuContent>
