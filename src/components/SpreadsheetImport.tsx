@@ -422,7 +422,23 @@ export function SpreadsheetImport({ onEntriesImported, templates = [] }: Spreads
         return;
       }
 
-      const { columnMap, unmapped } = mapHeaders(headers);
+      // Try template-based mapping first
+      let mappingResult: { columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>; unmapped: string[] } | null = null;
+
+      for (const template of templates) {
+        mappingResult = mapHeadersWithTemplate(headers, template.columnMapping);
+        if (mappingResult) {
+          toast.info(`Using template "${template.name}"`);
+          break;
+        }
+      }
+
+      // Fall back to keyword-based mapping
+      if (!mappingResult) {
+        mappingResult = mapHeaders(headers);
+      }
+
+      const { columnMap, unmapped } = mappingResult;
       setUnmappedCols(unmapped);
 
       const entries = rows
