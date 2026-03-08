@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      logbook_entries: {
+        Row: {
+          aircraft_reg: string
+          aircraft_type: string
+          created_at: string
+          date: string
+          flight_details: string
+          id: string
+          instructor_day: number
+          instructor_night: number
+          instrument_nav_aids: number
+          instrument_place: number
+          instrument_time: number
+          pilot_in_command: string
+          se_day_dual: number
+          se_day_pilot: number
+          se_night_dual: number
+          se_night_pilot: number
+          user_id: string
+        }
+        Insert: {
+          aircraft_reg?: string
+          aircraft_type?: string
+          created_at?: string
+          date?: string
+          flight_details?: string
+          id?: string
+          instructor_day?: number
+          instructor_night?: number
+          instrument_nav_aids?: number
+          instrument_place?: number
+          instrument_time?: number
+          pilot_in_command?: string
+          se_day_dual?: number
+          se_day_pilot?: number
+          se_night_dual?: number
+          se_night_pilot?: number
+          user_id: string
+        }
+        Update: {
+          aircraft_reg?: string
+          aircraft_type?: string
+          created_at?: string
+          date?: string
+          flight_details?: string
+          id?: string
+          instructor_day?: number
+          instructor_night?: number
+          instrument_nav_aids?: number
+          instrument_place?: number
+          instrument_time?: number
+          pilot_in_command?: string
+          se_day_dual?: number
+          se_day_pilot?: number
+          se_night_dual?: number
+          se_night_pilot?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
