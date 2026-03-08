@@ -175,7 +175,7 @@ const Index = () => {
               </Button>
             )}
             <ColumnTemplateManager />
-            <SpreadsheetImport onEntriesImported={addMultipleEntries} templates={templates} />
+            
             {lastImportIds && lastImportIds.length > 0 && (
               <Button variant="outline" size="sm" onClick={undoLastImport} className="font-mono text-[10px] gap-1 h-7 border-destructive text-destructive hover:bg-destructive/10">
                 <Undo2 className="h-3 w-3" />
