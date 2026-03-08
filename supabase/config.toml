@@ -1,1 +1,4 @@
 project_id = "toxomwfohykgdljhjdgz"
+
+[functions.extract-logbook]
+verify_jwt = false
