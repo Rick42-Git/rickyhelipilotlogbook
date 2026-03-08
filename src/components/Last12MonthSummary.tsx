@@ -53,9 +53,21 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
     },
   ];
 
+  // Per-type breakdown
+  const typeMap: Record<string, { hours: number; flights: number }> = {};
+  for (const e of filtered) {
+    const type = e.aircraftType || 'Unknown';
+    if (!typeMap[type]) typeMap[type] = { hours: 0, flights: 0 };
+    typeMap[type].flights += 1;
+    typeMap[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0)
+      + (e.instrumentNavAids || 0) + (e.instrumentPlace || 0) + (e.instrumentTime || 0)
+      + (e.instructorDay || 0) + (e.instructorNight || 0);
+  }
+  const typeTotals = Object.entries(typeMap).sort((a, b) => b[1].hours - a[1].hours);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg glass-panel">
+      <DialogContent className="max-w-lg glass-panel max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-mono text-primary">▸ LAST 12 MONTHS SUMMARY</DialogTitle>
         </DialogHeader>
@@ -80,6 +92,24 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
           <p className="font-mono text-[10px] text-muted-foreground text-center">
             {filtered.length} flights from {cutoff} to {now.toISOString().slice(0, 10)}
           </p>
+
+          {/* Per-type breakdown */}
+          {typeTotals.length > 0 && (
+            <div>
+              <p className="font-mono text-[9px] text-accent uppercase tracking-widest border-b border-border pb-1 mb-2">Hours by Aircraft Type</p>
+              <div className="space-y-1">
+                {typeTotals.map(([type, data]) => (
+                  <div key={type} className="flex justify-between items-center">
+                    <span className="font-mono text-xs text-foreground">{type}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-[10px] text-muted-foreground">{data.flights} flights</span>
+                      <span className="font-mono text-sm font-bold text-primary" style={{ fontVariantNumeric: 'tabular-nums' }}>{data.hours.toFixed(1)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Category breakdowns */}
           <div className="grid grid-cols-2 gap-4">
