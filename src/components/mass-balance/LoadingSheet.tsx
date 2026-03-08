@@ -7,6 +7,7 @@ interface LoadingSheetProps {
   onWeightChange: (index: number, value: number) => void;
   totalWeight: number;
   totalMoment: number;
+  maxGrossWeight: number;
 }
 
 export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, totalMoment }: LoadingSheetProps) {
