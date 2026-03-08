@@ -180,5 +180,5 @@ export function useLogbook() {
     }, initial);
   }, [entries]);
 
-  return { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, clearAllEntries, getTotals };
+  return { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, clearAllEntries, deleteUnknownEntries, getTotals };
 }
