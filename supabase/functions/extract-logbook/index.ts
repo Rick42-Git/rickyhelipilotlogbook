@@ -18,22 +18,22 @@ serve(async (req) => {
     const { imageBase64 } = await req.json();
     if (!imageBase64) throw new Error("No image data provided");
 
-    const systemPrompt = `You are a helicopter pilot logbook OCR specialist. Extract ALL flight entries from this logbook page image.
+    const systemPrompt = `You are an expert aviation data extraction specialist. Analyse the uploaded image — it could be ANYTHING related to flying: a logbook page, tech log, flight plan, training record, receipt, certificate, screenshot of a digital logbook, whiteboard notes, or any other document.
 
-The logbook has these columns matching standard aviation logbook format:
-- date (YYYY-MM-DD)
-- aircraftType (e.g. "RH-22", "R44", "Bell 206")
-- aircraftReg (registration)
-- pilotInCommand (name)
-- flightDetails (remarks/exercises)
-- Single Engine Day: seDayDual (col 1), seDayPilot (col 2)
-- Single Engine Night: seNightDual (col 3), seNightPilot (col 4)
-- Multi Engine Day: meDayDual (col 5), meDayPilot (col 6), meDayCoPilot (col 7)
-- Multi Engine Night: meNightDual (col 8), meNightPilot (col 9), meNightCoPilot (col 10)
+Extract as many flight entries as you can identify. For each flight, populate these fields:
+- date (YYYY-MM-DD format — infer year from context if only day/month visible)
+- aircraftType (e.g. "R22", "R44", "Bell 206", "AS350")
+- aircraftReg (registration e.g. "ZS-HBR")
+- pilotInCommand (name of PIC)
+- flightDetails (route, remarks, exercise numbers, any notes)
+- Single Engine Day: seDayDual (dual instruction received), seDayPilot (solo/PIC)
+- Single Engine Night: seNightDual, seNightPilot
 - Instrument Flying: instrumentNavAids (col 11), instrumentPlace (col 12), instrumentTime (col 13)
 - Flying as Instructor: instructorDay (col 14), instructorNight (col 15)
 
-All numeric values are decimal hours. If unreadable or blank, use 0.`;
+All numeric values are decimal hours (e.g. 1.3 = 1 hour 18 min). If a value is unreadable, missing, or not applicable, use 0.
+If the image is not aviation-related or contains no extractable flight data, return an empty entries array.
+Be thorough — extract partial data rather than skipping a row. Even a date and aircraft type alone is useful.`;
 
     const entrySchema = {
       type: "object",
