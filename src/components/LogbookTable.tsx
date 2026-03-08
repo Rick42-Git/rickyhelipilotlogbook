@@ -69,7 +69,7 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
   }
 
   return (
-    <div className="glass-panel" style={{ overflow: 'visible' }}: 'visible' }}>
+    <div className="glass-panel" style={{ overflow: 'visible' }}>
       <div className="flex justify-end p-2 border-b border-border/50">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
