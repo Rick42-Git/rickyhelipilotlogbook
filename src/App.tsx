@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import WaitlistPending from "./pages/WaitlistPending";
+import MassBalance from "./pages/MassBalance";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 
@@ -69,6 +70,7 @@ const App = () => (
             <Route path="/auth" element={<AuthRoute />} />
             <Route path="/admin" element={<AdminRoute />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/mass-balance" element={<ProtectedRoute><MassBalance /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
