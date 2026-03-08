@@ -6,11 +6,12 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3, LogOut } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut, MonitorSmartphone } from 'lucide-react';
 import { exportToNumbers } from '@/lib/exportLogbook';
 import { useAuth } from '@/hooks/useAuth';
 import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -18,6 +19,7 @@ const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
+  const { canInstall, install } = useInstallPrompt();
 
   const handleEdit = (entry: LogbookEntry) => {
     setEditingEntry(entry);
@@ -53,6 +55,12 @@ const Index = () => {
             </p>
           </div>
           <div className="flex gap-2">
+            {canInstall && (
+              <Button variant="outline" onClick={install} className="font-mono gap-2 border-primary text-primary">
+                <MonitorSmartphone className="h-4 w-4" />
+                INSTALL
+              </Button>
+            )}
             <SpreadsheetImport onEntriesImported={addMultipleEntries} />
             <Button variant="outline" onClick={() => setSummaryOpen(true)} disabled={entries.length === 0} className="font-mono gap-2">
               <BarChart3 className="h-4 w-4" />
