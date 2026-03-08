@@ -215,7 +215,7 @@ const Index = () => {
         </div>
 
         {/* Table */}
-        <LogbookTable entries={entries} onEdit={handleEdit} onDelete={deleteEntry} />
+        <LogbookTable entries={entries} onEdit={handleEdit} onDelete={deleteEntry} onClearAll={clearAllEntries} />
 
         {/* Entry Dialog */}
         <EntryFormDialog
