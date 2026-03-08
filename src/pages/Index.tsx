@@ -95,7 +95,7 @@ const Index = () => {
                   INSTALL
                 </Button>
               )}
-              
+              <SpreadsheetImport onEntriesImported={addMultipleEntries} templates={templates} />
               <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
                 <Clock className="h-4 w-4" />
                 F&D CALC
@@ -144,8 +144,7 @@ const Index = () => {
                 INSTALL
               </Button>
             )}
-            
-            
+            <SpreadsheetImport onEntriesImported={addMultipleEntries} templates={templates} />
             
             <Button variant="outline" size="sm" onClick={() => setDutyCalcOpen(true)} className="font-mono text-[10px] gap-1 h-7">
               <Clock className="h-3 w-3" />
