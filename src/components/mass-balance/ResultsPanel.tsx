@@ -1,5 +1,3 @@
-import { Progress } from '@/components/ui/progress';
-
 interface ResultsPanelProps {
   withinLimits: boolean;
   cgStation: number;
@@ -10,8 +8,6 @@ interface ResultsPanelProps {
 }
 
 export function ResultsPanel({ withinLimits, cgStation, weightMargin, grossWeight, maxGrossWeight, totalMoment }: ResultsPanelProps) {
-  const weightPercent = (grossWeight / maxGrossWeight) * 100;
-
   return (
     <div className="space-y-4">
       {/* Status */}
@@ -48,27 +44,6 @@ export function ResultsPanel({ withinLimits, cgStation, weightMargin, grossWeigh
           <div className="font-mono text-xl font-bold text-foreground">
             {(totalMoment / 1000).toFixed(1)}<span className="text-xs text-muted-foreground ml-0.5">k</span>
           </div>
-        </div>
-      </div>
-
-      {/* Weight bar */}
-      <div className="glass-panel hud-border p-4">
-        <div className="flex justify-between font-mono text-[10px] text-muted-foreground mb-2 tracking-wider">
-          <span>GROSS WEIGHT</span>
-          <span>{grossWeight.toLocaleString()} / {maxGrossWeight.toLocaleString()} lbs</span>
-        </div>
-        <div className="relative h-3 rounded-full bg-muted/30 overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-300 ${
-              weightPercent > 100 ? 'bg-destructive' : weightPercent > 85 ? 'bg-amber-500' : 'bg-primary'
-            }`}
-            style={{ width: `${Math.min(weightPercent, 100)}%` }}
-          />
-        </div>
-        <div className="flex justify-between font-mono text-[9px] text-muted-foreground/50 mt-1">
-          <span>0</span>
-          <span>{Math.round(maxGrossWeight / 2).toLocaleString()}</span>
-          <span>{maxGrossWeight.toLocaleString()}</span>
         </div>
       </div>
     </div>
