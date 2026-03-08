@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LogbookEntry } from '@/types/logbook';
 import { Pencil, Trash2, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import helicopterWatermark from '@/assets/helicopter-icon.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -90,8 +91,9 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto relative">
+        <img src={helicopterWatermark} alt="" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-auto opacity-[0.04] pointer-events-none select-none" />
+        <table className="w-full text-sm relative z-10">
           <thead>
             <tr className="border-b border-border bg-muted/30">
               {activeCols.map(col => (
