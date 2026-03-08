@@ -82,6 +82,12 @@ const Index = () => {
                 </Button>
               )}
               <SpreadsheetImport onEntriesImported={addMultipleEntries} />
+              {lastImportIds && lastImportIds.length > 0 && (
+                <Button variant="outline" onClick={undoLastImport} className="font-mono gap-2 border-destructive text-destructive hover:bg-destructive/10">
+                  <Undo2 className="h-4 w-4" />
+                  UNDO ({lastImportIds.length})
+                </Button>
+              )}
               <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
                 <Clock className="h-4 w-4" />
                 F&D CALC
