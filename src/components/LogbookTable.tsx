@@ -103,49 +103,51 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
             className="h-8 pl-8 font-mono text-xs bg-background/50"
           />
         </div>
-        {onClearAll && entries.length > 0 && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="font-mono text-xs gap-1.5 border-destructive text-destructive hover:bg-destructive/10">
-                <Trash2 className="h-3.5 w-3.5" />
-                CLEAR ALL
+        <div className="flex items-center gap-1.5">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="font-mono text-xs gap-1.5">
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+                COLUMNS
               </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="font-mono">CLEAR ALL ENTRIES?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete all {entries.length} flight entries. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="font-mono">CANCEL</AlertDialogCancel>
-                <AlertDialogAction onClick={onClearAll} className="font-mono bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  DELETE ALL
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="font-mono text-xs gap-1.5">
-              <SlidersHorizontal className="h-3.5 w-3.5" />
-              COLUMNS
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="p-3 grid grid-cols-2 gap-x-4 gap-y-2 w-[320px]">
-            {columns.map(col => (
-              <label key={col.key} className="flex items-center gap-2 cursor-pointer">
-                <Checkbox
-                  checked={visibleCols.has(col.key)}
-                  onCheckedChange={() => toggleCol(col.key)}
-                />
-                <span className="font-mono text-xs">{col.label}</span>
-              </label>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="p-3 grid grid-cols-2 gap-x-4 gap-y-2 w-[320px]">
+              {columns.map(col => (
+                <label key={col.key} className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox
+                    checked={visibleCols.has(col.key)}
+                    onCheckedChange={() => toggleCol(col.key)}
+                  />
+                  <span className="font-mono text-xs">{col.label}</span>
+                </label>
             ))}
           </DropdownMenuContent>
-        </DropdownMenu>
+          </DropdownMenu>
+          {onClearAll && entries.length > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="font-mono text-[10px] gap-1 h-6 px-2 text-destructive hover:bg-destructive/10">
+                  <Trash2 className="h-3 w-3" />
+                  CLEAR
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="font-mono">CLEAR ALL ENTRIES?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete all {entries.length} flight entries. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="font-mono">CANCEL</AlertDialogCancel>
+                  <AlertDialogAction onClick={onClearAll} className="font-mono bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    DELETE ALL
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </div>
       <div className="relative">
         <img src={helicopterWatermark} alt="" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-auto opacity-[0.04] pointer-events-none select-none" />
