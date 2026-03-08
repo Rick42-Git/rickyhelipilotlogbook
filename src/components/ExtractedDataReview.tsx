@@ -80,14 +80,18 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
 
         <div className="space-y-1">
           {/* Header */}
-          <div className="grid grid-cols-[36px_90px_70px_70px_100px_1fr_60px_60px_28px] gap-1.5 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+          <div className="grid grid-cols-[36px_90px_70px_70px_1fr_55px_55px_55px_55px_55px_55px_50px_28px] gap-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
             <span className="text-center">OK</span>
             <span>Date</span>
             <span>Type</span>
             <span>Reg</span>
-            <span>PIC</span>
             <span>Details</span>
-            <span>Day Hrs</span>
+            <span>Day D</span>
+            <span>Day P</span>
+            <span>Ngt D</span>
+            <span>Ngt P</span>
+            <span>Instr D</span>
+            <span>Instr N</span>
             <span>Conf</span>
             <span />
           </div>
@@ -98,7 +102,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
             return (
               <div
                 key={i}
-                className={`grid grid-cols-[36px_90px_70px_70px_100px_1fr_60px_60px_28px] gap-1.5 items-center py-1 rounded transition-colors ${
+                className={`grid grid-cols-[36px_90px_70px_70px_1fr_55px_55px_55px_55px_55px_55px_50px_28px] gap-1 items-center py-1 rounded transition-colors ${
                   accepted
                     ? 'bg-primary/10 border border-primary/30'
                     : flagged
@@ -139,20 +143,65 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
                   disabled={accepted}
                 />
                 <Input
-                  value={entry.pilotInCommand}
-                  onChange={e => updateField(i, 'pilotInCommand', e.target.value)}
-                  className="font-mono text-xs h-7"
-                  disabled={accepted}
-                />
-                <Input
                   value={entry.flightDetails}
                   onChange={e => updateField(i, 'flightDetails', e.target.value)}
                   className="font-mono text-xs h-7"
                   disabled={accepted}
                 />
-                <span className="font-mono text-xs text-center text-foreground">
-                  {(entry.seDayDual + entry.seDayPilot + entry.seNightDual + entry.seNightPilot).toFixed(1)}
-                </span>
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={entry.seDayDual || ''}
+                  onChange={e => updateField(i, 'seDayDual', parseFloat(e.target.value) || 0)}
+                  className="font-mono text-xs h-7 text-center"
+                  disabled={accepted}
+                  placeholder="0"
+                />
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={entry.seDayPilot || ''}
+                  onChange={e => updateField(i, 'seDayPilot', parseFloat(e.target.value) || 0)}
+                  className="font-mono text-xs h-7 text-center"
+                  disabled={accepted}
+                  placeholder="0"
+                />
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={entry.seNightDual || ''}
+                  onChange={e => updateField(i, 'seNightDual', parseFloat(e.target.value) || 0)}
+                  className="font-mono text-xs h-7 text-center"
+                  disabled={accepted}
+                  placeholder="0"
+                />
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={entry.seNightPilot || ''}
+                  onChange={e => updateField(i, 'seNightPilot', parseFloat(e.target.value) || 0)}
+                  className="font-mono text-xs h-7 text-center"
+                  disabled={accepted}
+                  placeholder="0"
+                />
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={entry.instructorDay || ''}
+                  onChange={e => updateField(i, 'instructorDay', parseFloat(e.target.value) || 0)}
+                  className="font-mono text-xs h-7 text-center"
+                  disabled={accepted}
+                  placeholder="0"
+                />
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={entry.instructorNight || ''}
+                  onChange={e => updateField(i, 'instructorNight', parseFloat(e.target.value) || 0)}
+                  className="font-mono text-xs h-7 text-center"
+                  disabled={accepted}
+                  placeholder="0"
+                />
                 <span className={`font-mono text-xs text-center font-bold ${
                   accepted ? 'text-primary' : flagged ? 'text-destructive' : 'text-primary'
                 }`}>
