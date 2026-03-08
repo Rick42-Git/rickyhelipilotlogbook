@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import WaitlistPending from "./pages/WaitlistPending";
+import MassBalance from "./pages/MassBalance";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 
