@@ -156,6 +156,9 @@ function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<L
 
   for (const h of headers) {
     if (!usedHeaders.has(h) && normalizeHeader(h)) unmapped.push(h);
+  }
+
+  return { columnMap, unmapped };
 }
 
 function mapHeadersWithTemplate(
@@ -186,11 +189,7 @@ function mapHeadersWithTemplate(
     }
   }
 
-  // Only use template if it matched at least 3 columns
   return matchCount >= 3 ? { columnMap, unmapped } : null;
-}
-
-  return { columnMap, unmapped };
 }
 
 function parseLocalizedNumber(value: unknown): number {
