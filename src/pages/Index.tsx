@@ -6,12 +6,14 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download } from 'lucide-react';
+import { Plus, Download, BarChart3 } from 'lucide-react';
 import { exportToNumbers } from '@/lib/exportLogbook';
+import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 
 const Index = () => {
   const { entries, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
 
   const handleEdit = (entry: LogbookEntry) => {
@@ -48,6 +50,10 @@ const Index = () => {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setSummaryOpen(true)} disabled={entries.length === 0} className="font-mono gap-2">
+              <BarChart3 className="h-4 w-4" />
+              12M SUMMARY
+            </Button>
             <Button variant="outline" onClick={() => exportToNumbers(entries)} disabled={entries.length === 0} className="font-mono gap-2">
               <Download className="h-4 w-4" />
               EXPORT
@@ -81,6 +87,8 @@ const Index = () => {
           entry={editingEntry}
           onSave={handleSave}
         />
+
+        <Last12MonthSummary entries={entries} open={summaryOpen} onOpenChange={setSummaryOpen} />
       </div>
     </div>
   );
