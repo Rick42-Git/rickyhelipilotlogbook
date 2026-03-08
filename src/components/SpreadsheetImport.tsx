@@ -256,7 +256,7 @@ function matrixToText(matrix: (string | number | null)[][]): string {
     .join('\n');
 }
 
-export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps) {
+export function SpreadsheetImport({ onEntriesImported, templates = [] }: SpreadsheetImportProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [parsedEntries, setParsedEntries] = useState<Omit<LogbookEntry, 'id'>[]>([]);
