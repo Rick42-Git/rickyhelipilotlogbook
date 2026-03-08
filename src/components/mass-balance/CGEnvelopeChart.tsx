@@ -68,7 +68,7 @@ export function CGEnvelopeChart({ envelope, currentStation, currentWeight, withi
         ))}
 
         {/* Envelope polygon */}
-        <path d={pathD} fill="hsl(var(--primary) / 0.15)" stroke="hsl(var(--primary))" strokeWidth="1.5" />
+        <path d={pathD} fill="hsl(var(--success) / 0.15)" stroke="hsl(var(--success))" strokeWidth="1.5" />
 
         {/* Current point */}
         <circle cx={cx} cy={cy} r={5} fill={withinLimits ? 'hsl(var(--primary))' : 'hsl(var(--destructive))'} stroke="hsl(var(--background))" strokeWidth="2" />
