@@ -32,8 +32,6 @@ export const emptyEntry: Omit<LogbookEntry, 'id'> = {
   seDayPilot: 0,
   seNightDual: 0,
   seNightPilot: 0,
-  instrumentNavAids: 0,
-  instrumentPlace: 0,
   instrumentTime: 0,
   instructorDay: 0,
   instructorNight: 0,
