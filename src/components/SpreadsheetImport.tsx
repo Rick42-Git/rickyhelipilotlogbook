@@ -9,8 +9,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 
+import { ColumnTemplate } from '@/hooks/useColumnTemplates';
+
 interface SpreadsheetImportProps {
   onEntriesImported: (entries: Omit<LogbookEntry, 'id'>[]) => void;
+  templates?: ColumnTemplate[];
 }
 
 const FIELD_KEYWORDS: { field: keyof Omit<LogbookEntry, 'id'>; keywords: string[]; priority: number }[] = [
