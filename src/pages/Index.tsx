@@ -42,6 +42,7 @@ const Index = () => {
   const [dutyCalcOpen, setDutyCalcOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
   const { canInstall, install } = useInstallPrompt();
+  const { templates } = useColumnTemplates();
 
   const handleEdit = (entry: LogbookEntry) => {
     setEditingEntry(entry);
