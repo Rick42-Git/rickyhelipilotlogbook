@@ -8,6 +8,20 @@ interface LogbookTableProps {
   onDelete: (id: string) => void;
 }
 
+const headers = [
+  'Date', 'Type', 'Reg', 'PIC', 'Details',
+  'SE D-Dual', 'SE D-Pilot', 'SE N-Dual', 'SE N-Pilot',
+  'ME D-Dual', 'ME D-Pilot', 'ME D-CoPlt',
+  'ME N-Dual', 'ME N-Pilot', 'ME N-CoPlt',
+  'Instr Nav', 'Instr Pl', 'Instr Tm',
+  'Inst Day', 'Inst Ngt',
+  '',
+];
+
+function fmt(n: number) {
+  return n > 0 ? n.toFixed(1) : '';
+}
+
 export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
   if (entries.length === 0) {
     return (
@@ -24,8 +38,8 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              {['Date', 'Type', 'Reg', 'From', 'To', 'Total', 'PIC', 'SIC', 'Night', 'IFR', 'Ldg', 'Remarks', ''].map(h => (
-                <th key={h} className="px-3 py-2 text-left font-mono text-xs text-primary uppercase tracking-wider whitespace-nowrap">
+              {headers.map((h, i) => (
+                <th key={i} className="px-2 py-2 text-left font-mono text-[10px] text-primary uppercase tracking-wider whitespace-nowrap">
                   {h}
                 </th>
               ))}
@@ -36,19 +50,27 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
               .sort((a, b) => (a.date > b.date ? -1 : 1))
               .map(entry => (
                 <tr key={entry.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                  <td className="px-3 py-2 font-mono text-xs whitespace-nowrap">{entry.date}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{entry.aircraftType}</td>
-                  <td className="px-3 py-2 font-mono text-xs text-accent">{entry.aircraftReg}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{entry.from}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{entry.to}</td>
-                  <td className="px-3 py-2 font-mono text-xs text-primary font-semibold">{entry.totalTime.toFixed(1)}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{entry.picTime.toFixed(1)}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{entry.sicTime.toFixed(1)}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{entry.nightTime.toFixed(1)}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{entry.ifrTime.toFixed(1)}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{entry.landings}</td>
-                  <td className="px-3 py-2 text-xs text-muted-foreground max-w-[150px] truncate">{entry.remarks}</td>
-                  <td className="px-3 py-2 whitespace-nowrap">
+                  <td className="px-2 py-2 font-mono text-xs whitespace-nowrap">{entry.date}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{entry.aircraftType}</td>
+                  <td className="px-2 py-2 font-mono text-xs text-accent">{entry.aircraftReg}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{entry.pilotInCommand}</td>
+                  <td className="px-2 py-2 text-xs text-muted-foreground max-w-[120px] truncate">{entry.flightDetails}</td>
+                  <td className="px-2 py-2 font-mono text-xs text-primary font-semibold">{fmt(entry.seDayDual)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.seDayPilot)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.seNightDual)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.seNightPilot)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meDayDual)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meDayPilot)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meDayCoPilot)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meNightDual)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meNightPilot)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meNightCoPilot)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.instrumentNavAids)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.instrumentPlace)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.instrumentTime)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.instructorDay)}</td>
+                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.instructorNight)}</td>
+                  <td className="px-2 py-2 whitespace-nowrap">
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(entry)}>
                       <Pencil className="h-3 w-3" />
                     </Button>
