@@ -6,13 +6,15 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3 } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut } from 'lucide-react';
 import { exportToNumbers } from '@/lib/exportLogbook';
+import { useAuth } from '@/hooks/useAuth';
 import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
 
 const Index = () => {
-  const { entries, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
+  const { signOut } = useAuth();
+  const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
@@ -63,6 +65,9 @@ const Index = () => {
             <Button onClick={handleNew} className="font-mono gap-2">
               <Plus className="h-4 w-4" />
               NEW ENTRY
+            </Button>
+            <Button variant="ghost" onClick={signOut} className="font-mono gap-2 text-muted-foreground">
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
