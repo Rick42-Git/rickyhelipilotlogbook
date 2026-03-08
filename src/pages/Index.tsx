@@ -7,7 +7,7 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +23,7 @@ import { FlightDutyCalculator } from '@/components/FlightDutyCalculator';
 
 const Index = () => {
   const { user, signOut } = useAuth();
-  const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
+  const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, getTotals } = useLogbook();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [dutyCalcOpen, setDutyCalcOpen] = useState(false);
@@ -82,6 +82,12 @@ const Index = () => {
                 </Button>
               )}
               <SpreadsheetImport onEntriesImported={addMultipleEntries} />
+              {lastImportIds && lastImportIds.length > 0 && (
+                <Button variant="outline" onClick={undoLastImport} className="font-mono gap-2 border-destructive text-destructive hover:bg-destructive/10">
+                  <Undo2 className="h-4 w-4" />
+                  UNDO ({lastImportIds.length})
+                </Button>
+              )}
               <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
                 <Clock className="h-4 w-4" />
                 F&D CALC
@@ -131,6 +137,12 @@ const Index = () => {
               </Button>
             )}
             <SpreadsheetImport onEntriesImported={addMultipleEntries} />
+            {lastImportIds && lastImportIds.length > 0 && (
+              <Button variant="outline" size="sm" onClick={undoLastImport} className="font-mono text-[10px] gap-1 h-7 border-destructive text-destructive hover:bg-destructive/10">
+                <Undo2 className="h-3 w-3" />
+                UNDO ({lastImportIds.length})
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={() => setDutyCalcOpen(true)} className="font-mono text-[10px] gap-1 h-7">
               <Clock className="h-3 w-3" />
               F&D

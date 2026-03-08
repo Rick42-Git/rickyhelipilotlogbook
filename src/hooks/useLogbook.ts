@@ -50,6 +50,7 @@ export function useLogbook() {
   const { user } = useAuth();
   const [entries, setEntries] = useState<LogbookEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastImportIds, setLastImportIds] = useState<string[] | null>(null);
 
   // Fetch entries on mount / user change
   useEffect(() => {
@@ -117,8 +118,24 @@ export function useLogbook() {
       .select();
 
     if (error) { toast.error('Failed to import entries'); return; }
-    setEntries(prev => [...prev, ...(data || []).map(fromDbEntry)]);
+    const imported = (data || []).map(fromDbEntry);
+    setEntries(prev => [...prev, ...imported]);
+    setLastImportIds(imported.map(e => e.id));
   }, [user]);
+
+  const undoLastImport = useCallback(async () => {
+    if (!user || !lastImportIds || lastImportIds.length === 0) return;
+    const { error } = await supabase
+      .from('logbook_entries')
+      .delete()
+      .in('id', lastImportIds);
+
+    if (error) { toast.error('Failed to undo import'); return; }
+    const idsToRemove = new Set(lastImportIds);
+    setEntries(prev => prev.filter(e => !idsToRemove.has(e.id)));
+    toast.success(`Removed ${lastImportIds.length} entries`);
+    setLastImportIds(null);
+  }, [user, lastImportIds]);
 
   const getTotals = useCallback(() => {
     const initial = Object.fromEntries(numericFields.map(f => [f, 0])) as Record<NumericField, number>;
@@ -128,5 +145,5 @@ export function useLogbook() {
     }, initial);
   }, [entries]);
 
-  return { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals };
+  return { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, getTotals };
 }
