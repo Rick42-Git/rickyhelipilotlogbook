@@ -203,24 +203,63 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
       const data = await file.arrayBuffer();
       const wb = XLSX.read(data, { type: 'array', cellDates: false });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws);
+      const matrix = XLSX.utils.sheet_to_json<(string | number | null)[]>(ws, {
+        header: 1,
+        raw: true,
+        defval: '',
+      });
 
-      if (rows.length === 0) {
+      if (matrix.length === 0) {
         toast.error('No data found in spreadsheet');
         setLoading(false);
         return;
       }
 
-      // Build column mapping from headers
-      const headers = Object.keys(rows[0]);
+      // Detect likely header row from first rows by best field match score
+      const scanRows = matrix.slice(0, Math.min(8, matrix.length));
+      let headerRowIndex = 0;
+      let bestScore = -1;
+
+      scanRows.forEach((row, idx) => {
+        const candidateHeaders = row.map(cell => String(cell ?? '').trim()).filter(Boolean);
+        if (candidateHeaders.length < 2) return;
+        const { columnMap } = mapHeaders(candidateHeaders);
+        const score = Object.keys(columnMap).length;
+        if (score > bestScore) {
+          bestScore = score;
+          headerRowIndex = idx;
+        }
+      });
+
+      const rawHeaders = (matrix[headerRowIndex] || []).map(cell => String(cell ?? '').trim());
+      const maxCols = Math.max(rawHeaders.length, ...matrix.slice(headerRowIndex + 1, headerRowIndex + 20).map(r => r.length));
+
+      // Ensure unique/fallback header names
+      const seen = new Map<string, number>();
+      const headers = Array.from({ length: maxCols }, (_, i) => {
+        const base = rawHeaders[i] || `Column ${i + 1}`;
+        const count = (seen.get(base) || 0) + 1;
+        seen.set(base, count);
+        return count === 1 ? base : `${base} (${count})`;
+      });
+
+      const rows = matrix.slice(headerRowIndex + 1).map((row) => {
+        const obj: Record<string, unknown> = {};
+        headers.forEach((h, i) => {
+          obj[h] = row[i] ?? '';
+        });
+        return obj;
+      });
+
+      if (rows.length === 0) {
+        toast.error('No data rows found in spreadsheet');
+        setLoading(false);
+        return;
+      }
+
+      // Build column mapping from detected headers
       const { columnMap, unmapped } = mapHeaders(headers);
-
       setUnmappedCols(unmapped);
-
-      // Parse rows
-      const entries = rows
-        .map(r => parseRow(r, columnMap))
-        .filter((e): e is Omit<LogbookEntry, 'id'> => e !== null);
 
       if (entries.length === 0) {
         toast.error('No valid entries found. Check that column headers match expected format.');
