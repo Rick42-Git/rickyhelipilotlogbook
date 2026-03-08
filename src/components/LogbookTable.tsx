@@ -10,11 +10,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface LogbookTableProps {
   entries: LogbookEntry[];
   onEdit: (entry: LogbookEntry) => void;
   onDelete: (id: string) => void;
+  onClearAll?: () => void;
 }
 
 type ColumnDef = {
