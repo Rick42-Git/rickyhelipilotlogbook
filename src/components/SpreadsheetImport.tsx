@@ -66,8 +66,10 @@ function scoreMatch(normalizedHeader: string, keywords: string[]): number {
 }
 
 const SECONDARY_HEADER_TOKENS = new Set([
-  'day', 'night', 'dual', 'pic', 'picus', 'co pilot', 'co-pilot', 'actual tme', 'actual time',
-  'fstd time', 'nav aids', 'place', 'se', 'me', 'remarks', 'date', 'dd mm yyyy',
+  'day', 'night', 'dual', 'pic', 'picus', 'co pilot', 'co-pilot',
+  'single engine aircraft', 'multi engine aircraft', 'instrument time', 'instructor time',
+  'actual tme', 'actual time', 'fstd time', 'nav aids', 'place', 'se', 'me', 'remarks',
+  'date', 'dd mm yyyy', 'class or type', 'registration marks', 'plt in command', 'details of flight',
 ]);
 
 function isHeaderContinuationRow(row: (string | number | null)[]): boolean {
@@ -78,10 +80,23 @@ function isHeaderContinuationRow(row: (string | number | null)[]): boolean {
   if (values.length < 3) return false;
 
   const tokenHits = values.filter((v) => SECONDARY_HEADER_TOKENS.has(v)).length;
-  const hasOnlyTinyStrings = values.every((v) => v.length <= 14);
+  const hasMostlyShortLabels = values.filter((v) => v.length <= 22).length >= Math.ceil(values.length * 0.7);
   const numericLike = row.filter((cell) => parseLocalizedNumber(cell) > 0).length;
 
-  return tokenHits >= 3 && hasOnlyTinyStrings && numericLike === 0;
+  return tokenHits >= 3 && hasMostlyShortLabels && numericLike === 0;
+}
+
+function expandMergedRowValues(row: (string | number | null)[], maxCols: number): string[] {
+  const expanded: string[] = [];
+  let carry = '';
+
+  for (let colIdx = 0; colIdx < maxCols; colIdx++) {
+    const value = String(row[colIdx] ?? '').trim();
+    if (value) carry = value;
+    expanded.push(value || carry);
+  }
+
+  return expanded;
 }
 
 function buildCompositeHeaders(
@@ -89,9 +104,11 @@ function buildCompositeHeaders(
   headerRows: number[],
   maxCols: number,
 ): string[] {
+  const expandedRows = headerRows.map((rowIdx) => expandMergedRowValues(matrix[rowIdx] || [], maxCols));
+
   return Array.from({ length: maxCols }, (_, colIdx) => {
-    const parts = headerRows
-      .map((rowIdx) => String(matrix[rowIdx]?.[colIdx] ?? '').trim())
+    const parts = expandedRows
+      .map((row) => row[colIdx] || '')
       .filter(Boolean);
 
     const unique: string[] = [];
@@ -320,12 +337,30 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
       const maxCols = Math.max(rawHeaders.length, ...matrix.slice(headerRowIndex + 1, headerRowIndex + 20).map(r => r.length));
 
       const candidateHeaderRows = [headerRowIndex];
-      if (headerRowIndex > 0) candidateHeaderRows.unshift(headerRowIndex - 1);
 
-      const nextRow = matrix[headerRowIndex + 1] || [];
-      const hasSecondaryHeader = isHeaderContinuationRow(nextRow);
-      if (hasSecondaryHeader) {
-        candidateHeaderRows.push(headerRowIndex + 1);
+      for (let i = 1; i <= 2; i++) {
+        const prevIdx = headerRowIndex - i;
+        if (prevIdx < 0) break;
+        const prevRow = matrix[prevIdx] || [];
+        const prevHasText = prevRow.some(cell => String(cell ?? '').trim().length > 0);
+        const prevLooksNumeric = prevRow.filter(cell => parseLocalizedNumber(cell) > 0).length > 2;
+        if (prevHasText && !prevLooksNumeric) {
+          candidateHeaderRows.unshift(prevIdx);
+        } else {
+          break;
+        }
+      }
+
+      let dataStartRow = headerRowIndex + 1;
+      for (let i = 1; i <= 2; i++) {
+        const nextIdx = headerRowIndex + i;
+        const nextRow = matrix[nextIdx] || [];
+        if (isHeaderContinuationRow(nextRow)) {
+          candidateHeaderRows.push(nextIdx);
+          dataStartRow = nextIdx + 1;
+          continue;
+        }
+        break;
       }
 
       const compositeHeaders = buildCompositeHeaders(matrix, candidateHeaderRows, maxCols);
@@ -337,7 +372,6 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
         return count === 1 ? base : `${base} (${count})`;
       });
 
-      const dataStartRow = hasSecondaryHeader ? headerRowIndex + 2 : headerRowIndex + 1;
       const rows = matrix.slice(dataStartRow).map((row) => {
         const obj: Record<string, unknown> = {};
         headers.forEach((h, i) => {
