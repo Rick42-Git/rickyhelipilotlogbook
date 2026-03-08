@@ -1,20 +1,8 @@
-import { useState, useCallback } from 'react';
-import { LogbookEntry, emptyEntry, NumericField } from '@/types/logbook';
-
-const STORAGE_KEY = 'heli-logbook-entries';
-
-function loadEntries(): LogbookEntry[] {
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveEntries(entries: LogbookEntry[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-}
+import { useState, useCallback, useEffect } from 'react';
+import { LogbookEntry, NumericField } from '@/types/logbook';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const numericFields: NumericField[] = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
@@ -22,26 +10,120 @@ const numericFields: NumericField[] = [
   'instructorDay', 'instructorNight',
 ];
 
+// Map between camelCase (frontend) and snake_case (DB)
+function toDbEntry(e: Omit<LogbookEntry, 'id'>, userId: string) {
+  return {
+    user_id: userId,
+    date: e.date,
+    aircraft_type: e.aircraftType,
+    aircraft_reg: e.aircraftReg,
+    pilot_in_command: e.pilotInCommand,
+    flight_details: e.flightDetails,
+    se_day_dual: e.seDayDual,
+    se_day_pilot: e.seDayPilot,
+    se_night_dual: e.seNightDual,
+    se_night_pilot: e.seNightPilot,
+    instrument_nav_aids: e.instrumentNavAids,
+    instrument_place: e.instrumentPlace,
+    instrument_time: e.instrumentTime,
+    instructor_day: e.instructorDay,
+    instructor_night: e.instructorNight,
+  };
+}
+
+function fromDbEntry(row: any): LogbookEntry {
+  return {
+    id: row.id,
+    date: row.date ?? '',
+    aircraftType: row.aircraft_type ?? '',
+    aircraftReg: row.aircraft_reg ?? '',
+    pilotInCommand: row.pilot_in_command ?? '',
+    flightDetails: row.flight_details ?? '',
+    seDayDual: Number(row.se_day_dual) || 0,
+    seDayPilot: Number(row.se_day_pilot) || 0,
+    seNightDual: Number(row.se_night_dual) || 0,
+    seNightPilot: Number(row.se_night_pilot) || 0,
+    instrumentNavAids: Number(row.instrument_nav_aids) || 0,
+    instrumentPlace: Number(row.instrument_place) || 0,
+    instrumentTime: Number(row.instrument_time) || 0,
+    instructorDay: Number(row.instructor_day) || 0,
+    instructorNight: Number(row.instructor_night) || 0,
+  };
+}
+
 export function useLogbook() {
-  const [entries, setEntries] = useState<LogbookEntry[]>(loadEntries);
+  const { user } = useAuth();
+  const [entries, setEntries] = useState<LogbookEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const addEntry = useCallback((entry: Omit<LogbookEntry, 'id'>) => {
-    const newEntry: LogbookEntry = { ...entry, id: crypto.randomUUID() };
-    setEntries(prev => { const updated = [...prev, newEntry]; saveEntries(updated); return updated; });
-  }, []);
+  // Fetch entries on mount / user change
+  useEffect(() => {
+    if (!user) { setEntries([]); setLoading(false); return; }
 
-  const updateEntry = useCallback((id: string, entry: Omit<LogbookEntry, 'id'>) => {
-    setEntries(prev => { const updated = prev.map(e => e.id === id ? { ...entry, id } : e); saveEntries(updated); return updated; });
-  }, []);
+    const fetchEntries = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('logbook_entries')
+        .select('*')
+        .order('date', { ascending: true });
 
-  const deleteEntry = useCallback((id: string) => {
-    setEntries(prev => { const updated = prev.filter(e => e.id !== id); saveEntries(updated); return updated; });
-  }, []);
+      if (error) {
+        console.error('Failed to load entries:', error);
+        toast.error('Failed to load entries');
+      } else {
+        setEntries((data || []).map(fromDbEntry));
+      }
+      setLoading(false);
+    };
 
-  const addMultipleEntries = useCallback((newEntries: Omit<LogbookEntry, 'id'>[]) => {
-    const withIds = newEntries.map(e => ({ ...e, id: crypto.randomUUID() }));
-    setEntries(prev => { const updated = [...prev, ...withIds]; saveEntries(updated); return updated; });
-  }, []);
+    fetchEntries();
+  }, [user]);
+
+  const addEntry = useCallback(async (entry: Omit<LogbookEntry, 'id'>) => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('logbook_entries')
+      .insert(toDbEntry(entry, user.id))
+      .select()
+      .single();
+
+    if (error) { toast.error('Failed to add entry'); return; }
+    setEntries(prev => [...prev, fromDbEntry(data)]);
+  }, [user]);
+
+  const updateEntry = useCallback(async (id: string, entry: Omit<LogbookEntry, 'id'>) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from('logbook_entries')
+      .update(toDbEntry(entry, user.id))
+      .eq('id', id);
+
+    if (error) { toast.error('Failed to update entry'); return; }
+    setEntries(prev => prev.map(e => e.id === id ? { ...entry, id } : e));
+  }, [user]);
+
+  const deleteEntry = useCallback(async (id: string) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from('logbook_entries')
+      .delete()
+      .eq('id', id);
+
+    if (error) { toast.error('Failed to delete entry'); return; }
+    setEntries(prev => prev.filter(e => e.id !== id));
+  }, [user]);
+
+  const addMultipleEntries = useCallback(async (newEntries: Omit<LogbookEntry, 'id'>[]) => {
+    if (!user) return;
+    const rows = newEntries.map(e => toDbEntry(e, user.id));
+    const { data, error } = await supabase
+      .from('logbook_entries')
+      .insert(rows)
+      .select();
+
+    if (error) { toast.error('Failed to import entries'); return; }
+    setEntries(prev => [...prev, ...(data || []).map(fromDbEntry)]);
+  }, [user]);
 
   const getTotals = useCallback(() => {
     const initial = Object.fromEntries(numericFields.map(f => [f, 0])) as Record<NumericField, number>;
@@ -51,5 +133,5 @@ export function useLogbook() {
     }, initial);
   }, [entries]);
 
-  return { entries, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals };
+  return { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals };
 }
