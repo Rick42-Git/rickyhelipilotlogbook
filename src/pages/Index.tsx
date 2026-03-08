@@ -95,7 +95,6 @@ const Index = () => {
                   INSTALL
                 </Button>
               )}
-              <ColumnTemplateManager />
               {lastImportIds && lastImportIds.length > 0 && (
                 <Button variant="outline" onClick={undoLastImport} className="font-mono gap-2 border-destructive text-destructive hover:bg-destructive/10">
                   <Undo2 className="h-4 w-4" />
