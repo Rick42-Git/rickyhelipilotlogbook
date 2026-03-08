@@ -70,6 +70,7 @@ const App = () => (
             <Route path="/auth" element={<AuthRoute />} />
             <Route path="/admin" element={<AdminRoute />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/mass-balance" element={<ProtectedRoute><MassBalance /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
