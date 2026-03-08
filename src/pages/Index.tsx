@@ -100,6 +100,10 @@ const Index = () => {
                 </Button>
               )}
               <SpreadsheetImport onEntriesImported={addMultipleEntries} templates={templates} />
+              <Button variant="outline" onClick={() => navigate('/mass-balance')} className="font-mono gap-2">
+                <Scale className="h-4 w-4" />
+                M&B CALC
+              </Button>
               <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
                 <Clock className="h-4 w-4" />
                 F&D CALC
