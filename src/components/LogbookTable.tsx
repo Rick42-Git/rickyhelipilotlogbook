@@ -94,8 +94,8 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
       <div className="overflow-x-auto relative">
         <img src={helicopterWatermark} alt="" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-auto opacity-[0.04] pointer-events-none select-none" />
         <table className="w-full text-sm relative z-10">
-          <thead>
-            <tr className="border-b border-border bg-muted/30">
+          <thead className="sticky top-0 z-20">
+            <tr className="border-b border-border bg-card">
               {activeCols.map(col => (
                 <th key={col.key} className="px-2 py-2 text-left font-mono text-[10px] text-primary uppercase tracking-wider whitespace-nowrap">{col.shortLabel}</th>
               ))}
