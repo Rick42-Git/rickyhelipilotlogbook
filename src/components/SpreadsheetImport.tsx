@@ -337,12 +337,30 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
       const maxCols = Math.max(rawHeaders.length, ...matrix.slice(headerRowIndex + 1, headerRowIndex + 20).map(r => r.length));
 
       const candidateHeaderRows = [headerRowIndex];
-      if (headerRowIndex > 0) candidateHeaderRows.unshift(headerRowIndex - 1);
 
-      const nextRow = matrix[headerRowIndex + 1] || [];
-      const hasSecondaryHeader = isHeaderContinuationRow(nextRow);
-      if (hasSecondaryHeader) {
-        candidateHeaderRows.push(headerRowIndex + 1);
+      for (let i = 1; i <= 2; i++) {
+        const prevIdx = headerRowIndex - i;
+        if (prevIdx < 0) break;
+        const prevRow = matrix[prevIdx] || [];
+        const prevHasText = prevRow.some(cell => String(cell ?? '').trim().length > 0);
+        const prevLooksNumeric = prevRow.filter(cell => parseLocalizedNumber(cell) > 0).length > 2;
+        if (prevHasText && !prevLooksNumeric) {
+          candidateHeaderRows.unshift(prevIdx);
+        } else {
+          break;
+        }
+      }
+
+      let dataStartRow = headerRowIndex + 1;
+      for (let i = 1; i <= 2; i++) {
+        const nextIdx = headerRowIndex + i;
+        const nextRow = matrix[nextIdx] || [];
+        if (isHeaderContinuationRow(nextRow)) {
+          candidateHeaderRows.push(nextIdx);
+          dataStartRow = nextIdx + 1;
+          continue;
+        }
+        break;
       }
 
       const compositeHeaders = buildCompositeHeaders(matrix, candidateHeaderRows, maxCols);
@@ -354,7 +372,6 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
         return count === 1 ? base : `${base} (${count})`;
       });
 
-      const dataStartRow = hasSecondaryHeader ? headerRowIndex + 2 : headerRowIndex + 1;
       const rows = matrix.slice(dataStartRow).map((row) => {
         const obj: Record<string, unknown> = {};
         headers.forEach((h, i) => {
