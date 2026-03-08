@@ -34,7 +34,7 @@ import { FlightDutyCalculator } from '@/components/FlightDutyCalculator';
 
 const Index = () => {
   const { user, signOut } = useAuth();
-  const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, getTotals } = useLogbook();
+  const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, clearAllEntries, getTotals } = useLogbook();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [dutyCalcOpen, setDutyCalcOpen] = useState(false);
