@@ -51,6 +51,7 @@ const Index = () => {
             </p>
           </div>
           <div className="flex gap-2">
+            <SpreadsheetImport onEntriesImported={addMultipleEntries} />
             <Button variant="outline" onClick={() => setSummaryOpen(true)} disabled={entries.length === 0} className="font-mono gap-2">
               <BarChart3 className="h-4 w-4" />
               12M SUMMARY
