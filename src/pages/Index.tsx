@@ -6,7 +6,7 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,12 +18,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
+import { FlightDutyCalculator } from '@/components/FlightDutyCalculator';
 
 const Index = () => {
   const { user, signOut } = useAuth();
   const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [dutyCalcOpen, setDutyCalcOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
   const { canInstall, install } = useInstallPrompt();
 
@@ -68,6 +70,10 @@ const Index = () => {
               </Button>
             )}
             <SpreadsheetImport onEntriesImported={addMultipleEntries} />
+            <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
+              <Clock className="h-4 w-4" />
+              F&D CALC
+            </Button>
             <Button variant="outline" onClick={() => setSummaryOpen(true)} disabled={entries.length === 0} className="font-mono gap-2">
               <BarChart3 className="h-4 w-4" />
               12M SUMMARY
@@ -141,6 +147,7 @@ const Index = () => {
         />
 
         <Last12MonthSummary entries={entries} open={summaryOpen} onOpenChange={setSummaryOpen} />
+        <FlightDutyCalculator open={dutyCalcOpen} onOpenChange={setDutyCalcOpen} />
       </div>
     </div>
   );
