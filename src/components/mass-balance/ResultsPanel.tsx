@@ -12,10 +12,10 @@ export function ResultsPanel({ withinLimits, cgStation, weightMargin, grossWeigh
     <div className="space-y-4">
       {/* Status */}
       <div className={`glass-panel hud-border p-4 text-center ${withinLimits ? '' : 'border-destructive/50'}`}>
-        <div className={`font-mono text-lg md:text-xl font-bold tracking-wider flex items-center justify-center gap-2 ${withinLimits ? 'text-primary' : 'text-destructive'}`}>
-          <span className={`w-2 h-2 rounded-full ${withinLimits ? 'bg-primary animate-pulse' : 'bg-destructive animate-pulse'}`} />
+        <div className={`font-mono text-lg md:text-xl font-bold tracking-wider flex items-center justify-center gap-2 ${withinLimits ? 'text-success' : 'text-destructive'}`}>
+          <span className={`w-2 h-2 rounded-full ${withinLimits ? 'bg-success animate-pulse' : 'bg-destructive animate-pulse'}`} />
           {withinLimits ? 'WITHIN LIMITS' : 'OUTSIDE LIMITS'}
-          <span className={`w-2 h-2 rounded-full ${withinLimits ? 'bg-primary animate-pulse' : 'bg-destructive animate-pulse'}`} />
+          <span className={`w-2 h-2 rounded-full ${withinLimits ? 'bg-success animate-pulse' : 'bg-destructive animate-pulse'}`} />
         </div>
       </div>
 
