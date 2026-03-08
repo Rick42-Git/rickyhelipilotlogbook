@@ -70,6 +70,27 @@ export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, t
         <div className="font-mono text-[10px] text-muted-foreground text-center">lbs</div>
         <div className="font-mono text-sm text-right font-bold text-primary">{Math.round(totalMoment).toLocaleString()}</div>
       </div>
+
+      {/* Gross Weight Bar */}
+      <div className="mt-3 px-1">
+        <div className="flex justify-between font-mono text-[10px] text-muted-foreground mb-2 tracking-wider">
+          <span>GROSS WEIGHT</span>
+          <span>{totalWeight.toLocaleString()} / {maxGrossWeight.toLocaleString()} lbs</span>
+        </div>
+        <div className="relative h-3 rounded-full bg-muted/30 overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all duration-300 ${
+              weightPercent > 100 ? 'bg-destructive' : weightPercent > 85 ? 'bg-amber-500' : 'bg-primary'
+            }`}
+            style={{ width: `${Math.min(weightPercent, 100)}%` }}
+          />
+        </div>
+        <div className="flex justify-between font-mono text-[9px] text-muted-foreground/50 mt-1">
+          <span>0</span>
+          <span>{Math.round(maxGrossWeight / 2).toLocaleString()}</span>
+          <span>{maxGrossWeight.toLocaleString()}</span>
+        </div>
+      </div>
     </div>
   );
 }
