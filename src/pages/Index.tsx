@@ -72,10 +72,23 @@ const Index = () => {
               <BarChart3 className="h-4 w-4" />
               12M SUMMARY
             </Button>
-            <Button variant="outline" onClick={() => exportToNumbers(entries)} disabled={entries.length === 0} className="font-mono gap-2">
-              <Download className="h-4 w-4" />
-              EXPORT
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={entries.length === 0} className="font-mono gap-2">
+                  <Download className="h-4 w-4" />
+                  EXPORT
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="font-mono">
+                <DropdownMenuItem onClick={() => exportToNumbers(entries)}>
+                  EXPORT ALL ({entries.length} entries)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportToNumbers(entries.slice(-72))}>
+                  LAST 3 PAGES (72 entries)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button onClick={handleNew} className="font-mono gap-2">
               <Plus className="h-4 w-4" />
               NEW ENTRY
