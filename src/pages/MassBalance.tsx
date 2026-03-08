@@ -4,8 +4,11 @@ import { aircraftTypes, AircraftType } from '@/data/aircraftData';
 import { LoadingSheet } from '@/components/mass-balance/LoadingSheet';
 import { CGEnvelopeChart } from '@/components/mass-balance/CGEnvelopeChart';
 import { ResultsPanel } from '@/components/mass-balance/ResultsPanel';
+import { FuelBurnPlanning } from '@/components/mass-balance/FuelBurnPlanning';
+import { LoadingDiagram } from '@/components/mass-balance/LoadingDiagram';
+import { AircraftDataPanel } from '@/components/mass-balance/AircraftDataPanel';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
 import helicopterIcon from '@/assets/helicopter-icon.png';
 
 function isPointInPolygon(px: number, py: number, polygon: { station: number; weight: number }[]): boolean {
@@ -49,12 +52,24 @@ const MassBalance = () => {
     return { totalWeight: tw, totalMoment: tm, cgStation: cg, weightMargin: margin, withinLimits: inLimits };
   }, [weights, selectedAircraft]);
 
+  const fuelStationIndex = useMemo(() => {
+    return selectedAircraft.stations.findIndex(s => s.label.toLowerCase().includes('fuel'));
+  }, [selectedAircraft]);
+
+  const handleExportPDF = () => {
+    window.print();
+  };
+
   return (
     <div className="min-h-screen bg-background grid-bg scanline">
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Header */}
-        <div className="glass-panel hud-border p-3 md:p-4 mb-6">
-          <div className="flex items-center justify-between">
+        <div className="glass-panel hud-border p-3 md:p-4 mb-6 relative overflow-hidden">
+          {/* Diagonal stripes background */}
+          <div className="absolute inset-0 opacity-[0.03]" style={{
+            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, hsl(var(--primary)) 10px, hsl(var(--primary)) 11px)',
+          }} />
+          <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="text-muted-foreground">
                 <ArrowLeft className="h-5 w-5" />
@@ -67,6 +82,15 @@ const MassBalance = () => {
                 <p className="font-mono text-[9px] md:text-xs text-muted-foreground tracking-widest">ROTARY WING AIRCRAFT LOADING COMPUTER</p>
               </div>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportPDF}
+              className="font-mono text-[10px] md:text-xs h-8 md:h-9 gap-1.5"
+            >
+              <Download className="h-3.5 w-3.5" />
+              EXPORT PDF
+            </Button>
           </div>
         </div>
 
@@ -76,14 +100,14 @@ const MassBalance = () => {
             <div className="w-1 h-4 bg-accent" />
             <h2 className="font-mono text-xs text-muted-foreground tracking-widest uppercase">Select Aircraft Type</h2>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
             {aircraftTypes.map(a => (
               <Button
                 key={a.name}
                 variant={selectedAircraft.name === a.name ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleAircraftChange(a)}
-                className="font-mono text-[10px] md:text-xs h-8 md:h-9"
+                className="font-mono text-[10px] md:text-xs h-8 md:h-9 w-full"
               >
                 {a.name}
               </Button>
@@ -100,6 +124,16 @@ const MassBalance = () => {
               onWeightChange={handleWeightChange}
               totalWeight={totalWeight}
               totalMoment={totalMoment}
+              maxGrossWeight={selectedAircraft.maxGrossWeight}
+            />
+            <FuelBurnPlanning
+              currentWeights={weights}
+              stations={selectedAircraft.stations}
+              fuelStationIndex={fuelStationIndex}
+              fuelWeightPerUnit={selectedAircraft.fuelWeightPerUnit || 6}
+              maxGrossWeight={selectedAircraft.maxGrossWeight}
+              cgEnvelope={selectedAircraft.cgEnvelope}
+              isPointInPolygon={isPointInPolygon}
             />
           </div>
           <div className="space-y-6">
@@ -117,7 +151,22 @@ const MassBalance = () => {
               currentWeight={totalWeight}
               withinLimits={withinLimits}
             />
+            <LoadingDiagram
+              stations={selectedAircraft.stations}
+              weights={weights}
+            />
+            <AircraftDataPanel aircraft={selectedAircraft} />
           </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="font-mono text-[10px] text-muted-foreground/50 tracking-widest">
+            ROTARY WING M&B COMPUTER
+          </p>
+          <p className="font-mono text-[9px] text-muted-foreground/30 mt-1">
+            For reference only — verify with official documentation
+          </p>
         </div>
       </div>
     </div>
