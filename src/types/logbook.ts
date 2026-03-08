@@ -40,7 +40,7 @@ export const emptyEntry: Omit<LogbookEntry, 'id'> = {
 export type NumericField =
   | 'seDayDual' | 'seDayPilot'
   | 'seNightDual' | 'seNightPilot'
-  | 'instrumentNavAids' | 'instrumentPlace' | 'instrumentTime'
+  | 'instrumentTime'
   | 'instructorDay' | 'instructorNight';
 
 export const numericFieldLabels: Record<NumericField, string> = {
