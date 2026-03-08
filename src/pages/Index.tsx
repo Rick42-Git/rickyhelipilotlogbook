@@ -144,8 +144,7 @@ const Index = () => {
                 INSTALL
               </Button>
             )}
-            
-            
+            <SpreadsheetImport onEntriesImported={addMultipleEntries} templates={templates} />
             
             <Button variant="outline" size="sm" onClick={() => setDutyCalcOpen(true)} className="font-mono text-[10px] gap-1 h-7">
               <Clock className="h-3 w-3" />
