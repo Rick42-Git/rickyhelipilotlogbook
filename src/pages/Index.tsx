@@ -56,11 +56,11 @@ const Index = () => {
         {/* Header */}
         <div className="glass-panel hud-border p-3 md:p-4 mb-6 md:mb-8">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 md:gap-4 min-w-0">
+            <div className="flex items-center gap-3 md:gap-4 shrink min-w-0 md:min-w-fit">
               <img src={helicopterIcon} alt="Helicopter" className="h-8 md:h-12 w-auto opacity-80 drop-shadow-[0_0_8px_hsl(38_95%_55%/0.3)] flex-shrink-0" />
-              <div className="min-w-0">
+              <div className="min-w-0 md:min-w-fit">
                 <div className="flex items-center gap-2">
-                  <h1 className="font-mono text-base md:text-2xl font-bold text-primary tracking-wider truncate">
+                  <h1 className="font-mono text-base md:text-2xl font-bold text-primary tracking-wider truncate md:truncate-none md:whitespace-nowrap">
                     HELI PILOT LOGBOOK
                   </h1>
                   <div className="status-dot flex-shrink-0" />
