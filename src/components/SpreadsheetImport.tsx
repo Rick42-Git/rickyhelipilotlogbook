@@ -113,6 +113,35 @@ const NUMERIC_FIELDS: NumericField[] = [
   'instrumentTime', 'instructorDay', 'instructorNight',
 ];
 
+function parseLocalizedNumber(value: unknown): number {
+  if (value === null || value === undefined || value === '') return 0;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+
+  let cleaned = String(value)
+    .trim()
+    .replace(/\s+/g, '')
+    .replace(/[^0-9,.-]/g, '');
+
+  if (!cleaned) return 0;
+
+  const lastDot = cleaned.lastIndexOf('.');
+  const lastComma = cleaned.lastIndexOf(',');
+
+  if (lastComma > lastDot) {
+    // EU style: 1.234,56
+    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (lastDot > lastComma) {
+    // US style: 1,234.56
+    cleaned = cleaned.replace(/,/g, '');
+  } else if (lastComma !== -1) {
+    // 1,5 -> 1.5
+    cleaned = cleaned.replace(',', '.');
+  }
+
+  const num = Number.parseFloat(cleaned);
+  return Number.isFinite(num) ? num : 0;
+}
+
 function parseRow(row: Record<string, unknown>, columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>): Omit<LogbookEntry, 'id'> | null {
   const entry: Record<string, unknown> = {
     date: '',
@@ -134,13 +163,14 @@ function parseRow(row: Record<string, unknown>, columnMap: Record<string, keyof 
     if (val === undefined || val === null || val === '') continue;
 
     if (NUMERIC_FIELDS.includes(field as NumericField)) {
-      const num = typeof val === 'number' ? val : parseFloat(String(val));
-      entry[field] = isNaN(num) ? 0 : num;
+      entry[field] = parseLocalizedNumber(val);
     } else if (field === 'date') {
       if (typeof val === 'number') {
         // Excel serial date
         const d = XLSX.SSF.parse_date_code(val);
-        entry[field] = `${d.y}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}`;
+        if (d?.y && d?.m && d?.d) {
+          entry[field] = `${d.y}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}`;
+        }
       } else {
         entry[field] = String(val).trim();
       }
