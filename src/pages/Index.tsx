@@ -13,7 +13,7 @@ import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
 
 const Index = () => {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -49,7 +49,7 @@ const Index = () => {
               ◈ HELI PILOT LOGBOOK
             </h1>
             <p className="font-mono text-xs text-muted-foreground mt-1 tracking-widest">
-              DIGITAL FLIGHT RECORD SYSTEM
+              PILOT: {user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
             </p>
           </div>
           <div className="flex gap-2">
