@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { LogbookEntry, emptyEntry } from '@/types/logbook';
+import { LogbookEntry, emptyEntry, NumericField } from '@/types/logbook';
 
 const STORAGE_KEY = 'heli-logbook-entries';
 
@@ -15,6 +15,14 @@ function loadEntries(): LogbookEntry[] {
 function saveEntries(entries: LogbookEntry[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
+
+const numericFields: NumericField[] = [
+  'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
+  'meDayDual', 'meDayPilot', 'meDayCoPilot',
+  'meNightDual', 'meNightPilot', 'meNightCoPilot',
+  'instrumentNavAids', 'instrumentPlace', 'instrumentTime',
+  'instructorDay', 'instructorNight',
+];
 
 export function useLogbook() {
   const [entries, setEntries] = useState<LogbookEntry[]>(loadEntries);
@@ -54,19 +62,13 @@ export function useLogbook() {
   }, []);
 
   const getTotals = useCallback(() => {
-    return entries.reduce(
-      (acc, e) => ({
-        totalTime: acc.totalTime + (e.totalTime || 0),
-        picTime: acc.picTime + (e.picTime || 0),
-        sicTime: acc.sicTime + (e.sicTime || 0),
-        dualTime: acc.dualTime + (e.dualTime || 0),
-        nightTime: acc.nightTime + (e.nightTime || 0),
-        ifrTime: acc.ifrTime + (e.ifrTime || 0),
-        crossCountry: acc.crossCountry + (e.crossCountry || 0),
-        landings: acc.landings + (e.landings || 0),
-      }),
-      { totalTime: 0, picTime: 0, sicTime: 0, dualTime: 0, nightTime: 0, ifrTime: 0, crossCountry: 0, landings: 0 }
-    );
+    const initial = Object.fromEntries(numericFields.map(f => [f, 0])) as Record<NumericField, number>;
+    return entries.reduce((acc, e) => {
+      for (const f of numericFields) {
+        acc[f] += (e[f] || 0);
+      }
+      return acc;
+    }, initial);
   }, [entries]);
 
   return { entries, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals };
