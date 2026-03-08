@@ -2,11 +2,10 @@ import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Plus, AlertTriangle, CheckCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Plane } from 'lucide-react';
+import { LogbookEntry } from '@/types/logbook';
 
-interface DutyEntry {
-  id: string;
-  date: string;
+interface DutyOverride {
   reportTime: string;
   rotorStop: string;
   sectors: number;
@@ -19,16 +18,12 @@ function calculateMaxFDP(reportTimeStr: string, sectors: number): number {
   let fdpLimits: Record<number, number>;
 
   if (mins >= 360 && mins <= 809) {
-    // 06:00–13:29
     fdpLimits = { 1: 10, 2: 10, 3: 10, 4: 10, 5: 9.25, 6: 8.5, 7: 8 };
   } else if (mins >= 810 && mins <= 1079) {
-    // 13:30–17:59
     fdpLimits = { 1: 9.5, 2: 9.5, 3: 9.5, 4: 9.5, 5: 8.75, 6: 8, 7: 8 };
   } else if (mins >= 1080 && mins <= 1319) {
-    // 18:00–21:59
     fdpLimits = { 1: 9, 2: 9, 3: 9, 4: 9, 5: 8.25, 6: 8, 7: 8 };
   } else {
-    // 22:00–05:59 (WOCL)
     fdpLimits = { 1: 8, 2: 8, 3: 8, 4: 8, 5: 8, 6: 8, 7: 8 };
   }
 
@@ -40,16 +35,23 @@ function calcActualFDP(reportTime: string, rotorStop: string): number {
   const [rh, rm] = reportTime.split(':').map(Number);
   const [sh, sm] = rotorStop.split(':').map(Number);
   let diff = (sh * 60 + sm) - (rh * 60 + rm);
-  if (diff < 0) diff += 1440; // overnight
+  if (diff < 0) diff += 1440;
   return diff / 60;
+}
+
+function getFlightHours(entry: LogbookEntry): number {
+  return (
+    entry.seDayDual + entry.seDayPilot +
+    entry.seNightDual + entry.seNightPilot +
+    entry.instructorDay + entry.instructorNight
+  );
 }
 
 function getMonthOptions() {
   const options: { value: string; label: string }[] = [];
   const now = new Date();
   const startYear = 2010;
-  const startMonth = 0; // January
-  const totalMonths = (now.getFullYear() - startYear) * 12 + now.getMonth() - startMonth + 1;
+  const totalMonths = (now.getFullYear() - startYear) * 12 + now.getMonth() + 1;
   for (let i = 0; i < totalMonths; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     options.push({
@@ -60,56 +62,82 @@ function getMonthOptions() {
   return options;
 }
 
+interface DayData {
+  date: string;
+  flights: LogbookEntry[];
+  totalFlightHours: number;
+  duty: DutyOverride;
+  actualFDP: number;
+  maxFDP: number;
+  exceeded: boolean;
+}
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  entries: LogbookEntry[];
 }
 
-export function FlightDutyCalculator({ open, onOpenChange }: Props) {
+export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
-  const [entries, setEntries] = useState<DutyEntry[]>([]);
+  const [dutyOverrides, setDutyOverrides] = useState<Record<string, DutyOverride>>({});
   const monthOptions = useMemo(getMonthOptions, []);
 
-  const addEntry = () => {
-    const [y, m] = selectedMonth.split('-');
-    setEntries(prev => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        date: `${y}-${m}-01`,
+  // Filter logbook entries for the selected month and group by date
+  const monthData = useMemo((): DayData[] => {
+    const filtered = entries.filter(e => e.date.startsWith(selectedMonth));
+
+    // Group by date
+    const byDate: Record<string, LogbookEntry[]> = {};
+    for (const e of filtered) {
+      if (!byDate[e.date]) byDate[e.date] = [];
+      byDate[e.date].push(e);
+    }
+
+    const dates = Object.keys(byDate).sort();
+
+    return dates.map(date => {
+      const flights = byDate[date];
+      const totalFlightHours = flights.reduce((sum, f) => sum + getFlightHours(f), 0);
+      const sectorCount = flights.length;
+
+      const duty = dutyOverrides[date] || {
         reportTime: '07:00',
         rotorStop: '15:00',
-        sectors: 1,
-      },
-    ]);
-  };
+        sectors: sectorCount,
+      };
 
-  const updateEntry = (id: string, field: keyof DutyEntry, value: string | number) => {
-    setEntries(prev => prev.map(e => (e.id === id ? { ...e, [field]: value } : e)));
-  };
-
-  const removeEntry = (id: string) => {
-    setEntries(prev => prev.filter(e => e.id !== id));
-  };
-
-  const results = useMemo(() => {
-    return entries.map(e => {
-      const maxFDP = calculateMaxFDP(e.reportTime, e.sectors);
-      const actualFDP = calcActualFDP(e.reportTime, e.rotorStop);
+      const actualFDP = calcActualFDP(duty.reportTime, duty.rotorStop);
+      const maxFDP = calculateMaxFDP(duty.reportTime, duty.sectors);
       const exceeded = actualFDP > maxFDP;
-      return { ...e, maxFDP, actualFDP, exceeded };
-    });
-  }, [entries]);
 
-  const totalDutyHours = results.reduce((sum, r) => sum + r.actualFDP, 0);
-  const exceedCount = results.filter(r => r.exceeded).length;
+      return { date, flights, totalFlightHours, duty, actualFDP, maxFDP, exceeded };
+    });
+  }, [entries, selectedMonth, dutyOverrides]);
+
+  const updateDuty = (date: string, field: keyof DutyOverride, value: string | number) => {
+    setDutyOverrides(prev => {
+      const existing = prev[date] || {
+        reportTime: '07:00',
+        rotorStop: '15:00',
+        sectors: monthData.find(d => d.date === date)?.flights.length || 1,
+      };
+      return { ...prev, [date]: { ...existing, [field]: value } };
+    });
+  };
+
+  const totalFlightHours = monthData.reduce((sum, d) => sum + d.totalFlightHours, 0);
+  const totalDutyHours = monthData.reduce((sum, d) => sum + d.actualFDP, 0);
+  const totalFlights = monthData.reduce((sum, d) => sum + d.flights.length, 0);
+  const exceedCount = monthData.filter(d => d.exceeded).length;
+  const flyingDays = monthData.length;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-mono text-primary tracking-wider">
             ▸ FLIGHT & DUTY CALCULATOR (SACAA)
@@ -127,87 +155,103 @@ export function FlightDutyCalculator({ open, onOpenChange }: Props) {
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
-          <Button size="sm" onClick={addEntry} className="font-mono gap-1 ml-auto">
-            <Plus className="h-3 w-3" /> ADD DUTY
-          </Button>
         </div>
 
-        {entries.length === 0 ? (
+        {/* Monthly summary cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="border border-border rounded p-3">
+            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">Flying Days</p>
+            <p className="font-mono text-lg font-bold text-foreground">{flyingDays}</p>
+          </div>
+          <div className="border border-border rounded p-3">
+            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">Total Flights</p>
+            <p className="font-mono text-lg font-bold text-foreground">{totalFlights}</p>
+          </div>
+          <div className="border border-border rounded p-3">
+            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Plane className="h-3 w-3" /> Flight Hours</p>
+            <p className="font-mono text-lg font-bold text-primary">{totalFlightHours.toFixed(1)} h</p>
+          </div>
+          <div className="border border-border rounded p-3">
+            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3" /> Duty Hours</p>
+            <p className="font-mono text-lg font-bold text-foreground">{totalDutyHours.toFixed(1)} h</p>
+          </div>
+        </div>
+
+        {monthData.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground font-mono text-xs">
-            No duty entries. Click ADD DUTY to start.
+            No flights found for this month.
           </div>
         ) : (
           <div className="space-y-2">
             {/* Header */}
-            <div className="grid grid-cols-[110px_90px_90px_70px_80px_80px_50px_28px] gap-2 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+            <div className="grid grid-cols-[90px_1fr_70px_80px_80px_70px_70px_70px_40px] gap-2 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
               <span>Date</span>
+              <span>Details</span>
+              <span>Flt Hrs</span>
               <span>Report</span>
               <span>Rotor Stop</span>
               <span>Sectors</span>
-              <span>Actual FDP</span>
+              <span>Act FDP</span>
               <span>Max FDP</span>
-              <span>Status</span>
               <span />
             </div>
 
-            {results.map(r => (
+            {monthData.map(d => (
               <div
-                key={r.id}
-                className={`grid grid-cols-[110px_90px_90px_70px_80px_80px_50px_28px] gap-2 items-center py-1 ${
-                  r.exceeded ? 'bg-destructive/10 rounded' : ''
+                key={d.date}
+                className={`grid grid-cols-[90px_1fr_70px_80px_80px_70px_70px_70px_40px] gap-2 items-center py-1.5 border-b border-border/30 ${
+                  d.exceeded ? 'bg-destructive/10 rounded' : ''
                 }`}
               >
+                <span className="font-mono text-xs text-foreground">{d.date}</span>
+                <div className="font-mono text-[10px] text-muted-foreground truncate">
+                  {d.flights.map(f => `${f.aircraftType} ${f.aircraftReg}`).join(', ')}
+                </div>
+                <span className="font-mono text-xs font-semibold text-primary">
+                  {d.totalFlightHours.toFixed(1)} h
+                </span>
                 <Input
-                  type="date"
-                  value={r.date}
-                  onChange={(e) => updateEntry(r.id, 'date', e.target.value)}
-                  className="font-mono text-xs h-8"
+                  type="time"
+                  value={d.duty.reportTime}
+                  onChange={(e) => updateDuty(d.date, 'reportTime', e.target.value)}
+                  className="font-mono text-xs h-7"
                 />
                 <Input
                   type="time"
-                  value={r.reportTime}
-                  onChange={(e) => updateEntry(r.id, 'reportTime', e.target.value)}
-                  className="font-mono text-xs h-8"
-                />
-                <Input
-                  type="time"
-                  value={r.rotorStop}
-                  onChange={(e) => updateEntry(r.id, 'rotorStop', e.target.value)}
-                  className="font-mono text-xs h-8"
+                  value={d.duty.rotorStop}
+                  onChange={(e) => updateDuty(d.date, 'rotorStop', e.target.value)}
+                  className="font-mono text-xs h-7"
                 />
                 <Input
                   type="number"
                   min={1}
                   max={10}
-                  value={r.sectors}
-                  onChange={(e) => updateEntry(r.id, 'sectors', parseInt(e.target.value) || 1)}
-                  className="font-mono text-xs h-8"
+                  value={d.duty.sectors}
+                  onChange={(e) => updateDuty(d.date, 'sectors', parseInt(e.target.value) || 1)}
+                  className="font-mono text-xs h-7"
                 />
                 <span className="font-mono text-xs font-semibold text-foreground">
-                  {r.actualFDP.toFixed(2)} h
+                  {d.actualFDP.toFixed(1)} h
                 </span>
                 <span className="font-mono text-xs text-muted-foreground">
-                  {r.maxFDP.toFixed(2)} h
+                  {d.maxFDP.toFixed(1)} h
                 </span>
                 <span>
-                  {r.exceeded ? (
+                  {d.exceeded ? (
                     <AlertTriangle className="h-4 w-4 text-destructive" />
                   ) : (
                     <CheckCircle className="h-4 w-4 text-primary" />
                   )}
                 </span>
-                <button onClick={() => removeEntry(r.id)} className="text-muted-foreground hover:text-destructive">
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
               </div>
             ))}
           </div>
         )}
 
-        {entries.length > 0 && (
+        {monthData.length > 0 && (
           <div className="mt-4 pt-3 border-t border-border flex items-center justify-between font-mono text-xs">
             <span className="text-muted-foreground">
-              {entries.length} DUTIES — <span className="text-foreground font-bold">{totalDutyHours.toFixed(2)}</span> HRS TOTAL
+              {flyingDays} DAYS — <span className="text-primary font-bold">{totalFlightHours.toFixed(1)}</span> FLT HRS — <span className="text-foreground font-bold">{totalDutyHours.toFixed(1)}</span> DUTY HRS
             </span>
             {exceedCount > 0 ? (
               <span className="text-destructive font-bold flex items-center gap-1">
