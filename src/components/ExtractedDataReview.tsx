@@ -21,6 +21,10 @@ const CONFIDENCE_THRESHOLD = 98;
 export function ExtractedDataReview({ open, onOpenChange, entries: initialEntries, onConfirm }: Props) {
   const [entries, setEntries] = useState<ExtractedEntry[]>(initialEntries);
 
+  useEffect(() => {
+    setEntries(initialEntries);
+  }, [initialEntries]);
+
   const updateField = (index: number, field: string, value: string | number) => {
     setEntries(prev => prev.map((e, i) => i === index ? { ...e, [field]: value } : e));
   };
