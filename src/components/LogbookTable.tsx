@@ -11,16 +11,12 @@ interface LogbookTableProps {
 const headers = [
   'Date', 'Type', 'Reg', 'PIC', 'Details',
   'SE D-Dual', 'SE D-Pilot', 'SE N-Dual', 'SE N-Pilot',
-  'ME D-Dual', 'ME D-Pilot', 'ME D-CoPlt',
-  'ME N-Dual', 'ME N-Pilot', 'ME N-CoPlt',
   'Instr Nav', 'Instr Pl', 'Instr Tm',
   'Inst Day', 'Inst Ngt',
   '',
 ];
 
-function fmt(n: number) {
-  return n > 0 ? n.toFixed(1) : '';
-}
+function fmt(n: number) { return n > 0 ? n.toFixed(1) : ''; }
 
 export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
   if (entries.length === 0) {
@@ -39,9 +35,7 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
           <thead>
             <tr className="border-b border-border bg-muted/30">
               {headers.map((h, i) => (
-                <th key={i} className="px-2 py-2 text-left font-mono text-[10px] text-primary uppercase tracking-wider whitespace-nowrap">
-                  {h}
-                </th>
+                <th key={i} className="px-2 py-2 text-left font-mono text-[10px] text-primary uppercase tracking-wider whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
@@ -59,12 +53,6 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
                   <td className="px-2 py-2 font-mono text-xs">{fmt(entry.seDayPilot)}</td>
                   <td className="px-2 py-2 font-mono text-xs">{fmt(entry.seNightDual)}</td>
                   <td className="px-2 py-2 font-mono text-xs">{fmt(entry.seNightPilot)}</td>
-                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meDayDual)}</td>
-                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meDayPilot)}</td>
-                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meDayCoPilot)}</td>
-                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meNightDual)}</td>
-                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meNightPilot)}</td>
-                  <td className="px-2 py-2 font-mono text-xs">{fmt(entry.meNightCoPilot)}</td>
                   <td className="px-2 py-2 font-mono text-xs">{fmt(entry.instrumentNavAids)}</td>
                   <td className="px-2 py-2 font-mono text-xs">{fmt(entry.instrumentPlace)}</td>
                   <td className="px-2 py-2 font-mono text-xs">{fmt(entry.instrumentTime)}</td>

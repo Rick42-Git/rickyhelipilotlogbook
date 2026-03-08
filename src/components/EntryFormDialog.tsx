@@ -25,14 +25,6 @@ const fields: { key: keyof Omit<LogbookEntry, 'id'>; label: string; type: string
   { key: 'seNightDual', label: 'Dual (3)', type: 'number', half: true, section: 'Single Engine — Night' },
   { key: 'seNightPilot', label: 'Pilot (4)', type: 'number', half: true },
 
-  { key: 'meDayDual', label: 'Dual (5)', type: 'number', half: true, section: 'Multi Engine — Day' },
-  { key: 'meDayPilot', label: 'Pilot (6)', type: 'number', half: true },
-  { key: 'meDayCoPilot', label: 'Co-Pilot (7)', type: 'number', half: true },
-
-  { key: 'meNightDual', label: 'Dual (8)', type: 'number', half: true, section: 'Multi Engine — Night' },
-  { key: 'meNightPilot', label: 'Pilot (9)', type: 'number', half: true },
-  { key: 'meNightCoPilot', label: 'Co-Pilot (10)', type: 'number', half: true },
-
   { key: 'instrumentNavAids', label: 'Nav Aids (11)', type: 'number', half: true, section: 'Instrument Flying' },
   { key: 'instrumentPlace', label: 'Place (12)', type: 'number', half: true },
   { key: 'instrumentTime', label: 'Time (13)', type: 'number', half: true },
@@ -43,8 +35,6 @@ const fields: { key: keyof Omit<LogbookEntry, 'id'>; label: string; type: string
 
 const numericKeys = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
-  'meDayDual', 'meDayPilot', 'meDayCoPilot',
-  'meNightDual', 'meNightPilot', 'meNightCoPilot',
   'instrumentNavAids', 'instrumentPlace', 'instrumentTime',
   'instructorDay', 'instructorNight',
 ];
@@ -53,9 +43,7 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave }: EntryForm
   const [form, setForm] = useState<Omit<LogbookEntry, 'id'>>(entry ? { ...entry } : { ...emptyEntry });
 
   const handleOpen = (o: boolean) => {
-    if (o) {
-      setForm(entry ? { ...entry } : { ...emptyEntry });
-    }
+    if (o) setForm(entry ? { ...entry } : { ...emptyEntry });
     onOpenChange(o);
   };
 
@@ -66,37 +54,24 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave }: EntryForm
     }));
   };
 
-  const handleSave = () => {
-    onSave(form);
-    onOpenChange(false);
-  };
+  const handleSave = () => { onSave(form); onOpenChange(false); };
 
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto glass-panel">
         <DialogHeader>
-          <DialogTitle className="font-mono text-primary">
-            {entry ? '✎ EDIT ENTRY' : '+ NEW ENTRY'}
-          </DialogTitle>
+          <DialogTitle className="font-mono text-primary">{entry ? '✎ EDIT ENTRY' : '+ NEW ENTRY'}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-3">
           {fields.map(f => (
-            <div key={f.key} className={`${f.half ? 'col-span-1' : 'col-span-2'}`}>
+            <div key={f.key} className={f.half ? 'col-span-1' : 'col-span-2'}>
               {f.section && (
                 <div className="col-span-2 mt-3 mb-1">
-                  <p className="font-mono text-[10px] text-accent uppercase tracking-widest border-b border-border pb-1">
-                    {f.section}
-                  </p>
+                  <p className="font-mono text-[10px] text-accent uppercase tracking-widest border-b border-border pb-1">{f.section}</p>
                 </div>
               )}
               <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{f.label}</Label>
-              <Input
-                type={f.type}
-                step={f.type === 'number' ? '0.1' : undefined}
-                value={form[f.key] as string | number}
-                onChange={e => handleChange(f.key, e.target.value)}
-                className="font-mono bg-muted/50 border-border focus:border-primary"
-              />
+              <Input type={f.type} step={f.type === 'number' ? '0.1' : undefined} value={form[f.key] as string | number} onChange={e => handleChange(f.key, e.target.value)} className="font-mono bg-muted/50 border-border focus:border-primary" />
             </div>
           ))}
         </div>
