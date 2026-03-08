@@ -141,6 +141,11 @@ const Index = () => {
             </div>
             {/* Mobile: sign out only */}
             <div className="flex md:hidden gap-1">
+              {isAdmin && (
+                <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="h-8 w-8 text-accent">
+                  <Shield className="h-4 w-4" />
+                </Button>
+              )}
               <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground">
                 <LogOut className="h-4 w-4" />
               </Button>
