@@ -41,8 +41,7 @@ const HEADER_MAP: Record<string, keyof Omit<LogbookEntry, 'id'>> = {
 
 const NUMERIC_FIELDS: NumericField[] = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
-  'instrumentNavAids', 'instrumentPlace', 'instrumentTime',
-  'instructorDay', 'instructorNight',
+  'instrumentTime', 'instructorDay', 'instructorNight',
 ];
 
 function parseRow(row: Record<string, unknown>, columnMap: Record<string, keyof Omit<LogbookEntry, 'id'>>): Omit<LogbookEntry, 'id'> | null {
