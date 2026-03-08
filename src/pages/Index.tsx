@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLogbook } from '@/hooks/useLogbook';
+import helicopterIcon from '@/assets/helicopter-icon.png';
 import { LogbookEntry } from '@/types/logbook';
 import { LogbookTable } from '@/components/LogbookTable';
 import { EntryFormDialog } from '@/components/EntryFormDialog';
