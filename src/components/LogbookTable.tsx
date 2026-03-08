@@ -122,8 +122,32 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
                 </label>
             ))}
           </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          </DropdownMenu>
+          {onClearAll && entries.length > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="font-mono text-[10px] gap-1 h-6 px-2 text-destructive hover:bg-destructive/10">
+                  <Trash2 className="h-3 w-3" />
+                  CLEAR
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="font-mono">CLEAR ALL ENTRIES?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete all {entries.length} flight entries. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="font-mono">CANCEL</AlertDialogCancel>
+                  <AlertDialogAction onClick={onClearAll} className="font-mono bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    DELETE ALL
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       <div className="relative">
         <img src={helicopterWatermark} alt="" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-auto opacity-[0.04] pointer-events-none select-none" />
         <table className="w-full text-sm relative z-10">
