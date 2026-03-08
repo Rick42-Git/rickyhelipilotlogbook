@@ -53,8 +53,6 @@ Be thorough — extract partial data rather than skipping a row. Even a date and
         meNightDual: { type: "number" },
         meNightPilot: { type: "number" },
         meNightCoPilot: { type: "number" },
-        instrumentNavAids: { type: "number" },
-        instrumentPlace: { type: "number" },
         instrumentTime: { type: "number" },
         instructorDay: { type: "number" },
         instructorNight: { type: "number" },
