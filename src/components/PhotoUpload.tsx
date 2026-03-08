@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { LogbookEntry } from '@/types/logbook';
+import { ExtractedDataReview, ExtractedEntry } from '@/components/ExtractedDataReview';
 
 interface PhotoUploadProps {
   onEntriesExtracted: (entries: Omit<LogbookEntry, 'id'>[]) => void;
@@ -21,6 +22,8 @@ function fileToBase64(file: File): Promise<string> {
 export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [processing, setProcessing] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [extractedEntries, setExtractedEntries] = useState<ExtractedEntry[]>([]);
 
   const processFile = useCallback(async (file: File) => {
     const base64 = await fileToBase64(file);
@@ -36,7 +39,7 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
       throw new Error(data.error);
     }
 
-    return (data?.entries || []) as Omit<LogbookEntry, 'id'>[];
+    return (data?.entries || []) as ExtractedEntry[];
   }, []);
 
   const handleFiles = useCallback(async (files: FileList | null) => {
@@ -48,7 +51,7 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
     }
 
     setProcessing(true);
-    let totalEntries: Omit<LogbookEntry, 'id'>[] = [];
+    let totalEntries: ExtractedEntry[] = [];
 
     try {
       for (const file of imageFiles) {
@@ -58,8 +61,14 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
       }
 
       if (totalEntries.length > 0) {
-        onEntriesExtracted(totalEntries);
-        toast.success(`Extracted ${totalEntries.length} flight entries from ${imageFiles.length} photo(s)`);
+        setExtractedEntries(totalEntries);
+        setReviewOpen(true);
+        const flagged = totalEntries.filter(e => e.confidence < 98).length;
+        if (flagged > 0) {
+          toast.warning(`${flagged} entr${flagged === 1 ? 'y' : 'ies'} flagged for review — please check before saving`);
+        } else {
+          toast.success(`${totalEntries.length} entries extracted — review and save`);
+        }
       } else {
         toast.warning('No flight entries could be extracted from the image(s)');
       }
@@ -70,7 +79,12 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
       setProcessing(false);
       if (inputRef.current) inputRef.current.value = '';
     }
-  }, [processFile, onEntriesExtracted]);
+  }, [processFile]);
+
+  const handleConfirm = useCallback((entries: Omit<LogbookEntry, 'id'>[]) => {
+    onEntriesExtracted(entries);
+    toast.success(`Saved ${entries.length} flight entries`);
+  }, [onEntriesExtracted]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -78,45 +92,54 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
   }, [handleFiles, processing]);
 
   return (
-    <div
-      className={`glass-panel p-6 border-dashed border-2 border-border transition-colors glow-cyan ${
-        processing ? 'opacity-70 cursor-wait' : 'hover:border-primary/50 cursor-pointer'
-      }`}
-      onDrop={handleDrop}
-      onDragOver={e => e.preventDefault()}
-      onClick={() => !processing && inputRef.current?.click()}
-    >
-      <input
-        ref={inputRef}
-        type="file"
-        multiple
-        accept="image/*"
-        className="hidden"
-        onChange={e => handleFiles(e.target.files)}
-        disabled={processing}
-      />
-      <div className="flex flex-col items-center gap-3 text-center">
-        <div className="flex gap-2">
-          {processing ? (
-            <Loader2 className="h-8 w-8 text-accent animate-spin" />
-          ) : (
-            <>
-              <Camera className="h-8 w-8 text-accent" />
-              <Upload className="h-8 w-8 text-accent" />
-            </>
-          )}
-        </div>
-        <div>
-          <p className="font-mono text-sm text-foreground">
-            {processing ? 'EXTRACTING FLIGHT DATA...' : 'UPLOAD LOGBOOK PHOTOS'}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {processing
-              ? 'AI is reading your logbook page — this may take a moment'
-              : 'Drag & drop or click to select pages — AI will extract flight data'}
-          </p>
+    <>
+      <div
+        className={`glass-panel p-6 border-dashed border-2 border-border transition-colors glow-cyan ${
+          processing ? 'opacity-70 cursor-wait' : 'hover:border-primary/50 cursor-pointer'
+        }`}
+        onDrop={handleDrop}
+        onDragOver={e => e.preventDefault()}
+        onClick={() => !processing && inputRef.current?.click()}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          multiple
+          accept="image/*"
+          className="hidden"
+          onChange={e => handleFiles(e.target.files)}
+          disabled={processing}
+        />
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex gap-2">
+            {processing ? (
+              <Loader2 className="h-8 w-8 text-accent animate-spin" />
+            ) : (
+              <>
+                <Camera className="h-8 w-8 text-accent" />
+                <Upload className="h-8 w-8 text-accent" />
+              </>
+            )}
+          </div>
+          <div>
+            <p className="font-mono text-sm text-foreground">
+              {processing ? 'EXTRACTING FLIGHT DATA...' : 'UPLOAD LOGBOOK PHOTOS'}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {processing
+                ? 'AI is reading your logbook page — this may take a moment'
+                : 'Drag & drop or click to select pages — AI will extract flight data'}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+
+      <ExtractedDataReview
+        open={reviewOpen}
+        onOpenChange={setReviewOpen}
+        entries={extractedEntries}
+        onConfirm={handleConfirm}
+      />
+    </>
   );
 }

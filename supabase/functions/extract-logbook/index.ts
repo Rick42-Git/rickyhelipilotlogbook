@@ -58,8 +58,9 @@ Be thorough — extract partial data rather than skipping a row. Even a date and
         instrumentTime: { type: "number" },
         instructorDay: { type: "number" },
         instructorNight: { type: "number" },
+        confidence: { type: "number", description: "Overall confidence score from 0 to 100 for this entry. Consider handwriting legibility, smudges, ambiguous characters (e.g. 1 vs 7, 0 vs O), and date format clarity. Be strict — if any field required guesswork, lower the score." },
       },
-      required: ["date", "aircraftType", "aircraftReg"],
+      required: ["date", "aircraftType", "aircraftReg", "confidence"],
     };
 
     const response = await fetch(
@@ -141,6 +142,7 @@ Be thorough — extract partial data rather than skipping a row. Even a date and
         aircraftReg: e.aircraftReg || "",
         pilotInCommand: e.pilotInCommand || "",
         flightDetails: e.flightDetails || "",
+        confidence: Math.min(100, Math.max(0, Number(e.confidence) || 0)),
       };
       for (const f of numFields) {
         entry[f] = Number(e[f]) || 0;
