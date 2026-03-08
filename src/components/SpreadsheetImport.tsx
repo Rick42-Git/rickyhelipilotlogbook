@@ -7,13 +7,12 @@ import { LogbookEntry, NumericField } from '@/types/logbook';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SpreadsheetImportProps {
   onEntriesImported: (entries: Omit<LogbookEntry, 'id'>[]) => void;
 }
 
-// Keywords that identify each field — scored by word overlap
-// Date priority lowered so hours fields take precedence
 const FIELD_KEYWORDS: { field: keyof Omit<LogbookEntry, 'id'>; keywords: string[]; priority: number }[] = [
   { field: 'date', keywords: ['date', 'flight date', 'day', 'datum'], priority: 3 },
   { field: 'aircraftType', keywords: ['aircraft type', 'a/c type', 'ac type', 'type', 'helicopter type', 'heli type', 'acft type', 'machine'], priority: 5 },
@@ -27,6 +26,11 @@ const FIELD_KEYWORDS: { field: keyof Omit<LogbookEntry, 'id'>; keywords: string[
   { field: 'instrumentTime', keywords: ['instrument time', 'instr time', 'instrument', 'ifr', 'ifr time', 'inst time', 'actual instrument', 'sim instrument', 'instrument flying'], priority: 7 },
   { field: 'instructorDay', keywords: ['instructor day', 'instr day', 'instructing day', 'day instructor'], priority: 8 },
   { field: 'instructorNight', keywords: ['instructor night', 'instr night', 'instructing night', 'night instructor'], priority: 8 },
+];
+
+const NUMERIC_FIELDS: NumericField[] = [
+  'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
+  'instrumentTime', 'instructorDay', 'instructorNight',
 ];
 
 function normalizeHeader(name: string): string {
@@ -72,9 +76,7 @@ function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<L
     if (!norm) { unmapped.push(h); continue; }
     for (const { field, keywords, priority } of FIELD_KEYWORDS) {
       const score = scoreMatch(norm, keywords);
-      if (score >= 0.3) {
-        candidates.push({ header: h, field, score, priority });
-      }
+      if (score >= 0.3) candidates.push({ header: h, field, score, priority });
     }
   }
 
@@ -95,18 +97,13 @@ function mapHeaders(headers: string[]): { columnMap: Record<string, keyof Omit<L
   return { columnMap, unmapped };
 }
 
-const NUMERIC_FIELDS: NumericField[] = [
-  'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
-  'instrumentTime', 'instructorDay', 'instructorNight',
-];
-
 function parseLocalizedNumber(value: unknown): number {
   if (value === null || value === undefined || value === '') return 0;
   if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+
   let cleaned = String(value).trim().replace(/\s+/g, '').replace(/[^0-9,.\-:]/g, '');
   if (!cleaned) return 0;
 
-  // Handle time format like 1:30 = 1.5 hours
   if (cleaned.includes(':')) {
     const [h, m] = cleaned.split(':').map(Number);
     if (Number.isFinite(h) && Number.isFinite(m)) return h + m / 60;
@@ -115,6 +112,7 @@ function parseLocalizedNumber(value: unknown): number {
 
   const lastDot = cleaned.lastIndexOf('.');
   const lastComma = cleaned.lastIndexOf(',');
+
   if (lastComma > lastDot) {
     cleaned = cleaned.replace(/\./g, '').replace(',', '.');
   } else if (lastDot > lastComma) {
@@ -122,32 +120,29 @@ function parseLocalizedNumber(value: unknown): number {
   } else if (lastComma !== -1) {
     cleaned = cleaned.replace(',', '.');
   }
+
   const num = Number.parseFloat(cleaned);
   return Number.isFinite(num) ? num : 0;
 }
 
-/** Try to parse any date format into YYYY-MM-DD */
 function parseFlexibleDate(val: unknown): string {
   if (val === null || val === undefined || val === '') return '';
 
-  // Excel serial date number
   if (typeof val === 'number') {
     try {
       const d = XLSX.SSF.parse_date_code(val);
       if (d?.y && d?.m && d?.d) {
         return `${d.y}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}`;
       }
-    } catch { /* fall through */ }
-    return String(val);
+    } catch {
+      return String(val);
+    }
   }
 
   const str = String(val).trim();
   if (!str) return '';
-
-  // Already YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
 
-  // Try DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY
   const dmy = str.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})$/);
   if (dmy) {
     const day = parseInt(dmy[1], 10);
@@ -159,24 +154,11 @@ function parseFlexibleDate(val: unknown): string {
     }
   }
 
-  // Try MM/DD/YYYY (if first number > 12, it's likely DD/MM already handled above)
-  const mdy = str.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$/);
-  if (mdy) {
-    const a = parseInt(mdy[1], 10);
-    const b = parseInt(mdy[2], 10);
-    let year = parseInt(mdy[3], 10);
-    if (a <= 12 && b >= 1 && b <= 31) {
-      return `${year}-${String(a).padStart(2, '0')}-${String(b).padStart(2, '0')}`;
-    }
-  }
-
-  // Try native Date parse as last resort
   const parsed = new Date(str);
   if (!isNaN(parsed.getTime()) && parsed.getFullYear() > 1900) {
     return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
   }
 
-  // Return as-is — user can edit it
   return str;
 }
 
@@ -190,22 +172,24 @@ function parseRow(row: Record<string, unknown>, columnMap: Record<string, keyof 
   for (const [col, field] of Object.entries(columnMap)) {
     const val = row[col];
     if (val === undefined || val === null || val === '') continue;
-    if (NUMERIC_FIELDS.includes(field as NumericField)) {
-      entry[field] = parseLocalizedNumber(val);
-    } else if (field === 'date') {
-      entry[field] = parseFlexibleDate(val);
-    } else {
-      entry[field] = String(val).trim();
-    }
+
+    if (NUMERIC_FIELDS.includes(field as NumericField)) entry[field] = parseLocalizedNumber(val);
+    else if (field === 'date') entry[field] = parseFlexibleDate(val);
+    else entry[field] = String(val).trim();
   }
 
-  // Accept row if it has ANY data at all (hours, type, reg, or date)
   const hasHours = NUMERIC_FIELDS.some(f => (entry[f] as number) > 0);
   const hasText = entry.aircraftType || entry.aircraftReg || entry.pilotInCommand || entry.flightDetails;
-  const hasDate = !!entry.date;
-  if (!hasHours && !hasText && !hasDate) return null;
+  if (!hasHours && !hasText && !entry.date) return null;
 
-  return entry as unknown as Omit<LogbookEntry, 'id'>;
+  return entry as Omit<LogbookEntry, 'id'>;
+}
+
+function matrixToText(matrix: (string | number | null)[][]): string {
+  return matrix
+    .slice(0, 1500)
+    .map((row, index) => `Row ${index + 1}: ${row.map(cell => String(cell ?? '').trim()).join(' | ')}`)
+    .join('\n');
 }
 
 export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps) {
@@ -217,30 +201,81 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
   const [loading, setLoading] = useState(false);
   const [unmappedCols, setUnmappedCols] = useState<string[]>([]);
 
+  const extractViaAi = useCallback(async (file: File, matrix: (string | number | null)[][]) => {
+    const spreadsheetText = matrixToText(matrix);
+    const { data, error } = await supabase.functions.invoke('extract-logbook', {
+      body: { spreadsheetText, fileName: file.name },
+    });
+
+    if (error || data?.error) return [] as Omit<LogbookEntry, 'id'>[];
+
+    const aiEntries = (data?.entries || []) as Array<Partial<Omit<LogbookEntry, 'id'>> & { confidence?: number }>;
+    return aiEntries
+      .map((e) => ({
+        date: String(e.date || ''),
+        aircraftType: String(e.aircraftType || ''),
+        aircraftReg: String(e.aircraftReg || ''),
+        pilotInCommand: String(e.pilotInCommand || ''),
+        flightDetails: String(e.flightDetails || ''),
+        seDayDual: Number(e.seDayDual) || 0,
+        seDayPilot: Number(e.seDayPilot) || 0,
+        seNightDual: Number(e.seNightDual) || 0,
+        seNightPilot: Number(e.seNightPilot) || 0,
+        instrumentTime: Number(e.instrumentTime) || 0,
+        instructorDay: Number(e.instructorDay) || 0,
+        instructorNight: Number(e.instructorNight) || 0,
+      }))
+      .filter((entry) => {
+        const hasHours = NUMERIC_FIELDS.some(f => (entry[f] || 0) > 0);
+        return hasHours || entry.date || entry.aircraftType || entry.aircraftReg;
+      });
+  }, []);
+
   const processFile = useCallback(async (file: File) => {
     setLoading(true);
     setFileName(file.name);
+
     try {
       const data = await file.arrayBuffer();
       const wb = XLSX.read(data, { type: 'array', cellDates: false });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const matrix = XLSX.utils.sheet_to_json<(string | number | null)[]>(ws, { header: 1, raw: true, defval: '' });
 
-      if (matrix.length === 0) { toast.error('No data found in spreadsheet'); setLoading(false); return; }
+      if (matrix.length === 0) {
+        toast.error('No data found in spreadsheet');
+        setLoading(false);
+        return;
+      }
+
+      // NEW: first try AI extraction by treating spreadsheet content like OCR text
+      const aiEntries = await extractViaAi(file, matrix);
+      if (aiEntries.length > 0) {
+        setUnmappedCols([]);
+        setParsedEntries(aiEntries);
+        setEditingIndex(null);
+        setPreviewOpen(true);
+        toast.success(`AI extracted ${aiEntries.length} entries from spreadsheet`);
+        return;
+      }
 
       const scanRows = matrix.slice(0, Math.min(8, matrix.length));
       let headerRowIndex = 0;
       let bestScore = -1;
+
       scanRows.forEach((row, idx) => {
         const candidateHeaders = row.map(cell => String(cell ?? '').trim()).filter(Boolean);
         if (candidateHeaders.length < 2) return;
         const { columnMap } = mapHeaders(candidateHeaders);
         const score = Object.keys(columnMap).length;
-        if (score > bestScore) { bestScore = score; headerRowIndex = idx; }
+        if (score > bestScore) {
+          bestScore = score;
+          headerRowIndex = idx;
+        }
       });
 
       const rawHeaders = (matrix[headerRowIndex] || []).map(cell => String(cell ?? '').trim());
       const maxCols = Math.max(rawHeaders.length, ...matrix.slice(headerRowIndex + 1, headerRowIndex + 20).map(r => r.length));
+
       const seen = new Map<string, number>();
       const headers = Array.from({ length: maxCols }, (_, i) => {
         const base = rawHeaders[i] || `Column ${i + 1}`;
@@ -251,22 +286,27 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
 
       const rows = matrix.slice(headerRowIndex + 1).map((row) => {
         const obj: Record<string, unknown> = {};
-        headers.forEach((h, i) => { obj[h] = row[i] ?? ''; });
+        headers.forEach((h, i) => {
+          obj[h] = row[i] ?? '';
+        });
         return obj;
       });
 
-      if (rows.length === 0) { toast.error('No data rows found'); setLoading(false); return; }
+      if (rows.length === 0) {
+        toast.error('No data rows found in spreadsheet');
+        setLoading(false);
+        return;
+      }
 
       const { columnMap, unmapped } = mapHeaders(headers);
       setUnmappedCols(unmapped);
 
-      console.log('Column mapping:', columnMap);
-      console.log('Unmapped columns:', unmapped);
-
-      const entries = rows.map(r => parseRow(r, columnMap)).filter((e): e is Omit<LogbookEntry, 'id'> => e !== null);
+      const entries = rows
+        .map(r => parseRow(r, columnMap))
+        .filter((e): e is Omit<LogbookEntry, 'id'> => e !== null);
 
       if (entries.length === 0) {
-        toast.error('No valid entries found. Check that column headers match expected format.');
+        toast.error('No valid entries found. Please use the AI extraction upload instead.');
         setLoading(false);
         return;
       }
@@ -281,7 +321,7 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
       setLoading(false);
       if (inputRef.current) inputRef.current.value = '';
     }
-  }, []);
+  }, [extractViaAi]);
 
   const updateEntry = (index: number, field: keyof Omit<LogbookEntry, 'id'>, value: string) => {
     setParsedEntries(prev => prev.map((e, i) => {
@@ -303,7 +343,12 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
       const hasHours = NUMERIC_FIELDS.some(f => (e[f] || 0) > 0);
       return hasHours || e.aircraftType || e.aircraftReg || e.date;
     });
-    if (valid.length === 0) { toast.error('No entries to import'); return; }
+
+    if (valid.length === 0) {
+      toast.error('No entries to import');
+      return;
+    }
+
     onEntriesImported(valid);
     toast.success(`Imported ${valid.length} flight entries`);
     setPreviewOpen(false);
@@ -317,9 +362,18 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
         type="file"
         accept=".xlsx,.xls,.csv,.numbers"
         className="hidden"
-        onChange={e => { const file = e.target.files?.[0]; if (file) processFile(file); }}
+        onChange={e => {
+          const file = e.target.files?.[0];
+          if (file) processFile(file);
+        }}
       />
-      <Button variant="outline" onClick={() => inputRef.current?.click()} disabled={loading} className="font-mono gap-2">
+
+      <Button
+        variant="outline"
+        onClick={() => inputRef.current?.click()}
+        disabled={loading}
+        className="font-mono gap-2"
+      >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
         IMPORT
       </Button>
@@ -460,7 +514,9 @@ export function SpreadsheetImport({ onEntriesImported }: SpreadsheetImportProps)
           </ScrollArea>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPreviewOpen(false)} className="font-mono">CANCEL</Button>
+            <Button variant="outline" onClick={() => setPreviewOpen(false)} className="font-mono">
+              CANCEL
+            </Button>
             <Button onClick={handleConfirm} className="font-mono gap-2">
               <Check className="h-4 w-4" />
               IMPORT {parsedEntries.length} ENTRIES
