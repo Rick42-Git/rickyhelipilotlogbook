@@ -640,7 +640,7 @@ export function SpreadsheetImport({ onEntriesImported, templates = [] }: Spreads
                   return (
                     <tr key={i} className="border-b border-border/30 hover:bg-muted/30 cursor-pointer group" onClick={() => setEditingIndex(i)}>
                       <td className="p-2 text-muted-foreground">{i + 1}</td>
-                      <td className="p-2">{e.date || '—'}</td>
+                      <td className="p-2">{e.date ? (() => { const [y,m,d] = e.date.split('-'); return d && m && y ? `${d}/${m}/${y}` : e.date; })() : '—'}</td>
                       <td className="p-2">{e.aircraftType || '—'}</td>
                       <td className="p-2">{e.aircraftReg || '—'}</td>
                       <td className="p-2">{e.pilotInCommand || '—'}</td>

@@ -38,8 +38,14 @@ type ColumnDef = {
 
 function fmt(n: number) { return n > 0 ? n.toFixed(1) : ''; }
 
+function fmtDate(iso: string) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return d && m && y ? `${d}/${m}/${y}` : iso;
+}
+
 const columns: ColumnDef[] = [
-  { key: 'date', label: 'Date', shortLabel: 'Date', render: e => e.date },
+  { key: 'date', label: 'Date', shortLabel: 'Date', render: e => fmtDate(e.date) },
   { key: 'type', label: 'Class or Type', shortLabel: 'Type', render: e => e.aircraftType },
   { key: 'reg', label: 'Registration', shortLabel: 'Reg', render: e => <span className="text-accent">{e.aircraftReg}</span> },
   { key: 'pic', label: 'Pilot in Command', shortLabel: 'PIC', render: e => e.pilotInCommand },
