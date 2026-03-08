@@ -54,7 +54,7 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
     let totalEntries: ExtractedEntry[] = [];
 
     try {
-      for (const file of imageFiles) {
+      for (const file of validFiles) {
         toast.info(`Processing ${file.name}...`);
         const entries = await processFile(file);
         totalEntries = [...totalEntries, ...entries];
