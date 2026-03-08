@@ -81,7 +81,16 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
 
   return (
     <div className="bg-card/80 backdrop-blur-sm border border-border rounded-lg">
-      <div className="flex justify-end p-2 border-b border-border/50">
+      <div className="flex items-center justify-between gap-2 p-2 border-b border-border/50">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search entries..."
+            className="h-8 pl-8 font-mono text-xs bg-background/50"
+          />
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="font-mono text-xs gap-1.5">
@@ -114,7 +123,7 @@ export function LogbookTable({ entries, onEdit, onDelete }: LogbookTableProps) {
             </tr>
           </thead>
           <tbody>
-            {entries
+            {filteredEntries
               .sort((a, b) => (a.date > b.date ? -1 : 1))
               .map(entry => (
                 <tr key={entry.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
