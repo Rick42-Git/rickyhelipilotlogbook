@@ -1,11 +1,25 @@
-import { numericFieldLabels, NumericField } from '@/types/logbook';
+import { LogbookEntry, numericFieldLabels, NumericField } from '@/types/logbook';
 
 interface SummaryPanelProps {
   totals: Record<NumericField, number>;
   entryCount: number;
+  entries: LogbookEntry[];
 }
 
-export function SummaryPanel({ totals, entryCount }: SummaryPanelProps) {
+function getTypeTotals(entries: LogbookEntry[]) {
+  const map: Record<string, { hours: number; flights: number }> = {};
+  for (const e of entries) {
+    const type = e.aircraftType || 'Unknown';
+    if (!map[type]) map[type] = { hours: 0, flights: 0 };
+    map[type].flights += 1;
+    map[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0)
+      + (e.instrumentNavAids || 0) + (e.instrumentPlace || 0) + (e.instrumentTime || 0)
+      + (e.instructorDay || 0) + (e.instructorNight || 0);
+  }
+  return Object.entries(map).sort((a, b) => b[1].hours - a[1].hours);
+}
+
+export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps) {
   const groups = [
     { title: 'Single Engine — Day', fields: ['seDayDual', 'seDayPilot'] as NumericField[] },
     { title: 'Single Engine — Night', fields: ['seNightDual', 'seNightPilot'] as NumericField[] },
@@ -14,6 +28,7 @@ export function SummaryPanel({ totals, entryCount }: SummaryPanelProps) {
   ];
 
   const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0);
+  const typeTotals = getTypeTotals(entries);
 
   return (
     <div className="glass-panel p-5 glow-amber">
@@ -32,6 +47,24 @@ export function SummaryPanel({ totals, entryCount }: SummaryPanelProps) {
           <span className="font-mono text-xs text-primary/70 ml-1.5 uppercase tracking-widest">HRS</span>
         </div>
       </div>
+
+      {/* Per-type totals */}
+      {typeTotals.length > 0 && (
+        <div className="mb-4">
+          <p className="font-mono text-[9px] text-accent uppercase tracking-widest border-b border-border pb-1 mb-2">Hours by Aircraft Type</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-1">
+            {typeTotals.map(([type, data]) => (
+              <div key={type} className="flex justify-between items-center">
+                <span className="font-mono text-[10px] text-muted-foreground truncate mr-2">{type}</span>
+                <span className="font-mono text-xs font-semibold text-foreground whitespace-nowrap">
+                  {data.hours.toFixed(1)} <span className="text-muted-foreground font-normal text-[9px]">({data.flights})</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {groups.map(g => (
           <div key={g.title} className="space-y-1">
