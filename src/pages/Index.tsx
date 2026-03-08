@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Download, BarChart3 } from 'lucide-react';
 import { exportToNumbers } from '@/lib/exportLogbook';
 import { Last12MonthSummary } from '@/components/Last12MonthSummary';
+import { SpreadsheetImport } from '@/components/SpreadsheetImport';
 
 const Index = () => {
   const { entries, addEntry, updateEntry, deleteEntry, addMultipleEntries, getTotals } = useLogbook();
@@ -50,6 +51,7 @@ const Index = () => {
             </p>
           </div>
           <div className="flex gap-2">
+            <SpreadsheetImport onEntriesImported={addMultipleEntries} />
             <Button variant="outline" onClick={() => setSummaryOpen(true)} disabled={entries.length === 0} className="font-mono gap-2">
               <BarChart3 className="h-4 w-4" />
               12M SUMMARY
