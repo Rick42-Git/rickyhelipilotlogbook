@@ -123,12 +123,12 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
           </div>
           <div>
             <p className="font-mono text-sm text-foreground">
-              {processing ? 'EXTRACTING FLIGHT DATA...' : 'UPLOAD LOGBOOK PHOTOS'}
+              {processing ? 'EXTRACTING FLIGHT DATA...' : 'UPLOAD LOGBOOK PHOTOS / PDF'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {processing
-                ? 'AI is reading your logbook page — this may take a moment'
-                : 'Drag & drop or click to select pages — AI will extract flight data'}
+                ? 'AI is reading your logbook — this may take a moment'
+                : 'Drag & drop or click — supports images and PDFs'}
             </p>
           </div>
         </div>
