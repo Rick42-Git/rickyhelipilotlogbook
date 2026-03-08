@@ -6,8 +6,7 @@ import { toast } from 'sonner';
 
 const numericFields: NumericField[] = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
-  'instrumentNavAids', 'instrumentPlace', 'instrumentTime',
-  'instructorDay', 'instructorNight',
+  'instrumentTime', 'instructorDay', 'instructorNight',
 ];
 
 // Map between camelCase (frontend) and snake_case (DB)
