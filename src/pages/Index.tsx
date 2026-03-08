@@ -70,6 +70,10 @@ const Index = () => {
               </Button>
             )}
             <SpreadsheetImport onEntriesImported={addMultipleEntries} />
+            <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
+              <Clock className="h-4 w-4" />
+              F&D CALC
+            </Button>
             <Button variant="outline" onClick={() => setSummaryOpen(true)} disabled={entries.length === 0} className="font-mono gap-2">
               <BarChart3 className="h-4 w-4" />
               12M SUMMARY
