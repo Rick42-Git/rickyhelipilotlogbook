@@ -28,7 +28,7 @@ function fmt(n: number) { return n > 0 ? n.toFixed(1) : ''; }
 
 const columns: ColumnDef[] = [
   { key: 'date', label: 'Date', shortLabel: 'Date', render: e => e.date },
-  { key: 'type', label: 'Aircraft Type', shortLabel: 'Type', render: e => e.aircraftType },
+  { key: 'type', label: 'Class or Type', shortLabel: 'Type', render: e => e.aircraftType },
   { key: 'reg', label: 'Registration', shortLabel: 'Reg', render: e => <span className="text-accent">{e.aircraftReg}</span> },
   { key: 'pic', label: 'Pilot in Command', shortLabel: 'PIC', render: e => e.pilotInCommand },
   { key: 'details', label: 'Flight Details', shortLabel: 'Details', render: e => <span className="text-muted-foreground max-w-[120px] truncate block">{e.flightDetails}</span> },
