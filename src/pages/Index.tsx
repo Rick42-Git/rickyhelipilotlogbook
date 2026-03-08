@@ -55,6 +55,12 @@ const Index = () => {
             </p>
           </div>
           <div className="flex gap-2">
+            {canInstall && (
+              <Button variant="outline" onClick={install} className="font-mono gap-2 border-primary text-primary">
+                <MonitorSmartphone className="h-4 w-4" />
+                INSTALL
+              </Button>
+            )}
             <SpreadsheetImport onEntriesImported={addMultipleEntries} />
             <Button variant="outline" onClick={() => setSummaryOpen(true)} disabled={entries.length === 0} className="font-mono gap-2">
               <BarChart3 className="h-4 w-4" />
