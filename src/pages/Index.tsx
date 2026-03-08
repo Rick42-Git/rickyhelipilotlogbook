@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { useLogbook } from '@/hooks/useLogbook';
 import { LogbookEntry } from '@/types/logbook';
 import { LogbookTable } from '@/components/LogbookTable';
