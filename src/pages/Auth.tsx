@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import helicopterIcon from '@/assets/helicopter-icon.png';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -38,14 +39,19 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-background grid-bg scanline flex items-center justify-center px-4">
-      <div className="glass-panel p-8 w-full max-w-sm space-y-6">
-        <div className="text-center">
+      <div className="glass-panel hud-border p-8 w-full max-w-sm space-y-6">
+        <div className="text-center space-y-3">
+          <img src={helicopterIcon} alt="Helicopter" className="h-16 w-auto mx-auto opacity-70 drop-shadow-[0_0_12px_hsl(38_95%_55%/0.3)]" />
           <h1 className="font-mono text-xl font-bold text-primary tracking-wider">
-            ◈ HELI PILOT LOGBOOK
+            HELI PILOT LOGBOOK
           </h1>
-          <p className="font-mono text-xs text-muted-foreground mt-1 tracking-widest">
-            {isLogin ? 'SIGN IN' : 'CREATE ACCOUNT'}
-          </p>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 alt-line" />
+            <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em]">
+              {isLogin ? 'SIGN IN' : 'CREATE ACCOUNT'}
+            </span>
+            <div className="flex-1 alt-line" />
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

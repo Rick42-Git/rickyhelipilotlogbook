@@ -54,20 +54,26 @@ const Index = () => {
     <div className="min-h-screen bg-background grid-bg scanline">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <img src={helicopterIcon} alt="Helicopter" className="h-10 w-auto opacity-80" />
-            <div>
-              <h1 className="font-mono text-2xl font-bold text-primary tracking-wider">
-                HELI PILOT LOGBOOK
-              </h1>
-              <p className="font-mono text-xs text-muted-foreground mt-1 tracking-widest">
-                PILOT: {user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
-              </p>
+        <div className="glass-panel hud-border p-4 mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img src={helicopterIcon} alt="Helicopter" className="h-12 w-auto opacity-80 drop-shadow-[0_0_8px_hsl(38_95%_55%/0.3)]" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-mono text-2xl font-bold text-primary tracking-wider">
+                    HELI PILOT LOGBOOK
+                  </h1>
+                  <div className="status-dot" />
+                </div>
+                <div className="flex items-center gap-3 mt-1">
+                  <p className="font-mono text-xs text-muted-foreground tracking-widest">
+                    PILOT: {user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
+                  </p>
+                  <span className="font-mono text-[9px] text-accent/60">▸ ACTIVE</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-2">
-            {canInstall && (
+            <div className="flex gap-2">{canInstall && (
               <Button variant="outline" onClick={install} className="font-mono gap-2 border-primary text-primary">
                 <MonitorSmartphone className="h-4 w-4" />
                 INSTALL
@@ -106,13 +112,16 @@ const Index = () => {
             <Button variant="ghost" onClick={signOut} className="font-mono gap-2 text-muted-foreground">
               <LogOut className="h-4 w-4" />
             </Button>
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-border/40" />
-          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em]">totals</span>
-          <div className="flex-1 h-px bg-border/40" />
+          <div className="flex-1 alt-line" />
+          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2">
+            <span>totals</span>
+          </span>
+          <div className="flex-1 alt-line" />
         </div>
 
         {/* Summary */}
@@ -121,9 +130,11 @@ const Index = () => {
         </div>
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-border/40" />
-          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em]">upload</span>
-          <div className="flex-1 h-px bg-border/40" />
+          <div className="flex-1 alt-line" />
+          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2">
+            <span>upload</span>
+          </span>
+          <div className="flex-1 alt-line" />
         </div>
 
         {/* Photo Upload */}
@@ -134,9 +145,11 @@ const Index = () => {
         </div>
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-border/40" />
-          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em]">entries</span>
-          <div className="flex-1 h-px bg-border/40" />
+          <div className="flex-1 alt-line" />
+          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2">
+            <span>entries</span>
+          </span>
+          <div className="flex-1 alt-line" />
         </div>
 
         {/* Table */}
