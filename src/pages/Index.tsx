@@ -49,7 +49,7 @@ const Index = () => {
               ◈ HELI PILOT LOGBOOK
             </h1>
             <p className="font-mono text-xs text-muted-foreground mt-1 tracking-widest">
-              DIGITAL FLIGHT RECORD SYSTEM
+              PILOT: {user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
             </p>
           </div>
           <div className="flex gap-2">
