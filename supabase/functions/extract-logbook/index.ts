@@ -53,7 +53,17 @@ Rules:
 - If date is ambiguous, keep best guess but do not drop the row if hours are present.
 - Missing numeric fields must be 0.
 - Extract partial entries rather than skipping rows.
-- If no extractable flights exist, return entries: [].`;
+- If no extractable flights exist, return entries: [].
+- Column header synonyms to recognise:
+  * seDayDual: "SE Day Dual", "Single Engine Aircraft Day Dual", "Single Engine Aircraft Day Co-Pilot", "Multi Engine Aircraft Day Dual", "Day Dual", "Dual"
+  * seDayPilot: "SE Day Pilot", "Single Engine Aircraft Day PIC", "Single Engine Aircraft Day Picus", "Multi Engine Aircraft Day PIC", "Multi Engine Aircraft Day Picus", "Multi Engine Aircraft Day Co-Pilot", "Day PIC", "Day Picus"
+  * seNightDual: "SE Night Dual", "Single Engine Aircraft Night Dual", "Single Engine Aircraft Night Co-Pilot", "Multi Engine Aircraft Night Dual", "Night Dual"
+  * seNightPilot: "SE Night Pilot", "Single Engine Aircraft Night PIC", "Single Engine Aircraft Night Picus", "Multi Engine Aircraft Night PIC", "Multi Engine Aircraft Night Picus", "Multi Engine Aircraft Night Co-Pilot", "Night PIC", "Night Picus"
+  * instrumentTime: "Instrument Time", "Instrument Time Place Co-Pilot", "Instrument Time Actual Time Co-Pilot", "Instrument Time FSTD Time Co-Pilot", "FSTD Actual Time FSTD Time Co-Pilot", "FSTD Time", "IFR Time"
+  * instructorDay: "Instructor Day", "Instructor Time SE", "Instructor Time FSTD Time Co-Pilot"
+  * instructorNight: "Instructor Night", "Instructor Time ME"
+- Map Multi Engine columns to the corresponding Single Engine fields.
+- "Remarks FSTD Time Co-Pilot" should be treated as flightDetails/remarks.`;
 
     const entrySchema = {
       type: "object",
