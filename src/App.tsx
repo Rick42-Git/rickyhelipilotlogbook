@@ -18,21 +18,28 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isOfflineMode } = useAuth();
   const { status, requestAccess } = useAccessRequest();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
 
   // Auto-request access on first login
   useEffect(() => {
-    if (user && status === 'none') {
+    if (user && !isOfflineMode && status === 'none') {
       requestAccess();
     }
-  }, [user, status]);
+  }, [user, status, isOfflineMode]);
 
-  if (loading || adminLoading || status === 'loading') {
+  if (loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center font-mono text-muted-foreground">Loading...</div>;
   }
   if (!user) return <Navigate to="/auth" replace />;
+  
+  // Offline mode bypasses waitlist/admin checks
+  if (isOfflineMode) return <>{children}</>;
+  
+  if (adminLoading || status === 'loading') {
+    return <div className="min-h-screen bg-background flex items-center justify-center font-mono text-muted-foreground">Loading...</div>;
+  }
   
   // Admins bypass waitlist
   if (isAdmin) return <>{children}</>;
