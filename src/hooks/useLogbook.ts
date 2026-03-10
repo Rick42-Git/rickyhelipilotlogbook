@@ -3,6 +3,7 @@ import { LogbookEntry, NumericField } from '@/types/logbook';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { getCachedEntries, setCachedEntries } from '@/lib/offlineCache';
 
 const numericFields: NumericField[] = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
