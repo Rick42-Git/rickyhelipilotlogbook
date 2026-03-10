@@ -13,6 +13,7 @@ import WaitlistPending from "./pages/WaitlistPending";
 import MassBalance from "./pages/MassBalance";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
+import { OfflineBanner } from "@/components/OfflineBanner";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
+        <OfflineBanner />
         <Toaster />
         <Sonner />
         <BrowserRouter>
