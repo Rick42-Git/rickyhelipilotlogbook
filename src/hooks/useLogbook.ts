@@ -3,6 +3,7 @@ import { LogbookEntry, NumericField } from '@/types/logbook';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { getCachedEntries, setCachedEntries } from '@/lib/offlineCache';
 
 const numericFields: NumericField[] = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
@@ -58,6 +59,17 @@ export function useLogbook() {
 
     const fetchEntries = async () => {
       setLoading(true);
+
+      if (!navigator.onLine) {
+        const cached = getCachedEntries<LogbookEntry>();
+        if (cached) {
+          setEntries(cached);
+          toast.info('Showing cached data — you are offline');
+        }
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('logbook_entries')
         .select('*')
@@ -65,9 +77,17 @@ export function useLogbook() {
 
       if (error) {
         console.error('Failed to load entries:', error);
-        toast.error('Failed to load entries');
+        const cached = getCachedEntries<LogbookEntry>();
+        if (cached) {
+          setEntries(cached);
+          toast.warning('Using cached data — failed to reach server');
+        } else {
+          toast.error('Failed to load entries');
+        }
       } else {
-        setEntries((data || []).map(fromDbEntry));
+        const mapped = (data || []).map(fromDbEntry);
+        setEntries(mapped);
+        setCachedEntries(mapped);
       }
       setLoading(false);
     };
