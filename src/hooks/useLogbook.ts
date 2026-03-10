@@ -3,7 +3,13 @@ import { LogbookEntry, NumericField } from '@/types/logbook';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { getCachedEntries, setCachedEntries } from '@/lib/offlineCache';
+import {
+  getCachedEntries,
+  setCachedEntries,
+  pushOfflineAction,
+  getOfflineQueue,
+  clearOfflineQueue,
+} from '@/lib/offlineCache';
 
 const numericFields: NumericField[] = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
@@ -53,6 +59,75 @@ export function useLogbook() {
   const [loading, setLoading] = useState(true);
   const [lastImportIds, setLastImportIds] = useState<string[] | null>(null);
 
+  // Sync offline queue when coming back online
+  const syncOfflineQueue = useCallback(async (userId: string) => {
+    const queue = getOfflineQueue();
+    if (queue.length === 0) return;
+
+    let syncedCount = 0;
+    const tempIdMap = new Map<string, string>(); // tempId -> real DB id
+
+    for (const action of queue) {
+      try {
+        if (action.type === 'add') {
+          const { data, error } = await supabase
+            .from('logbook_entries')
+            .insert({ ...action.entry, user_id: userId })
+            .select()
+            .single();
+          if (!error && data) {
+            tempIdMap.set(action.tempId, data.id);
+            syncedCount++;
+          }
+        } else if (action.type === 'update') {
+          // If updating a temp entry, resolve the real id
+          const realId = tempIdMap.get(action.id) || action.id;
+          const { error } = await supabase
+            .from('logbook_entries')
+            .update({ ...action.entry, user_id: userId })
+            .eq('id', realId);
+          if (!error) syncedCount++;
+        } else if (action.type === 'delete') {
+          const realId = tempIdMap.get(action.id) || action.id;
+          const { error } = await supabase
+            .from('logbook_entries')
+            .delete()
+            .eq('id', realId);
+          if (!error) syncedCount++;
+        }
+      } catch {
+        // Network still down — stop trying
+        break;
+      }
+    }
+
+    if (syncedCount > 0) {
+      clearOfflineQueue();
+      toast.success(`Synced ${syncedCount} offline change${syncedCount > 1 ? 's' : ''}`);
+      // Re-fetch to get clean server state
+      const { data } = await supabase
+        .from('logbook_entries')
+        .select('*')
+        .order('date', { ascending: true });
+      if (data) {
+        const mapped = data.map(fromDbEntry);
+        setEntries(mapped);
+        setCachedEntries(mapped);
+      }
+    }
+  }, []);
+
+  // Listen for online event to trigger sync
+  useEffect(() => {
+    const handleOnline = () => {
+      if (user) {
+        syncOfflineQueue(user.id);
+      }
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [user, syncOfflineQueue]);
+
   // Fetch entries on mount / user change
   useEffect(() => {
     if (!user) { setEntries([]); setLoading(false); return; }
@@ -69,6 +144,9 @@ export function useLogbook() {
         setLoading(false);
         return;
       }
+
+      // Sync any pending offline changes first
+      await syncOfflineQueue(user.id);
 
       const { data, error } = await supabase
         .from('logbook_entries')
@@ -93,10 +171,25 @@ export function useLogbook() {
     };
 
     fetchEntries();
-  }, [user]);
+  }, [user, syncOfflineQueue]);
 
   const addEntry = useCallback(async (entry: Omit<LogbookEntry, 'id'>) => {
     if (!user) return;
+
+    if (!navigator.onLine) {
+      const tempId = `offline-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const dbShape = toDbEntry(entry, user.id);
+      pushOfflineAction({ type: 'add', tempId, entry: dbShape });
+      const newEntry: LogbookEntry = { ...entry, id: tempId };
+      setEntries(prev => {
+        const updated = [...prev, newEntry];
+        setCachedEntries(updated);
+        return updated;
+      });
+      toast.info('Entry saved offline — will sync when online');
+      return;
+    }
+
     const { data, error } = await supabase
       .from('logbook_entries')
       .insert(toDbEntry(entry, user.id))
@@ -104,33 +197,88 @@ export function useLogbook() {
       .single();
 
     if (error) { toast.error('Failed to add entry'); return; }
-    setEntries(prev => [...prev, fromDbEntry(data)]);
+    setEntries(prev => {
+      const updated = [...prev, fromDbEntry(data)];
+      setCachedEntries(updated);
+      return updated;
+    });
   }, [user]);
 
   const updateEntry = useCallback(async (id: string, entry: Omit<LogbookEntry, 'id'>) => {
     if (!user) return;
+
+    if (!navigator.onLine) {
+      const dbShape = toDbEntry(entry, user.id);
+      pushOfflineAction({ type: 'update', id, entry: dbShape });
+      setEntries(prev => {
+        const updated = prev.map(e => e.id === id ? { ...entry, id } : e);
+        setCachedEntries(updated);
+        return updated;
+      });
+      toast.info('Edit saved offline — will sync when online');
+      return;
+    }
+
     const { error } = await supabase
       .from('logbook_entries')
       .update(toDbEntry(entry, user.id))
       .eq('id', id);
 
     if (error) { toast.error('Failed to update entry'); return; }
-    setEntries(prev => prev.map(e => e.id === id ? { ...entry, id } : e));
+    setEntries(prev => {
+      const updated = prev.map(e => e.id === id ? { ...entry, id } : e);
+      setCachedEntries(updated);
+      return updated;
+    });
   }, [user]);
 
   const deleteEntry = useCallback(async (id: string) => {
     if (!user) return;
+
+    if (!navigator.onLine) {
+      pushOfflineAction({ type: 'delete', id });
+      setEntries(prev => {
+        const updated = prev.filter(e => e.id !== id);
+        setCachedEntries(updated);
+        return updated;
+      });
+      toast.info('Delete saved offline — will sync when online');
+      return;
+    }
+
     const { error } = await supabase
       .from('logbook_entries')
       .delete()
       .eq('id', id);
 
     if (error) { toast.error('Failed to delete entry'); return; }
-    setEntries(prev => prev.filter(e => e.id !== id));
+    setEntries(prev => {
+      const updated = prev.filter(e => e.id !== id);
+      setCachedEntries(updated);
+      return updated;
+    });
   }, [user]);
 
   const addMultipleEntries = useCallback(async (newEntries: Omit<LogbookEntry, 'id'>[]) => {
     if (!user) return;
+
+    if (!navigator.onLine) {
+      const offlineEntries: LogbookEntry[] = newEntries.map(entry => {
+        const tempId = `offline-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const dbShape = toDbEntry(entry, user.id);
+        pushOfflineAction({ type: 'add', tempId, entry: dbShape });
+        return { ...entry, id: tempId };
+      });
+      setEntries(prev => {
+        const updated = [...prev, ...offlineEntries];
+        setCachedEntries(updated);
+        return updated;
+      });
+      toast.info(`${newEntries.length} entries saved offline — will sync when online`);
+      setLastImportIds(offlineEntries.map(e => e.id));
+      return;
+    }
+
     const rows = newEntries.map(e => toDbEntry(e, user.id));
     const { data, error } = await supabase
       .from('logbook_entries')
@@ -139,7 +287,11 @@ export function useLogbook() {
 
     if (error) { toast.error('Failed to import entries'); return; }
     const imported = (data || []).map(fromDbEntry);
-    setEntries(prev => [...prev, ...imported]);
+    setEntries(prev => {
+      const updated = [...prev, ...imported];
+      setCachedEntries(updated);
+      return updated;
+    });
     setLastImportIds(imported.map(e => e.id));
   }, [user]);
 
@@ -178,7 +330,6 @@ export function useLogbook() {
   const clearAllEntries = useCallback(async () => {
     if (!user || entries.length === 0) return;
     const ids = entries.map(e => e.id);
-    // Delete in batches of 100 to avoid query limits
     for (let i = 0; i < ids.length; i += 100) {
       const batch = ids.slice(i, i + 100);
       const { error } = await supabase
