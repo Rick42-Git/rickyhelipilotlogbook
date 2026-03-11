@@ -14,6 +14,8 @@ import MassBalance from "./pages/MassBalance";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { useOffline } from "@/hooks/useOffline";
+import { getOfflineUser } from "@/lib/offlineCache";
 
 const queryClient = new QueryClient();
 
