@@ -64,6 +64,15 @@ const defaultVisible = new Set(columns.map(c => c.key));
 export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookTableProps) {
   const [visibleCols, setVisibleCols] = useState<Set<string>>(defaultVisible);
   const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const toggleCol = (key: string) => {
     setVisibleCols(prev => {
