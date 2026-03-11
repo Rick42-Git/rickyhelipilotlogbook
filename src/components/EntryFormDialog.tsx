@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { LogbookEntry, emptyEntry } from '@/types/logbook';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -42,8 +42,8 @@ const autoCompleteKeys = ['aircraftType', 'aircraftReg', 'pilotInCommand', 'flig
 export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEntries = [] }: EntryFormDialogProps) {
   const [form, setForm] = useState<Omit<LogbookEntry, 'id'>>(entry ? { ...entry } : { ...emptyEntry });
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const dropdownInteracting = useRef(false);
 
-  // Build unique previous values for autocomplete fields
   const suggestions = useMemo(() => {
     const map: Record<string, string[]> = {};
     for (const key of autoCompleteKeys) {
@@ -70,9 +70,12 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
       ...prev,
       [key]: numericKeys.includes(key) ? (value === '' ? 0 : parseFloat(value) || 0) : value,
     }));
+    // Re-open dropdown when typing in autocomplete fields
+    if (autoCompleteKeys.includes(key)) {
+      setActiveDropdown(key);
+    }
   };
 
-  // Display empty string for zero numeric fields so users don't fight a stuck "0"
   const displayValue = (key: string, val: string | number) => {
     if (numericKeys.includes(key)) {
       return val === 0 || val === '0' ? '' : val;
@@ -83,9 +86,11 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
   const handleSave = () => { onSave(form); onOpenChange(false); };
 
   const getFilteredSuggestions = (key: string) => {
-    const currentVal = (form[key as keyof Omit<LogbookEntry, 'id'>] as string || '').toLowerCase();
-    return (suggestions[key] || []).filter(s => 
-      s.toLowerCase().includes(currentVal) && s.toLowerCase() !== currentVal
+    const currentVal = (form[key as keyof Omit<LogbookEntry, 'id'>] as string || '').toLowerCase().trim();
+    // Show all suggestions when empty, filter as user types
+    if (!currentVal) return suggestions[key] || [];
+    return (suggestions[key] || []).filter(s =>
+      s.toLowerCase().includes(currentVal)
     );
   };
 
@@ -119,21 +124,33 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
                       setActiveDropdown(f.key);
                     }
                   }}
-                  onBlur={() => setTimeout(() => setActiveDropdown(null), 150)}
+                  onBlur={() => {
+                    // Only close if not interacting with the dropdown
+                    setTimeout(() => {
+                      if (!dropdownInteracting.current) {
+                        setActiveDropdown(null);
+                      }
+                    }, 200);
+                  }}
                   className="font-mono bg-muted/50 border-border focus:border-primary text-sm min-w-0 w-full"
                   autoComplete="off"
                 />
                 {activeDropdown === f.key && getFilteredSuggestions(f.key).length > 0 && (
-                  <div className="absolute z-50 top-full left-0 right-0 mt-1 max-h-32 overflow-y-auto rounded-md border border-border bg-popover shadow-md">
+                  <div
+                    className="absolute z-50 top-full left-0 right-0 mt-1 max-h-40 overflow-y-auto rounded-md border border-border bg-popover shadow-lg"
+                    onMouseEnter={() => { dropdownInteracting.current = true; }}
+                    onMouseLeave={() => { dropdownInteracting.current = false; }}
+                  >
                     {getFilteredSuggestions(f.key).map(s => (
                       <button
                         key={s}
                         type="button"
-                        className="w-full text-left px-3 py-1.5 text-sm font-mono text-popover-foreground hover:bg-primary/20 hover:text-primary hover:scale-[1.02] origin-left transition-all duration-150"
+                        className="w-full text-left px-3 py-2 text-sm font-mono text-popover-foreground hover:bg-primary/20 hover:text-primary hover:scale-[1.02] origin-left transition-all duration-150"
                         onMouseDown={e => {
                           e.preventDefault();
                           handleChange(f.key, s);
                           setActiveDropdown(null);
+                          dropdownInteracting.current = false;
                         }}
                       >
                         {s}
