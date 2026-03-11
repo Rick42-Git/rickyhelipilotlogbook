@@ -179,9 +179,15 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
             {filteredEntries
               .sort((a, b) => (a.date > b.date ? -1 : 1))
               .map(entry => (
-                <tr key={entry.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                  {activeCols.map(col => (
-                    <td key={col.key} className="px-2 py-2 font-mono text-xs whitespace-nowrap">{col.render(entry)}</td>
+                 <tr
+                   key={entry.id}
+                   onClick={() => toggleSelect(entry.id)}
+                   className={`border-b border-border/50 cursor-pointer transition-all duration-200 ${
+                     selectedIds.has(entry.id)
+                       ? 'bg-primary/10 scale-[1.01] shadow-sm ring-1 ring-primary/30 z-10 relative'
+                       : 'hover:bg-muted/20'
+                   }`}
+                 >
                   ))}
                   <td className="px-2 py-2 whitespace-nowrap">
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(entry)}>
