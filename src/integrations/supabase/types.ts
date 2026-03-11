@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_codes: {
+        Row: {
+          activated: boolean
+          code: string
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+        }
+        Insert: {
+          activated?: boolean
+          code: string
+          created_at?: string
+          display_name: string
+          email?: string
+          id?: string
+        }
+        Update: {
+          activated?: boolean
+          code?: string
+          created_at?: string
+          display_name?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       access_requests: {
         Row: {
           created_at: string
