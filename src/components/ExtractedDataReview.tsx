@@ -86,7 +86,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
 
         <div className="space-y-1">
           {/* Header */}
-          <div className="grid grid-cols-[36px_90px_70px_70px_1fr_55px_55px_55px_55px_55px_55px_50px_28px] gap-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+          <div className="grid grid-cols-[36px_90px_70px_70px_1fr_65px_65px_65px_65px_65px_65px_50px_28px] gap-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
             <span className="text-center">OK</span>
             <span>Date</span>
             <span>Type</span>
