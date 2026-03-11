@@ -188,8 +188,10 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
                        : 'hover:bg-muted/20'
                    }`}
                  >
+                  {activeCols.map(col => (
+                    <td key={col.key} className="px-2 py-2 font-mono text-xs whitespace-nowrap">{col.render(entry)}</td>
                   ))}
-                  <td className="px-2 py-2 whitespace-nowrap">
+                   <td className="px-2 py-2 whitespace-nowrap" onClick={e => e.stopPropagation()}>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(entry)}>
                       <Pencil className="h-3 w-3" />
                     </Button>
