@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_codes: {
+        Row: {
+          activated: boolean
+          code: string
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+          is_admin: boolean
+        }
+        Insert: {
+          activated?: boolean
+          code: string
+          created_at?: string
+          display_name: string
+          email?: string
+          id?: string
+          is_admin?: boolean
+        }
+        Update: {
+          activated?: boolean
+          code?: string
+          created_at?: string
+          display_name?: string
+          email?: string
+          id?: string
+          is_admin?: boolean
+        }
+        Relationships: []
+      }
       access_requests: {
         Row: {
           created_at: string

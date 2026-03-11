@@ -1,101 +1,63 @@
-import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getActivatedUser, setActivatedUser, clearActivatedUser, ActivatedUser } from '@/lib/activation';
 import { supabase } from '@/integrations/supabase/client';
-import { setOfflineUser } from '@/lib/offlineCache';
-import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: { id: string; email: string } | null;
+  activatedUser: ActivatedUser | null;
   loading: boolean;
-  signOut: () => Promise<void>;
+  activate: (code: string) => Promise<{ success: boolean; error?: string }>;
+  signOut: () => void;
   isOfflineMode: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  session: null,
+  activatedUser: null,
   loading: true,
-  signOut: async () => {},
-  isOfflineMode: false,
+  activate: async () => ({ success: false }),
+  signOut: () => {},
+  isOfflineMode: true,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [activatedUser, setUser] = useState<ActivatedUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isOfflineMode, setIsOfflineMode] = useState(false);
-
-  const enableGuestMode = useCallback(() => {
-    const guestUser = {
-      id: 'offline-guest-user',
-      email: 'offline@local.dev',
-    } as User;
-
-    setSession(null);
-    setUser(guestUser);
-    setIsOfflineMode(true);
-    setOfflineUser({ id: guestUser.id, email: guestUser.email || '', offlineApproved: true });
-  }, []);
 
   useEffect(() => {
-    const fetchOfflineApproval = async (userId: string, email: string) => {
-      try {
-        const { data } = await supabase
-          .from('access_requests')
-          .select('offline_approved')
-          .eq('user_id', userId)
-          .maybeSingle();
-        setOfflineUser({ id: userId, email, offlineApproved: data?.offline_approved ?? false });
-      } catch {
-        // Keep existing cached value if fetch fails
-      }
-    };
+    const cached = getActivatedUser();
+    setUser(cached);
+    setLoading(false);
+  }, []);
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      if (nextSession?.user) {
-        setSession(nextSession);
-        setUser(nextSession.user);
-        setIsOfflineMode(false);
-        setOfflineUser({ id: nextSession.user.id, email: nextSession.user.email || '' });
-        fetchOfflineApproval(nextSession.user.id, nextSession.user.email || '');
-      } else {
-        enableGuestMode();
-      }
-      setLoading(false);
-    });
-
-    supabase.auth.getSession()
-      .then(({ data: { session: currentSession } }) => {
-        if (currentSession?.user) {
-          setSession(currentSession);
-          setUser(currentSession.user);
-          setOfflineUser({ id: currentSession.user.id, email: currentSession.user.email || '' });
-          fetchOfflineApproval(currentSession.user.id, currentSession.user.email || '');
-          setIsOfflineMode(false);
-        } else {
-          enableGuestMode();
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        enableGuestMode();
-        setLoading(false);
+  const activate = async (code: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-access-code', {
+        body: { code },
       });
 
-    return () => subscription.unsubscribe();
-  }, [enableGuestMode]);
+      if (error || !data?.success) {
+        return { success: false, error: data?.error || 'Invalid access code' };
+      }
 
-  const signOut = async () => {
-    if (!isOfflineMode) {
-      await supabase.auth.signOut();
+      const u: ActivatedUser = data.user;
+      setActivatedUser(u);
+      setUser(u);
+      return { success: true };
+    } catch {
+      return { success: false, error: 'Network error — you need internet for first-time activation' };
     }
-    enableGuestMode();
   };
 
+  const signOut = () => {
+    clearActivatedUser();
+    setUser(null);
+  };
+
+  const user = activatedUser ? { id: activatedUser.id, email: activatedUser.email } : null;
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut, isOfflineMode }}>
+    <AuthContext.Provider value={{ user, activatedUser, loading, activate, signOut, isOfflineMode: true }}>
       {children}
     </AuthContext.Provider>
   );
