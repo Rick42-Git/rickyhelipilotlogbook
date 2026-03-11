@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { LogbookEntry, emptyEntry } from '@/types/logbook';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -42,8 +42,8 @@ const autoCompleteKeys = ['aircraftType', 'aircraftReg', 'pilotInCommand', 'flig
 export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEntries = [] }: EntryFormDialogProps) {
   const [form, setForm] = useState<Omit<LogbookEntry, 'id'>>(entry ? { ...entry } : { ...emptyEntry });
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const dropdownInteracting = useRef(false);
 
-  // Build unique previous values for autocomplete fields
   const suggestions = useMemo(() => {
     const map: Record<string, string[]> = {};
     for (const key of autoCompleteKeys) {
@@ -70,9 +70,12 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
       ...prev,
       [key]: numericKeys.includes(key) ? (value === '' ? 0 : parseFloat(value) || 0) : value,
     }));
+    // Re-open dropdown when typing in autocomplete fields
+    if (autoCompleteKeys.includes(key)) {
+      setActiveDropdown(key);
+    }
   };
 
-  // Display empty string for zero numeric fields so users don't fight a stuck "0"
   const displayValue = (key: string, val: string | number) => {
     if (numericKeys.includes(key)) {
       return val === 0 || val === '0' ? '' : val;
@@ -84,20 +87,59 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
 
   const getFilteredSuggestions = (key: string) => {
     const currentVal = (form[key as keyof Omit<LogbookEntry, 'id'>] as string || '').toLowerCase().trim();
+    // Show all suggestions when empty, filter as user types
     if (!currentVal) return suggestions[key] || [];
-    return (suggestions[key] || []).filter(s => 
+    return (suggestions[key] || []).filter(s =>
       s.toLowerCase().includes(currentVal)
     );
   };
 
-  // Track if user is interacting with dropdown to prevent blur from closing it
-  const dropdownInteracting = React.useRef(false);
-...
+  return (
+    <Dialog open={open} onOpenChange={handleOpen}>
+      <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto glass-panel">
+        <DialogHeader>
+          <DialogTitle className="font-mono text-primary">{entry ? '✎ EDIT ENTRY' : '+ NEW ENTRY'}</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-3">
+          {fields.map(f => (
+            <div key={f.key} className={f.half ? 'col-span-1' : 'col-span-2'}>
+              {f.section && (
+                <div className="col-span-2 mt-3 mb-1">
+                  <p className="font-mono text-[10px] text-accent uppercase tracking-widest border-b border-border pb-1">{f.section}</p>
+                </div>
+              )}
+              <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{f.label}</Label>
+              <div className="relative">
+                <Input
+                  type={f.type}
+                  step={f.type === 'number' ? '0.1' : undefined}
+                  placeholder={numericKeys.includes(f.key) ? '0' : ''}
+                  value={displayValue(f.key, form[f.key] as string | number)}
+                  onChange={e => handleChange(f.key, e.target.value)}
+                  onFocus={e => {
+                    if (numericKeys.includes(f.key)) {
+                      e.target.select();
+                    }
+                    if (autoCompleteKeys.includes(f.key)) {
+                      setActiveDropdown(f.key);
+                    }
+                  }}
+                  onBlur={() => {
+                    // Only close if not interacting with the dropdown
+                    setTimeout(() => {
+                      if (!dropdownInteracting.current) {
+                        setActiveDropdown(null);
+                      }
+                    }, 200);
+                  }}
+                  className="font-mono bg-muted/50 border-border focus:border-primary text-sm min-w-0 w-full"
+                  autoComplete="off"
+                />
                 {activeDropdown === f.key && getFilteredSuggestions(f.key).length > 0 && (
                   <div
                     className="absolute z-50 top-full left-0 right-0 mt-1 max-h-40 overflow-y-auto rounded-md border border-border bg-popover shadow-lg"
-                    onMouseDown={() => { dropdownInteracting.current = true; }}
-                    onMouseUp={() => { dropdownInteracting.current = false; }}
+                    onMouseEnter={() => { dropdownInteracting.current = true; }}
+                    onMouseLeave={() => { dropdownInteracting.current = false; }}
                   >
                     {getFilteredSuggestions(f.key).map(s => (
                       <button
@@ -108,6 +150,7 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
                           e.preventDefault();
                           handleChange(f.key, s);
                           setActiveDropdown(null);
+                          dropdownInteracting.current = false;
                         }}
                       >
                         {s}
