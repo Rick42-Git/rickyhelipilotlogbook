@@ -2,3 +2,9 @@ project_id = "toxomwfohykgdljhjdgz"
 
 [functions.extract-logbook]
 verify_jwt = false
+
+[functions.verify-access-code]
+verify_jwt = false
+
+[functions.admin-codes]
+verify_jwt = false
