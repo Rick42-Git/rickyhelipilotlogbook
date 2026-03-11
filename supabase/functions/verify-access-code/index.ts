@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
 
     const { data, error } = await supabase
       .from("access_codes")
-      .select("id, display_name, email, activated")
+      .select("id, display_name, email, activated, is_admin")
       .eq("code", code.trim().toUpperCase())
       .maybeSingle();
 
@@ -53,6 +53,7 @@ Deno.serve(async (req) => {
           id: data.id,
           displayName: data.display_name,
           email: data.email,
+          isAdmin: data.is_admin,
         },
       }),
       {

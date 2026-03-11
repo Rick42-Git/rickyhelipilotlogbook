@@ -3,7 +3,6 @@ import { getActivatedUser, setActivatedUser, clearActivatedUser, ActivatedUser }
 import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextType {
-  /** Activated user mapped as a minimal User-like object for backward compat */
   user: { id: string; email: string } | null;
   activatedUser: ActivatedUser | null;
   loading: boolean;
@@ -55,7 +54,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  // Map activatedUser to a user-like object for backward compat
   const user = activatedUser ? { id: activatedUser.id, email: activatedUser.email } : null;
 
   return (
