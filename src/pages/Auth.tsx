@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -7,34 +7,22 @@ import { Loader2 } from 'lucide-react';
 import helicopterIcon from '@/assets/helicopter-icon.png';
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { activate } = useAuth();
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!code.trim()) return;
     setLoading(true);
 
-    try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast.success('Logged in successfully');
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        toast.success('Check your email to confirm your account');
-      }
-    } catch (err: any) {
-      toast.error(err.message || 'Authentication failed');
-    } finally {
-      setLoading(false);
+    const result = await activate(code.trim());
+    if (result.success) {
+      toast.success('Access granted — welcome!');
+    } else {
+      toast.error(result.error || 'Invalid code');
     }
+    setLoading(false);
   };
 
   return (
@@ -48,44 +36,33 @@ export default function Auth() {
           <div className="flex items-center gap-3">
             <div className="flex-1 alt-line" />
             <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em]">
-              {isLogin ? 'SIGN IN' : 'CREATE ACCOUNT'}
+              ACTIVATION
             </span>
             <div className="flex-1 alt-line" />
           </div>
+          <p className="font-mono text-[10px] text-muted-foreground">
+            Enter the access code provided by your administrator to activate this device.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            type="text"
+            placeholder="ACCESS CODE"
+            value={code}
+            onChange={e => setCode(e.target.value.toUpperCase())}
             required
-            className="font-mono"
+            className="font-mono text-center tracking-[0.3em] text-lg"
+            autoComplete="off"
           />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            minLength={6}
-            className="font-mono"
-          />
-          <Button type="submit" className="w-full font-mono" disabled={loading}>
+          <Button type="submit" className="w-full font-mono" disabled={loading || !code.trim()}>
             {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {isLogin ? 'SIGN IN' : 'SIGN UP'}
+            ACTIVATE
           </Button>
         </form>
 
-        <p className="text-center text-xs text-muted-foreground font-mono">
-          {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-primary hover:underline"
-          >
-            {isLogin ? 'Sign up' : 'Sign in'}
-          </button>
+        <p className="text-center text-[10px] text-muted-foreground/50 font-mono">
+          One-time activation • Works offline after
         </p>
       </div>
     </div>
