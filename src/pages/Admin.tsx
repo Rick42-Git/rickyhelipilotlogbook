@@ -13,6 +13,7 @@ interface AccessRequest {
   status: string;
   created_at: string;
   user_id: string;
+  offline_approved: boolean;
 }
 
 export default function Admin() {
