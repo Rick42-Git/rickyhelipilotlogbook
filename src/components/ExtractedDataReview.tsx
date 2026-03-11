@@ -41,15 +41,16 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
   };
 
   const acceptEntry = useCallback((index: number) => {
-    setEntries(prev => prev.map((e, i) => i === index ? { ...e, accepted: true } : e));
-    // Save this single entry immediately
-    const entry = entries[index];
-    if (entry) {
-      const { confidence, accepted, ...clean } = entry as ExtractedEntry & { accepted?: boolean };
-      onConfirm([clean]);
-      toast.success(`Saved: ${clean.date} ${clean.aircraftReg}`);
-    }
-  }, [entries, onConfirm]);
+    setEntries(prev => {
+      const entry = prev[index];
+      if (entry && !entry.accepted) {
+        const { confidence, accepted, ...clean } = entry;
+        onConfirm([clean]);
+        toast.success(`Saved: ${clean.date} ${clean.aircraftReg}`);
+      }
+      return prev.map((e, i) => i === index ? { ...e, accepted: true } : e);
+    });
+  }, [onConfirm]);
 
   const acceptAll = useCallback(() => {
     const unaccepted = entries.filter(e => !e.accepted);
