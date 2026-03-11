@@ -68,8 +68,16 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
   const handleChange = (key: string, value: string) => {
     setForm(prev => ({
       ...prev,
-      [key]: numericKeys.includes(key) ? parseFloat(value) || 0 : value,
+      [key]: numericKeys.includes(key) ? (value === '' ? 0 : parseFloat(value) || 0) : value,
     }));
+  };
+
+  // Display empty string for zero numeric fields so users don't fight a stuck "0"
+  const displayValue = (key: string, val: string | number) => {
+    if (numericKeys.includes(key)) {
+      return val === 0 || val === '0' ? '' : val;
+    }
+    return val;
   };
 
   const handleSave = () => { onSave(form); onOpenChange(false); };
@@ -100,9 +108,17 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
                 <Input
                   type={f.type}
                   step={f.type === 'number' ? '0.1' : undefined}
-                  value={form[f.key] as string | number}
+                  placeholder={numericKeys.includes(f.key) ? '0' : ''}
+                  value={displayValue(f.key, form[f.key] as string | number)}
                   onChange={e => handleChange(f.key, e.target.value)}
-                  onFocus={() => autoCompleteKeys.includes(f.key) && setActiveDropdown(f.key)}
+                  onFocus={e => {
+                    if (numericKeys.includes(f.key)) {
+                      e.target.select();
+                    }
+                    if (autoCompleteKeys.includes(f.key)) {
+                      setActiveDropdown(f.key);
+                    }
+                  }}
                   onBlur={() => setTimeout(() => setActiveDropdown(null), 150)}
                   className="font-mono bg-muted/50 border-border focus:border-primary text-sm min-w-0 w-full"
                   autoComplete="off"
@@ -113,7 +129,7 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
                       <button
                         key={s}
                         type="button"
-                        className="w-full text-left px-3 py-1.5 text-sm font-mono text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                        className="w-full text-left px-3 py-1.5 text-sm font-mono text-popover-foreground hover:bg-primary/20 hover:text-primary hover:scale-[1.02] origin-left transition-all duration-150"
                         onMouseDown={e => {
                           e.preventDefault();
                           handleChange(f.key, s);
