@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (!navigator.onLine) {
         // Offline and no session — use cached user
         const cached = getOfflineUser();
-        if (cached) {
+        if (cached && cached.offlineApproved) {
           // Create a minimal User-like object for offline use
           const offlineUser = { id: cached.id, email: cached.email } as User;
           setUser(offlineUser);

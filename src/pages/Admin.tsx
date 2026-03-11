@@ -105,17 +105,29 @@ export default function Admin() {
             <p className="font-mono text-xs text-muted-foreground text-center py-8">No access requests yet.</p>
           ) : (
             <div className="space-y-2">
-              <div className="grid grid-cols-[1fr_80px_100px] gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider pb-2 border-b border-primary/20">
+              <div className="grid grid-cols-[1fr_80px_60px_100px] gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider pb-2 border-b border-primary/20">
                 <span>Email</span>
                 <span>Status</span>
+                <span>Offline</span>
                 <span className="text-right">Actions</span>
               </div>
               {requests.map(req => (
-                <div key={req.id} className="grid grid-cols-[1fr_80px_100px] gap-2 items-center py-2 border-b border-border/30">
+                <div key={req.id} className="grid grid-cols-[1fr_80px_60px_100px] gap-2 items-center py-2 border-b border-border/30">
                   <span className="font-mono text-xs text-foreground truncate">{req.email}</span>
                   <span className={`font-mono text-[10px] uppercase tracking-wider ${statusColor(req.status)}`}>
                     {req.status}
                   </span>
+                  <div className="flex justify-center">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => toggleOffline(req.id, req.offline_approved)}
+                      className={`h-6 w-6 p-0 ${req.offline_approved ? 'text-green-400' : 'text-muted-foreground/40'}`}
+                      title={req.offline_approved ? 'Offline access granted' : 'No offline access'}
+                    >
+                      {req.offline_approved ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+                    </Button>
+                  </div>
                   <div className="flex gap-1 justify-end">
                     {req.status !== 'approved' && (
                       <Button size="sm" variant="outline" onClick={() => updateStatus(req.id, 'approved')} className="h-6 px-2 font-mono text-[10px] text-green-400 hover:bg-green-400/10">
