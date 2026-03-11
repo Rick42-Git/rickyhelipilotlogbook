@@ -26,12 +26,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isOfflineMode, setIsOfflineMode] = useState(false);
 
   useEffect(() => {
+    const fetchOfflineApproval = async (userId: string, email: string) => {
+      try {
+        const { data } = await supabase
+          .from('access_requests')
+          .select('offline_approved')
+          .eq('user_id', userId)
+          .maybeSingle();
+        setOfflineUser({ id: userId, email, offlineApproved: data?.offline_approved ?? false });
+      } catch {
+        // Keep existing cached value if fetch fails
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsOfflineMode(false);
       if (session?.user) {
         setOfflineUser({ id: session.user.id, email: session.user.email || '' });
+        fetchOfflineApproval(session.user.id, session.user.email || '');
       }
       setLoading(false);
     });
@@ -41,12 +55,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session.user);
         setOfflineUser({ id: session.user.id, email: session.user.email || '' });
+        fetchOfflineApproval(session.user.id, session.user.email || '');
         setIsOfflineMode(false);
         setLoading(false);
       } else if (!navigator.onLine) {
         // Offline and no session — use cached user
         const cached = getOfflineUser();
-        if (cached) {
+        if (cached && cached.offlineApproved) {
           // Create a minimal User-like object for offline use
           const offlineUser = { id: cached.id, email: cached.email } as User;
           setUser(offlineUser);

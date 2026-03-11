@@ -72,7 +72,7 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave }: EntryForm
                 </div>
               )}
               <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{f.label}</Label>
-              <Input type={f.type} step={f.type === 'number' ? '0.1' : undefined} value={form[f.key] as string | number} onChange={e => handleChange(f.key, e.target.value)} className="font-mono bg-muted/50 border-border focus:border-primary" />
+              <Input type={f.type} step={f.type === 'number' ? '0.1' : undefined} value={form[f.key] as string | number} onChange={e => handleChange(f.key, e.target.value)} className="font-mono bg-muted/50 border-border focus:border-primary text-sm min-w-0 w-full" />
             </div>
           ))}
         </div>

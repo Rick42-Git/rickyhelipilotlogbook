@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          offline_approved: boolean
           status: Database["public"]["Enums"]["access_status"]
           updated_at: string
           user_id: string
@@ -27,6 +28,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          offline_approved?: boolean
           status?: Database["public"]["Enums"]["access_status"]
           updated_at?: string
           user_id: string
@@ -35,6 +37,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          offline_approved?: boolean
           status?: Database["public"]["Enums"]["access_status"]
           updated_at?: string
           user_id?: string

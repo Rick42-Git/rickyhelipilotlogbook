@@ -23,13 +23,13 @@ export function setCachedEntries<T>(entries: T[]) {
 
 // --- Offline user memory (remember last logged-in user for offline bypass) ---
 
-export function setOfflineUser(user: { id: string; email: string }) {
+export function setOfflineUser(user: { id: string; email: string; offlineApproved?: boolean }) {
   try {
     localStorage.setItem(OFFLINE_USER_KEY, JSON.stringify(user));
   } catch {}
 }
 
-export function getOfflineUser(): { id: string; email: string } | null {
+export function getOfflineUser(): { id: string; email: string; offlineApproved?: boolean } | null {
   try {
     const raw = localStorage.getItem(OFFLINE_USER_KEY);
     return raw ? JSON.parse(raw) : null;
