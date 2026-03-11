@@ -108,6 +108,7 @@ export function useLogbook() {
       const { data } = await supabase
         .from('logbook_entries')
         .select('*')
+        .eq('user_id', user.id)
         .order('date', { ascending: true });
       if (data) {
         const mapped = data.map(fromDbEntry);
@@ -151,6 +152,7 @@ export function useLogbook() {
       const { data, error } = await supabase
         .from('logbook_entries')
         .select('*')
+        .eq('user_id', user.id)
         .order('date', { ascending: true });
 
       if (error) {
