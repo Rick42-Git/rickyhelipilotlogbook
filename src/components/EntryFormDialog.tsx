@@ -68,8 +68,16 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
   const handleChange = (key: string, value: string) => {
     setForm(prev => ({
       ...prev,
-      [key]: numericKeys.includes(key) ? parseFloat(value) || 0 : value,
+      [key]: numericKeys.includes(key) ? (value === '' ? 0 : parseFloat(value) || 0) : value,
     }));
+  };
+
+  // Display empty string for zero numeric fields so users don't fight a stuck "0"
+  const displayValue = (key: string, val: string | number) => {
+    if (numericKeys.includes(key)) {
+      return val === 0 || val === '0' ? '' : val;
+    }
+    return val;
   };
 
   const handleSave = () => { onSave(form); onOpenChange(false); };
