@@ -129,7 +129,7 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
                       <button
                         key={s}
                         type="button"
-                        className="w-full text-left px-3 py-1.5 text-sm font-mono text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                        className="w-full text-left px-3 py-1.5 text-sm font-mono text-popover-foreground hover:bg-primary/20 hover:text-primary hover:scale-[1.02] origin-left transition-all duration-150"
                         onMouseDown={e => {
                           e.preventDefault();
                           handleChange(f.key, s);
