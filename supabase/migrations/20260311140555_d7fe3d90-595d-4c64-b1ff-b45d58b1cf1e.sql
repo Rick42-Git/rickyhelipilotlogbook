@@ -1,0 +1,1 @@
+ALTER TABLE public.access_requests ADD COLUMN offline_approved boolean NOT NULL DEFAULT false;
