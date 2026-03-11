@@ -245,6 +245,7 @@ const Index = () => {
           onOpenChange={setDialogOpen}
           entry={editingEntry}
           onSave={handleSave}
+          existingEntries={entries}
         />
 
         <Last12MonthSummary entries={entries} open={summaryOpen} onOpenChange={setSummaryOpen} />

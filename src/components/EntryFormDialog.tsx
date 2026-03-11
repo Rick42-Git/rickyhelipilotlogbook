@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { LogbookEntry, emptyEntry } from '@/types/logbook';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ interface EntryFormDialogProps {
   onOpenChange: (open: boolean) => void;
   entry?: LogbookEntry | null;
   onSave: (entry: Omit<LogbookEntry, 'id'>) => void;
+  existingEntries?: LogbookEntry[];
 }
 
 const fields: { key: keyof Omit<LogbookEntry, 'id'>; label: string; type: string; half?: boolean; section?: string }[] = [
@@ -36,8 +37,23 @@ const numericKeys = [
   'instrumentTime', 'instructorDay', 'instructorNight',
 ];
 
-export function EntryFormDialog({ open, onOpenChange, entry, onSave }: EntryFormDialogProps) {
+const autoCompleteKeys = ['aircraftType', 'aircraftReg', 'pilotInCommand', 'flightDetails'];
+
+export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEntries = [] }: EntryFormDialogProps) {
   const [form, setForm] = useState<Omit<LogbookEntry, 'id'>>(entry ? { ...entry } : { ...emptyEntry });
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  // Build unique previous values for autocomplete fields
+  const suggestions = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const key of autoCompleteKeys) {
+      const values = existingEntries
+        .map(e => e[key as keyof LogbookEntry] as string)
+        .filter(v => v && v.trim() !== '');
+      map[key] = [...new Set(values)].sort();
+    }
+    return map;
+  }, [existingEntries]);
 
   useEffect(() => {
     if (open) setForm(entry ? { ...entry } : { ...emptyEntry });
@@ -45,6 +61,7 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave }: EntryForm
 
   const handleOpen = (o: boolean) => {
     if (o) setForm(entry ? { ...entry } : { ...emptyEntry });
+    setActiveDropdown(null);
     onOpenChange(o);
   };
 
@@ -56,6 +73,13 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave }: EntryForm
   };
 
   const handleSave = () => { onSave(form); onOpenChange(false); };
+
+  const getFilteredSuggestions = (key: string) => {
+    const currentVal = (form[key as keyof Omit<LogbookEntry, 'id'>] as string || '').toLowerCase();
+    return (suggestions[key] || []).filter(s => 
+      s.toLowerCase().includes(currentVal) && s.toLowerCase() !== currentVal
+    );
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
@@ -72,7 +96,36 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave }: EntryForm
                 </div>
               )}
               <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{f.label}</Label>
-              <Input type={f.type} step={f.type === 'number' ? '0.1' : undefined} value={form[f.key] as string | number} onChange={e => handleChange(f.key, e.target.value)} className="font-mono bg-muted/50 border-border focus:border-primary text-sm min-w-0 w-full" />
+              <div className="relative">
+                <Input
+                  type={f.type}
+                  step={f.type === 'number' ? '0.1' : undefined}
+                  value={form[f.key] as string | number}
+                  onChange={e => handleChange(f.key, e.target.value)}
+                  onFocus={() => autoCompleteKeys.includes(f.key) && setActiveDropdown(f.key)}
+                  onBlur={() => setTimeout(() => setActiveDropdown(null), 150)}
+                  className="font-mono bg-muted/50 border-border focus:border-primary text-sm min-w-0 w-full"
+                  autoComplete="off"
+                />
+                {activeDropdown === f.key && getFilteredSuggestions(f.key).length > 0 && (
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 max-h-32 overflow-y-auto rounded-md border border-border bg-popover shadow-md">
+                    {getFilteredSuggestions(f.key).map(s => (
+                      <button
+                        key={s}
+                        type="button"
+                        className="w-full text-left px-3 py-1.5 text-sm font-mono text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                        onMouseDown={e => {
+                          e.preventDefault();
+                          handleChange(f.key, s);
+                          setActiveDropdown(null);
+                        }}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
