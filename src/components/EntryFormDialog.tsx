@@ -108,9 +108,17 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
                 <Input
                   type={f.type}
                   step={f.type === 'number' ? '0.1' : undefined}
-                  value={form[f.key] as string | number}
+                  placeholder={numericKeys.includes(f.key) ? '0' : ''}
+                  value={displayValue(f.key, form[f.key] as string | number)}
                   onChange={e => handleChange(f.key, e.target.value)}
-                  onFocus={() => autoCompleteKeys.includes(f.key) && setActiveDropdown(f.key)}
+                  onFocus={e => {
+                    if (numericKeys.includes(f.key)) {
+                      e.target.select();
+                    }
+                    if (autoCompleteKeys.includes(f.key)) {
+                      setActiveDropdown(f.key);
+                    }
+                  }}
                   onBlur={() => setTimeout(() => setActiveDropdown(null), 150)}
                   className="font-mono bg-muted/50 border-border focus:border-primary text-sm min-w-0 w-full"
                   autoComplete="off"
