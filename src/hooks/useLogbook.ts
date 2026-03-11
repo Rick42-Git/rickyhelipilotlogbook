@@ -282,12 +282,14 @@ export function useLogbook() {
     }
 
     const rows = newEntries.map(e => toDbEntry(e, user.id));
+    console.log('[Logbook] Inserting', rows.length, 'entries for user', user.id);
     const { data, error } = await supabase
       .from('logbook_entries')
       .insert(rows)
       .select();
 
-    if (error) { toast.error('Failed to import entries'); return; }
+    if (error) { console.error('[Logbook] Insert failed:', error); toast.error('Failed to import entries: ' + error.message); return; }
+    console.log('[Logbook] Inserted', data?.length, 'entries successfully');
     const imported = (data || []).map(fromDbEntry);
     setEntries(prev => {
       const updated = [...prev, ...imported];
