@@ -204,7 +204,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
                   step="0.1"
                   value={entry.instructorNight || ''}
                   onChange={e => updateField(i, 'instructorNight', parseFloat(e.target.value) || 0)}
-                  className="font-mono text-xs h-7 text-center"
+                  className="font-mono text-xs h-7 text-center px-1"
                   disabled={accepted}
                   placeholder="0"
                 />
