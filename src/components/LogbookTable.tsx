@@ -64,6 +64,15 @@ const defaultVisible = new Set(columns.map(c => c.key));
 export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookTableProps) {
   const [visibleCols, setVisibleCols] = useState<Set<string>>(defaultVisible);
   const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const toggleCol = (key: string) => {
     setVisibleCols(prev => {
@@ -170,11 +179,19 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
             {filteredEntries
               .sort((a, b) => (a.date > b.date ? -1 : 1))
               .map(entry => (
-                <tr key={entry.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                 <tr
+                   key={entry.id}
+                   onClick={() => toggleSelect(entry.id)}
+                   className={`border-b border-border/50 cursor-pointer transition-all duration-200 ${
+                     selectedIds.has(entry.id)
+                       ? 'bg-primary/10 scale-[1.01] shadow-sm ring-1 ring-primary/30 z-10 relative'
+                       : 'hover:bg-muted/20'
+                   }`}
+                 >
                   {activeCols.map(col => (
                     <td key={col.key} className="px-2 py-2 font-mono text-xs whitespace-nowrap">{col.render(entry)}</td>
                   ))}
-                  <td className="px-2 py-2 whitespace-nowrap">
+                   <td className="px-2 py-2 whitespace-nowrap" onClick={e => e.stopPropagation()}>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(entry)}>
                       <Pencil className="h-3 w-3" />
                     </Button>
