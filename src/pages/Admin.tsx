@@ -53,6 +53,20 @@ export default function Admin() {
     }
   };
 
+  const toggleOffline = async (id: string, current: boolean) => {
+    const { error } = await supabase
+      .from('access_requests')
+      .update({ offline_approved: !current, updated_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) {
+      toast.error('Failed to update offline access');
+    } else {
+      toast.success(`Offline access ${!current ? 'granted' : 'revoked'}`);
+      fetchRequests();
+    }
+  };
+
   const statusColor = (s: string) => {
     if (s === 'approved') return 'text-green-400';
     if (s === 'rejected') return 'text-destructive';
