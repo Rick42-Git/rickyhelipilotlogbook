@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { setOfflineUser, getOfflineUser } from '@/lib/offlineCache';
+import { setOfflineUser } from '@/lib/offlineCache';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -25,6 +25,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
 
+  const enableGuestMode = useCallback(() => {
+    const guestUser = {
+      id: 'offline-guest-user',
+      email: 'offline@local.dev',
+    } as User;
+
+    setSession(null);
+    setUser(guestUser);
+    setIsOfflineMode(true);
+    setOfflineUser({ id: guestUser.id, email: guestUser.email || '', offlineApproved: true });
+  }, []);
+
   useEffect(() => {
     const fetchOfflineApproval = async (userId: string, email: string) => {
       try {
@@ -39,51 +51,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsOfflineMode(false);
-      if (session?.user) {
-        setOfflineUser({ id: session.user.id, email: session.user.email || '' });
-        fetchOfflineApproval(session.user.id, session.user.email || '');
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (nextSession?.user) {
+        setSession(nextSession);
+        setUser(nextSession.user);
+        setIsOfflineMode(false);
+        setOfflineUser({ id: nextSession.user.id, email: nextSession.user.email || '' });
+        fetchOfflineApproval(nextSession.user.id, nextSession.user.email || '');
+      } else {
+        enableGuestMode();
       }
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setSession(session);
-        setUser(session.user);
-        setOfflineUser({ id: session.user.id, email: session.user.email || '' });
-        fetchOfflineApproval(session.user.id, session.user.email || '');
-        setIsOfflineMode(false);
-        setLoading(false);
-      } else if (!navigator.onLine) {
-        // Offline and no session — use cached user
-        const cached = getOfflineUser();
-        if (cached && cached.offlineApproved) {
-          // Create a minimal User-like object for offline use
-          const offlineUser = { id: cached.id, email: cached.email } as User;
-          setUser(offlineUser);
-          setIsOfflineMode(true);
+    supabase.auth.getSession()
+      .then(({ data: { session: currentSession } }) => {
+        if (currentSession?.user) {
+          setSession(currentSession);
+          setUser(currentSession.user);
+          setOfflineUser({ id: currentSession.user.id, email: currentSession.user.email || '' });
+          fetchOfflineApproval(currentSession.user.id, currentSession.user.email || '');
+          setIsOfflineMode(false);
+        } else {
+          enableGuestMode();
         }
         setLoading(false);
-      } else {
+      })
+      .catch(() => {
+        enableGuestMode();
         setLoading(false);
-      }
-    });
+      });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [enableGuestMode]);
 
   const signOut = async () => {
-    if (isOfflineMode) {
-      setUser(null);
-      setSession(null);
-      setIsOfflineMode(false);
-      return;
+    if (!isOfflineMode) {
+      await supabase.auth.signOut();
     }
-    await supabase.auth.signOut();
+    enableGuestMode();
   };
 
   return (
