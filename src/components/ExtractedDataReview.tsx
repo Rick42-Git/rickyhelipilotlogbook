@@ -86,7 +86,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
 
         <div className="space-y-1">
           {/* Header */}
-          <div className="grid grid-cols-[36px_90px_70px_70px_1fr_55px_55px_55px_55px_55px_55px_50px_28px] gap-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+          <div className="grid grid-cols-[36px_90px_70px_70px_1fr_65px_65px_65px_65px_65px_65px_50px_28px] gap-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
             <span className="text-center">OK</span>
             <span>Date</span>
             <span>Type</span>
@@ -108,7 +108,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
             return (
               <div
                 key={i}
-                className={`grid grid-cols-[36px_90px_70px_70px_1fr_55px_55px_55px_55px_55px_55px_50px_28px] gap-1 items-center py-1 rounded transition-colors ${
+                className={`grid grid-cols-[36px_90px_70px_70px_1fr_65px_65px_65px_65px_65px_65px_50px_28px] gap-1 items-center py-1 rounded transition-colors ${
                   accepted
                     ? 'bg-primary/10 border border-primary/30'
                     : flagged
@@ -159,7 +159,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
                   step="0.1"
                   value={entry.seDayDual || ''}
                   onChange={e => updateField(i, 'seDayDual', parseFloat(e.target.value) || 0)}
-                  className="font-mono text-xs h-7 text-center"
+                  className="font-mono text-xs h-7 text-center px-1"
                   disabled={accepted}
                   placeholder="0"
                 />
@@ -168,7 +168,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
                   step="0.1"
                   value={entry.seDayPilot || ''}
                   onChange={e => updateField(i, 'seDayPilot', parseFloat(e.target.value) || 0)}
-                  className="font-mono text-xs h-7 text-center"
+                  className="font-mono text-xs h-7 text-center px-1"
                   disabled={accepted}
                   placeholder="0"
                 />
@@ -177,7 +177,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
                   step="0.1"
                   value={entry.seNightDual || ''}
                   onChange={e => updateField(i, 'seNightDual', parseFloat(e.target.value) || 0)}
-                  className="font-mono text-xs h-7 text-center"
+                  className="font-mono text-xs h-7 text-center px-1"
                   disabled={accepted}
                   placeholder="0"
                 />
@@ -186,7 +186,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
                   step="0.1"
                   value={entry.seNightPilot || ''}
                   onChange={e => updateField(i, 'seNightPilot', parseFloat(e.target.value) || 0)}
-                  className="font-mono text-xs h-7 text-center"
+                  className="font-mono text-xs h-7 text-center px-1"
                   disabled={accepted}
                   placeholder="0"
                 />
@@ -195,7 +195,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
                   step="0.1"
                   value={entry.instructorDay || ''}
                   onChange={e => updateField(i, 'instructorDay', parseFloat(e.target.value) || 0)}
-                  className="font-mono text-xs h-7 text-center"
+                  className="font-mono text-xs h-7 text-center px-1"
                   disabled={accepted}
                   placeholder="0"
                 />
@@ -204,7 +204,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
                   step="0.1"
                   value={entry.instructorNight || ''}
                   onChange={e => updateField(i, 'instructorNight', parseFloat(e.target.value) || 0)}
-                  className="font-mono text-xs h-7 text-center"
+                  className="font-mono text-xs h-7 text-center px-1"
                   disabled={accepted}
                   placeholder="0"
                 />
