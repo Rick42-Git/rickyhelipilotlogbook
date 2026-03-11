@@ -3,17 +3,22 @@ import { getActivatedUser, setActivatedUser, clearActivatedUser, ActivatedUser }
 import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextType {
+  /** Activated user mapped as a minimal User-like object for backward compat */
+  user: { id: string; email: string } | null;
   activatedUser: ActivatedUser | null;
   loading: boolean;
   activate: (code: string) => Promise<{ success: boolean; error?: string }>;
-  deactivate: () => void;
+  signOut: () => void;
+  isOfflineMode: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
+  user: null,
   activatedUser: null,
   loading: true,
   activate: async () => ({ success: false }),
-  deactivate: () => {},
+  signOut: () => {},
+  isOfflineMode: true,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -36,22 +41,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, error: data?.error || 'Invalid access code' };
       }
 
-      const user: ActivatedUser = data.user;
-      setActivatedUser(user);
-      setUser(user);
+      const u: ActivatedUser = data.user;
+      setActivatedUser(u);
+      setUser(u);
       return { success: true };
     } catch {
       return { success: false, error: 'Network error — you need internet for first-time activation' };
     }
   };
 
-  const deactivate = () => {
+  const signOut = () => {
     clearActivatedUser();
     setUser(null);
   };
 
+  // Map activatedUser to a user-like object for backward compat
+  const user = activatedUser ? { id: activatedUser.id, email: activatedUser.email } : null;
+
   return (
-    <AuthContext.Provider value={{ activatedUser, loading, activate, deactivate }}>
+    <AuthContext.Provider value={{ user, activatedUser, loading, activate, signOut, isOfflineMode: true }}>
       {children}
     </AuthContext.Provider>
   );
