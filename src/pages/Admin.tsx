@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Check, X, ArrowLeft, RefreshCw, Plus, Copy } from 'lucide-react';
+import { X, ArrowLeft, RefreshCw, Plus, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import helicopterIcon from '@/assets/helicopter-icon.png';
@@ -13,6 +14,7 @@ interface AccessCode {
   display_name: string;
   email: string;
   activated: boolean;
+  is_admin: boolean;
   created_at: string;
 }
 
@@ -26,6 +28,7 @@ function generateCode(): string {
 }
 
 export default function Admin() {
+  const { activatedUser } = useAuth();
   const navigate = useNavigate();
   const [codes, setCodes] = useState<AccessCode[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,31 +36,33 @@ export default function Admin() {
   const [newEmail, setNewEmail] = useState('');
   const [creating, setCreating] = useState(false);
 
-  const fetchCodes = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('access_codes')
-      .select('*')
-      .order('created_at', { ascending: false });
+  const adminId = activatedUser?.id;
 
-    if (error) {
+  const fetchCodes = async () => {
+    if (!adminId) return;
+    setLoading(true);
+    const { data, error } = await supabase.functions.invoke('admin-codes', {
+      body: { action: 'list', adminId },
+    });
+
+    if (error || !data?.data) {
       toast.error('Failed to load access codes');
     } else {
-      setCodes((data as unknown as AccessCode[]) || []);
+      setCodes(data.data);
     }
     setLoading(false);
   };
 
-  useEffect(() => { fetchCodes(); }, []);
+  useEffect(() => { fetchCodes(); }, [adminId]);
 
   const createCode = async () => {
-    if (!newName.trim()) { toast.error('Name is required'); return; }
+    if (!newName.trim() || !adminId) { toast.error('Name is required'); return; }
     setCreating(true);
 
     const code = generateCode();
-    const { error } = await supabase
-      .from('access_codes')
-      .insert({ code, display_name: newName.trim(), email: newEmail.trim() } as any);
+    const { data, error } = await supabase.functions.invoke('admin-codes', {
+      body: { action: 'create', adminId, code, display_name: newName.trim(), email: newEmail.trim() },
+    });
 
     if (error) {
       toast.error('Failed to create code');
@@ -71,10 +76,10 @@ export default function Admin() {
   };
 
   const deleteCode = async (id: string) => {
-    const { error } = await supabase
-      .from('access_codes')
-      .delete()
-      .eq('id', id);
+    if (!adminId) return;
+    const { error } = await supabase.functions.invoke('admin-codes', {
+      body: { action: 'delete', adminId, id },
+    });
 
     if (error) {
       toast.error('Failed to delete code');
@@ -158,6 +163,7 @@ export default function Admin() {
                   <div>
                     <span className="font-mono text-xs text-foreground block truncate">{c.display_name}</span>
                     {c.email && <span className="font-mono text-[10px] text-muted-foreground block truncate">{c.email}</span>}
+                    {c.is_admin && <span className="font-mono text-[9px] text-primary">ADMIN</span>}
                   </div>
                   <span className="font-mono text-xs text-primary tracking-widest">{c.code}</span>
                   <span className={`font-mono text-[10px] uppercase tracking-wider ${c.activated ? 'text-green-400' : 'text-muted-foreground/50'}`}>
