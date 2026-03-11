@@ -83,53 +83,27 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
   const handleSave = () => { onSave(form); onOpenChange(false); };
 
   const getFilteredSuggestions = (key: string) => {
-    const currentVal = (form[key as keyof Omit<LogbookEntry, 'id'>] as string || '').toLowerCase();
+    const currentVal = (form[key as keyof Omit<LogbookEntry, 'id'>] as string || '').toLowerCase().trim();
+    if (!currentVal) return suggestions[key] || [];
     return (suggestions[key] || []).filter(s => 
-      s.toLowerCase().includes(currentVal) && s.toLowerCase() !== currentVal
+      s.toLowerCase().includes(currentVal)
     );
   };
 
-  return (
-    <Dialog open={open} onOpenChange={handleOpen}>
-      <DialogContent className="max-w-xl max-h-[85vh] overflow-y-auto glass-panel">
-        <DialogHeader>
-          <DialogTitle className="font-mono text-primary">{entry ? '✎ EDIT ENTRY' : '+ NEW ENTRY'}</DialogTitle>
-        </DialogHeader>
-        <div className="grid grid-cols-2 gap-3">
-          {fields.map(f => (
-            <div key={f.key} className={f.half ? 'col-span-1' : 'col-span-2'}>
-              {f.section && (
-                <div className="col-span-2 mt-3 mb-1">
-                  <p className="font-mono text-[10px] text-accent uppercase tracking-widest border-b border-border pb-1">{f.section}</p>
-                </div>
-              )}
-              <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{f.label}</Label>
-              <div className="relative">
-                <Input
-                  type={f.type}
-                  step={f.type === 'number' ? '0.1' : undefined}
-                  placeholder={numericKeys.includes(f.key) ? '0' : ''}
-                  value={displayValue(f.key, form[f.key] as string | number)}
-                  onChange={e => handleChange(f.key, e.target.value)}
-                  onFocus={e => {
-                    if (numericKeys.includes(f.key)) {
-                      e.target.select();
-                    }
-                    if (autoCompleteKeys.includes(f.key)) {
-                      setActiveDropdown(f.key);
-                    }
-                  }}
-                  onBlur={() => setTimeout(() => setActiveDropdown(null), 150)}
-                  className="font-mono bg-muted/50 border-border focus:border-primary text-sm min-w-0 w-full"
-                  autoComplete="off"
-                />
+  // Track if user is interacting with dropdown to prevent blur from closing it
+  const dropdownInteracting = React.useRef(false);
+...
                 {activeDropdown === f.key && getFilteredSuggestions(f.key).length > 0 && (
-                  <div className="absolute z-50 top-full left-0 right-0 mt-1 max-h-32 overflow-y-auto rounded-md border border-border bg-popover shadow-md">
+                  <div
+                    className="absolute z-50 top-full left-0 right-0 mt-1 max-h-40 overflow-y-auto rounded-md border border-border bg-popover shadow-lg"
+                    onMouseDown={() => { dropdownInteracting.current = true; }}
+                    onMouseUp={() => { dropdownInteracting.current = false; }}
+                  >
                     {getFilteredSuggestions(f.key).map(s => (
                       <button
                         key={s}
                         type="button"
-                        className="w-full text-left px-3 py-1.5 text-sm font-mono text-popover-foreground hover:bg-primary/20 hover:text-primary hover:scale-[1.02] origin-left transition-all duration-150"
+                        className="w-full text-left px-3 py-2 text-sm font-mono text-popover-foreground hover:bg-primary/20 hover:text-primary hover:scale-[1.02] origin-left transition-all duration-150"
                         onMouseDown={e => {
                           e.preventDefault();
                           handleChange(f.key, s);
