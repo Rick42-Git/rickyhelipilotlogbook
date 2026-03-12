@@ -45,9 +45,9 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
     currentSpread * ROWS_PER_SPREAD + ROWS_PER_SPREAD
   );
 
-  // Compute page totals
-  const pageTotals = useMemo(() => {
-    return spreadEntries.reduce((t, e) => ({
+  // Compute grand totals of ALL entries
+  const grandTotals = useMemo(() => {
+    return sorted.reduce((t, e) => ({
       seDayPilot: t.seDayPilot + e.seDayPilot,
       seDayDual: t.seDayDual + e.seDayDual,
       seNightDual: t.seNightDual + e.seNightDual,
@@ -59,7 +59,7 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
       seDayPilot: 0, seDayDual: 0, seNightDual: 0, seNightPilot: 0,
       instrumentTime: 0, instructorDay: 0, instructorNight: 0,
     });
-  }, [spreadEntries]);
+  }, [sorted]);
 
   // Year for the header
   const spreadYear = spreadEntries.length > 0 ? getMonthDay(spreadEntries[0].date).year : '';
@@ -218,8 +218,8 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
                     ))}
                     {/* Totals row */}
                     <tr style={{ background: 'hsl(40 20% 87%)' }}>
-                      <td colSpan={6} className="px-2 py-[3px] font-mono text-[9px] italic border-r-0" style={{ color: 'hsl(30 15% 45%)' }}>
-                        Totals This Page
+                      <td colSpan={6} className="px-2 py-[3px] font-mono text-[9px] italic border-r-0 font-bold" style={{ color: 'hsl(30 15% 40%)' }}>
+                        Grand Totals
                       </td>
                     </tr>
                   </tbody>
@@ -295,13 +295,13 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
                     ))}
                     {/* Totals row */}
                     <tr style={{ background: 'hsl(40 20% 87%)' }}>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(pageTotals.seDayPilot)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(pageTotals.seDayDual)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(pageTotals.seNightDual)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(pageTotals.seNightPilot)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(30 15% 30%)' }}>{fmt(pageTotals.instrumentTime)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(pageTotals.instructorDay)}</td>
-                      <td className={`${tdClass} font-bold text-[9px] border-r-0`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(pageTotals.instructorNight)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(grandTotals.seDayPilot)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(grandTotals.seDayDual)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(grandTotals.seNightDual)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(grandTotals.seNightPilot)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(30 15% 30%)' }}>{fmt(grandTotals.instrumentTime)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(grandTotals.instructorDay)}</td>
+                      <td className={`${tdClass} font-bold text-[9px] border-r-0`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(grandTotals.instructorNight)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -323,9 +323,19 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
           <ChevronLeft className="h-4 w-4" />
           PREV PAGE
         </Button>
-        <span className="font-mono text-[10px] text-muted-foreground">
-          Spread {currentSpread + 1} of {totalSpreads}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] text-muted-foreground">Spread</span>
+          <select
+            value={currentSpread}
+            onChange={e => setCurrentSpread(Number(e.target.value))}
+            className="font-mono text-[10px] bg-transparent border border-border/50 rounded px-1.5 py-0.5 text-foreground appearance-none cursor-pointer"
+          >
+            {Array.from({ length: totalSpreads }).map((_, i) => (
+              <option key={i} value={i}>{i + 1}</option>
+            ))}
+          </select>
+          <span className="font-mono text-[10px] text-muted-foreground">of {totalSpreads}</span>
+        </div>
         <Button
           variant="ghost"
           size="sm"
