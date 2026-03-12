@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { LogbookEntry, NumericField } from '@/types/logbook';
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { FileDown } from 'lucide-react';
 
 interface Last12MonthSummaryProps {
   entries: LogbookEntry[];
