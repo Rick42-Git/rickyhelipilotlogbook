@@ -114,8 +114,12 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg glass-panel max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-mono text-primary">▸ LAST 12 MONTHS SUMMARY</DialogTitle>
-        </DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="font-mono text-primary">▸ LAST 12 MONTHS SUMMARY</DialogTitle>
+            <Button variant="ghost" size="sm" className="h-7 px-2 font-mono text-[10px]" onClick={exportSummary}>
+              <FileDown className="h-3.5 w-3.5 mr-1" /> Export
+            </Button>
+          </div>
 
         <div className="space-y-4">
           {/* Grand totals */}
