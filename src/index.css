@@ -166,28 +166,74 @@
   }
 }
 
-/* Book page-turn animations */
-@keyframes page-turn-forward {
-  0% { transform: perspective(1200px) rotateY(0deg); }
-  30% { transform: perspective(1200px) rotateY(-3deg); }
-  60% { transform: perspective(1200px) rotateY(2deg); }
-  100% { transform: perspective(1200px) rotateY(0deg); }
+/* ===== Book View Styles ===== */
+.book-border-color {
+  border-color: hsl(30 15% 70% / 0.4);
+}
+.book-row-border {
+  border-color: hsl(200 40% 70% / 0.25);
 }
 
-@keyframes page-turn-backward {
-  0% { transform: perspective(1200px) rotateY(0deg); }
-  30% { transform: perspective(1200px) rotateY(3deg); }
-  60% { transform: perspective(1200px) rotateY(-2deg); }
-  100% { transform: perspective(1200px) rotateY(0deg); }
+/* Realistic page turn animation */
+@keyframes page-flip-forward {
+  0% {
+    transform: perspective(2000px) rotateY(0deg);
+    box-shadow: -4px 0 12px hsl(30 15% 20% / 0.1);
+  }
+  15% {
+    transform: perspective(2000px) rotateY(-8deg) scaleX(0.98);
+    box-shadow: -8px 0 20px hsl(30 15% 20% / 0.2);
+  }
+  50% {
+    transform: perspective(2000px) rotateY(-90deg) scaleX(0.85);
+    box-shadow: -2px 0 40px hsl(30 15% 20% / 0.35);
+  }
+  85% {
+    transform: perspective(2000px) rotateY(-165deg) scaleX(0.92);
+    box-shadow: 4px 0 20px hsl(30 15% 20% / 0.15);
+  }
+  100% {
+    transform: perspective(2000px) rotateY(-180deg) scaleX(1);
+    box-shadow: 2px 0 8px hsl(30 15% 20% / 0.05);
+  }
 }
 
-.animate-page-forward {
-  animation: page-turn-forward 0.5s ease-in-out;
+@keyframes page-flip-backward {
+  0% {
+    transform: perspective(2000px) rotateY(-180deg);
+    box-shadow: 2px 0 8px hsl(30 15% 20% / 0.05);
+  }
+  15% {
+    transform: perspective(2000px) rotateY(-170deg) scaleX(0.98);
+    box-shadow: 4px 0 20px hsl(30 15% 20% / 0.15);
+  }
+  50% {
+    transform: perspective(2000px) rotateY(-90deg) scaleX(0.85);
+    box-shadow: -2px 0 40px hsl(30 15% 20% / 0.35);
+  }
+  85% {
+    transform: perspective(2000px) rotateY(-8deg) scaleX(0.92);
+    box-shadow: -8px 0 20px hsl(30 15% 20% / 0.2);
+  }
+  100% {
+    transform: perspective(2000px) rotateY(0deg) scaleX(1);
+    box-shadow: -4px 0 12px hsl(30 15% 20% / 0.1);
+  }
+}
+
+.book-flip-page {
+  background: linear-gradient(135deg, hsl(45 30% 90%) 0%, hsl(42 25% 86%) 100%);
+  border-radius: 2px;
+  backface-visibility: hidden;
+}
+
+.book-flip-page.flipping-forward {
+  animation: page-flip-forward 0.7s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
   transform-origin: left center;
 }
 
-.animate-page-backward {
-  animation: page-turn-backward 0.5s ease-in-out;
+.book-flip-page.flipping-backward {
+  animation: page-flip-backward 0.7s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
   transform-origin: right center;
 }
 
