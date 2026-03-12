@@ -145,7 +145,9 @@ export function FlightMap({
     const layerConfig = baseLayers[activeLayer];
     baseLayerRef.current = L.tileLayer(layerConfig.url, {
       attribution: layerConfig.attribution,
-      maxZoom: layerConfig.maxZoom,
+      maxZoom: layerConfig.maxZoom ?? 18,
+      noWrap: true,
+      bounds: mapBounds,
     }).addTo(map);
 
     // Ensure overlays stay on top by re-adding them
