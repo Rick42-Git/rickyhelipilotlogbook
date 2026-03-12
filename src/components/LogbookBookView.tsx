@@ -140,7 +140,21 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
 
             <div className="flex">
               {/* ========== LEFT PAGE ========== */}
-              <div className="flex-1 min-w-0 border-r" style={{ borderColor: 'hsl(30 15% 70% / 0.3)' }}>
+              <div className="flex-1 min-w-0 border-r relative" style={{ borderColor: 'hsl(30 15% 70% / 0.3)' }}>
+                {/* Helicopter watermark */}
+                <svg viewBox="0 0 200 120" className="absolute pointer-events-none z-[1]" style={{ width: '60%', left: '20%', top: '35%', opacity: 0.04 }}>
+                  <g fill="hsl(30 15% 30%)" transform="translate(10,10)">
+                    <ellipse cx="80" cy="55" rx="45" ry="22" />
+                    <rect x="125" y="50" width="55" height="8" rx="3" />
+                    <polygon points="175,42 195,48 195,56 175,62 180,55" />
+                    <rect x="55" y="30" width="3" height="25" rx="1" />
+                    <line x1="20" y1="30" x2="130" y2="30" stroke="hsl(30 15% 30%)" strokeWidth="3" strokeLinecap="round" />
+                    <rect x="55" y="75" width="8" height="18" rx="2" />
+                    <rect x="95" y="75" width="8" height="18" rx="2" />
+                    <rect x="45" y="93" width="30" height="3" rx="1" />
+                    <rect x="85" y="93" width="30" height="3" rx="1" />
+                  </g>
+                </svg>
                 {/* Header row */}
                 <div className="flex items-center justify-between px-3 pt-2 pb-1 border-b book-border-color">
                   <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'hsl(30 15% 35%)' }}>
@@ -229,7 +243,21 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
               </div>
 
               {/* ========== RIGHT PAGE ========== */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 relative">
+                {/* Helicopter watermark */}
+                <svg viewBox="0 0 200 120" className="absolute pointer-events-none z-[1]" style={{ width: '60%', left: '20%', top: '35%', opacity: 0.04 }}>
+                  <g fill="hsl(30 15% 30%)" transform="translate(10,10) scale(-1,1) translate(-190,0)">
+                    <ellipse cx="80" cy="55" rx="45" ry="22" />
+                    <rect x="125" y="50" width="55" height="8" rx="3" />
+                    <polygon points="175,42 195,48 195,56 175,62 180,55" />
+                    <rect x="55" y="30" width="3" height="25" rx="1" />
+                    <line x1="20" y1="30" x2="130" y2="30" stroke="hsl(30 15% 30%)" strokeWidth="3" strokeLinecap="round" />
+                    <rect x="55" y="75" width="8" height="18" rx="2" />
+                    <rect x="95" y="75" width="8" height="18" rx="2" />
+                    <rect x="45" y="93" width="30" height="3" rx="1" />
+                    <rect x="85" y="93" width="30" height="3" rx="1" />
+                  </g>
+                </svg>
                 {/* Header */}
                 <div className="flex items-center justify-between px-3 pt-2 pb-1 border-b book-border-color">
                   <span className="font-mono text-[7px] tracking-widest uppercase" style={{ color: 'hsl(30 15% 55%)' }}>
