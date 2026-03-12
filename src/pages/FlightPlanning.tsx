@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Globe } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Save, FolderOpen } from 'lucide-react';
 import { FlightMap, MapLayer } from '@/components/flight-planning/FlightMap';
 import { FlightPlanPanel } from '@/components/flight-planning/FlightPlanPanel';
 import { FlightLogTable } from '@/components/flight-planning/FlightLogTable';
+import { SavedPlansDialog } from '@/components/flight-planning/SavedPlansDialog';
 import { Waypoint } from '@/types/flightPlan';
 import { Airport } from '@/data/africanAirports';
+import { useFlightPlans, SavedFlightPlan } from '@/hooks/useFlightPlans';
+import { toast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,10 +21,17 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
 
 const FlightPlanning = () => {
   const navigate = useNavigate();
+  const { plans, loading: plansLoading, savePlan, deletePlan } = useFlightPlans();
 
+  // Current plan state
+  const [currentPlanId, setCurrentPlanId] = useState<string | null>(null);
+  const [planName, setPlanName] = useState('');
   const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
   const [groundSpeed, setGroundSpeed] = useState(90);
   const [fuelBurnRate, setFuelBurnRate] = useState(120);
@@ -31,6 +42,11 @@ const FlightPlanning = () => {
   const [pilotInCommand, setPilotInCommand] = useState('');
   const [planNotes, setPlanNotes] = useState('');
 
+  // Dialogs
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
+  const [saveName, setSaveName] = useState('');
+
   // Map controls
   const [showAirports, setShowAirports] = useState(true);
   const [filterCustoms, setFilterCustoms] = useState(false);
@@ -40,18 +56,16 @@ const FlightPlanning = () => {
   const [showAirspaces, setShowAirspaces] = useState(false);
   const [showBoundaries, setShowBoundaries] = useState(true);
 
-  const handleMapClick = (lat: number, lng: number) => {
-    const wp: Waypoint = {
+  const handleMapClick = useCallback((lat: number, lng: number) => {
+    setWaypoints(prev => [...prev, {
       id: crypto.randomUUID(),
-      name: `WPT ${waypoints.length + 1}`,
-      lat,
-      lng,
-    };
-    setWaypoints([...waypoints, wp]);
-  };
+      name: `WPT ${prev.length + 1}`,
+      lat, lng,
+    }]);
+  }, []);
 
-  const handleAirportClick = (airport: Airport) => {
-    const wp: Waypoint = {
+  const handleAirportClick = useCallback((airport: Airport) => {
+    setWaypoints(prev => [...prev, {
       id: crypto.randomUUID(),
       name: `${airport.icao} - ${airport.city}`,
       icao: airport.icao,
@@ -62,12 +76,69 @@ const FlightPlanning = () => {
       hasFuel: airport.hasFuel,
       country: airport.country,
       notes: airport.notes,
-    };
-    setWaypoints([...waypoints, wp]);
-  };
+    }]);
+  }, []);
 
   const toggleMeasure = () => {
     setMeasure(prev => ({ active: !prev.active, points: prev.active ? [] : prev.points }));
+  };
+
+  const handleSave = async () => {
+    const name = saveName.trim() || planName.trim() || 'Untitled Plan';
+    const id = await savePlan({
+      id: currentPlanId || undefined,
+      name,
+      aircraft_type: aircraftType,
+      aircraft_reg: aircraftReg,
+      pilot_in_command: pilotInCommand,
+      ground_speed: groundSpeed,
+      fuel_burn_rate: fuelBurnRate,
+      fuel_on_board: fuelOnBoard,
+      reserve_fuel: reserveFuel,
+      waypoints,
+      notes: planNotes,
+    });
+    if (id) {
+      setCurrentPlanId(id);
+      setPlanName(name);
+      setShowSaveDialog(false);
+    }
+  };
+
+  const handleQuickSave = async () => {
+    if (currentPlanId && planName) {
+      await savePlan({
+        id: currentPlanId,
+        name: planName,
+        aircraft_type: aircraftType,
+        aircraft_reg: aircraftReg,
+        pilot_in_command: pilotInCommand,
+        ground_speed: groundSpeed,
+        fuel_burn_rate: fuelBurnRate,
+        fuel_on_board: fuelOnBoard,
+        reserve_fuel: reserveFuel,
+        waypoints,
+        notes: planNotes,
+      });
+    } else {
+      setSaveName(planName || '');
+      setShowSaveDialog(true);
+    }
+  };
+
+  const handleLoad = (plan: SavedFlightPlan) => {
+    setCurrentPlanId(plan.id);
+    setPlanName(plan.name);
+    setWaypoints(plan.waypoints);
+    setGroundSpeed(plan.ground_speed);
+    setFuelBurnRate(plan.fuel_burn_rate);
+    setFuelOnBoard(plan.fuel_on_board);
+    setReserveFuel(plan.reserve_fuel);
+    setAircraftType(plan.aircraft_type);
+    setAircraftReg(plan.aircraft_reg);
+    setPilotInCommand(plan.pilot_in_command);
+    setPlanNotes(plan.notes);
+    toast({ title: 'Plan loaded', description: `"${plan.name}" loaded.` });
   };
 
   const layerLabels: Record<MapLayer, string> = {
@@ -87,12 +158,35 @@ const FlightPlanning = () => {
           </Button>
           <div className="flex items-center gap-2">
             <Plane className="h-4 w-4 text-primary" />
-            <h1 className="font-mono text-sm md:text-base font-bold text-primary tracking-wider">FLIGHT PLANNING</h1>
+            <h1 className="font-mono text-sm md:text-base font-bold text-primary tracking-wider">
+              {planName ? planName.toUpperCase() : 'FLIGHT PLANNING'}
+            </h1>
             <div className="status-dot" />
           </div>
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Save / Load */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleQuickSave}
+            className="font-mono text-[10px] gap-1 h-7"
+            title={currentPlanId ? 'Quick save' : 'Save as...'}
+          >
+            <Save className="h-3 w-3" />
+            <span className="hidden md:inline">{currentPlanId ? 'SAVE' : 'SAVE AS'}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowLoadDialog(true)}
+            className="font-mono text-[10px] gap-1 h-7"
+          >
+            <FolderOpen className="h-3 w-3" />
+            <span className="hidden md:inline">LOAD</span>
+          </Button>
+
           {/* Map Layer Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -235,6 +329,40 @@ const FlightPlanning = () => {
         <span className="hidden md:inline">|</span>
         <span className="hidden md:inline">Click map to add waypoint • Click airport dot to add as waypoint</span>
       </div>
+
+      {/* Save dialog */}
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-mono text-primary tracking-wider">SAVE FLIGHT PLAN</DialogTitle>
+          </DialogHeader>
+          <div>
+            <Label className="font-mono text-[10px] text-muted-foreground">PLAN NAME</Label>
+            <Input
+              value={saveName}
+              onChange={e => setSaveName(e.target.value)}
+              className="font-mono text-xs"
+              placeholder="e.g. JHB to CPT via BFN"
+              autoFocus
+              onKeyDown={e => e.key === 'Enter' && handleSave()}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveDialog(false)} className="font-mono text-xs">Cancel</Button>
+            <Button onClick={handleSave} className="font-mono text-xs">Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Load dialog */}
+      <SavedPlansDialog
+        open={showLoadDialog}
+        onOpenChange={setShowLoadDialog}
+        plans={plans}
+        loading={plansLoading}
+        onLoad={handleLoad}
+        onDelete={deletePlan}
+      />
     </div>
   );
 };
