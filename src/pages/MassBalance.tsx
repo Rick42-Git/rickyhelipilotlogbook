@@ -72,7 +72,18 @@ const MassBalance = () => {
   }, [selectedAircraft]);
 
   const handleExportPDF = () => {
-    window.print();
+    exportMassBalancePDF({
+      aircraft: selectedAircraft,
+      weights,
+      totalWeight,
+      totalMoment,
+      cgStation,
+      lateralCG,
+      lateralMoment,
+      weightMargin,
+      withinLimits,
+      lateralWithinLimits,
+    });
   };
 
   return (
