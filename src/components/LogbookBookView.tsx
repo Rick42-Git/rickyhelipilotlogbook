@@ -45,9 +45,9 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
     currentSpread * ROWS_PER_SPREAD + ROWS_PER_SPREAD
   );
 
-  // Compute page totals
-  const pageTotals = useMemo(() => {
-    return spreadEntries.reduce((t, e) => ({
+  // Compute grand totals of ALL entries
+  const grandTotals = useMemo(() => {
+    return sorted.reduce((t, e) => ({
       seDayPilot: t.seDayPilot + e.seDayPilot,
       seDayDual: t.seDayDual + e.seDayDual,
       seNightDual: t.seNightDual + e.seNightDual,
@@ -59,7 +59,7 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
       seDayPilot: 0, seDayDual: 0, seNightDual: 0, seNightPilot: 0,
       instrumentTime: 0, instructorDay: 0, instructorNight: 0,
     });
-  }, [spreadEntries]);
+  }, [sorted]);
 
   // Year for the header
   const spreadYear = spreadEntries.length > 0 ? getMonthDay(spreadEntries[0].date).year : '';
