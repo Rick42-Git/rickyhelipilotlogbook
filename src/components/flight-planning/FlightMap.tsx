@@ -284,8 +284,9 @@ export function FlightMap({
       const marker = L.marker([airport.lat, airport.lng], { icon });
 
       const popupId = `add-apt-${airport.icao}`;
+      const weatherId = `wx-${airport.icao}`;
       const popupHtml = `
-        <div style="font-family:monospace;font-size:11px;min-width:180px;">
+        <div style="font-family:monospace;font-size:11px;min-width:200px;">
           <div style="font-weight:bold;font-size:13px;">${airport.icao}${airport.iata ? ` / ${airport.iata}` : ''}</div>
           <div>${airport.name}</div>
           <div style="color:#888;">${airport.city}, ${airport.country}</div>
@@ -297,6 +298,9 @@ export function FlightMap({
           ${airport.fuelTypes ? `<div>Fuel: ${airport.fuelTypes.join(', ')}</div>` : ''}
           ${airport.runwaySurface ? `<div>Surface: ${airport.runwaySurface}</div>` : ''}
           ${airport.notes ? `<div style="color:#999;font-style:italic;margin-top:4px;">${airport.notes}</div>` : ''}
+          <div id="${weatherId}" style="margin-top:6px;padding:4px;background:hsla(220,20%,10%,0.5);border-radius:4px;font-size:10px;color:#aaa;">
+            Loading METAR...
+          </div>
           <div style="margin-top:6px;"><button id="${popupId}" style="background:hsl(38,95%,55%);color:#111;border:none;padding:3px 8px;border-radius:4px;font-family:monospace;font-size:10px;cursor:pointer;font-weight:bold;">+ ADD TO ROUTE</button></div>
         </div>`;
 
