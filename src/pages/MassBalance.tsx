@@ -200,7 +200,7 @@ const MassBalance = () => {
               stations={selectedAircraft.stations}
               weights={weights}
             />
-            <AircraftDataPanel aircraft={selectedAircraft} />
+            <AircraftDataPanel aircraft={selectedAircraft} currentEmptyWeight={weights[0]} />
           </div>
         </div>
 
