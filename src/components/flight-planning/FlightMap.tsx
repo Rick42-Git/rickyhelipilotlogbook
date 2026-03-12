@@ -4,6 +4,9 @@ import 'leaflet/dist/leaflet.css';
 import { Airport, africanAirports } from '@/data/africanAirports';
 import { Waypoint, calcDistanceNm } from '@/types/flightPlan';
 
+// Abort controller for any pending fetches
+let boundaryAbortController: AbortController | null = null;
+
 interface MeasureState {
   active: boolean;
   points: [number, number][];
