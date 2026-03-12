@@ -66,7 +66,7 @@ const Index = () => {
     }
   };
 
-  const totals = getTotals();
+  const totals = useMemo(() => getTotals(), [getTotals]);
 
   return (
     <div className="min-h-screen bg-background grid-bg scanline">
