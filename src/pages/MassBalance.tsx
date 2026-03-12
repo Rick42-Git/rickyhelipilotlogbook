@@ -125,7 +125,16 @@ const MassBalance = () => {
             <h2 className="font-mono text-xs text-muted-foreground tracking-widest uppercase">Select Aircraft Type</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {aircraftTypes.map(a => (
+            {aircraftTypes.map(a => {
+              const isTwin = ['Bell 429', 'Airbus H135 (EC135)', 'Airbus H145 (EC145)', 'Kawasaki BK117'].includes(a.name);
+              const isLight = ['Robinson R22 Beta II', 'Robinson R44 Raven II'].includes(a.name);
+              const isHeavy = ['Bell UH-1H Huey'].includes(a.name);
+              let categoryLabel = 'TURBINE SINGLE';
+              if (isTwin) categoryLabel = 'TWIN ENGINE';
+              else if (isLight) categoryLabel = 'PISTON';
+              else if (isHeavy) categoryLabel = 'TURBINE HEAVY';
+
+              return (
               <button
                 key={a.name}
                 onClick={() => handleAircraftChange(a)}
@@ -136,8 +145,96 @@ const MassBalance = () => {
                 }`}
               >
                 <div className="flex flex-col items-center gap-2">
-                  <svg viewBox="0 0 24 24" className={`w-8 h-8 transition-colors ${selectedAircraft.name === a.name ? 'text-primary' : 'text-muted-foreground group-hover:text-primary/70'}`} fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M12 2C12 2 10 6 10 8V11L4 14V16L10 14.5V18L8 19.5V21L12 20L16 21V19.5L14 18V14.5L20 16V14L14 11V8C14 6 12 2 12 2Z" />
+                  <svg viewBox="0 0 48 48" className={`w-10 h-10 transition-colors ${selectedAircraft.name === a.name ? 'text-primary' : 'text-muted-foreground group-hover:text-primary/70'}`} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    {isTwin ? (
+                      /* Twin-engine: wider body, two engine bumps on top */
+                      <>
+                        {/* Fuselage */}
+                        <path d="M14 28C10 27 6 26 4 25L6 23L14 24" />
+                        <path d="M14 22C14 18 18 14 24 12C30 14 34 18 34 22V28C34 32 30 36 24 38C18 36 14 32 14 28V22Z" />
+                        <path d="M34 28C38 27 42 26 44 25L42 23L34 24" />
+                        {/* Twin engines */}
+                        <circle cx="19" cy="16" r="2.5" strokeWidth="1.2" />
+                        <circle cx="29" cy="16" r="2.5" strokeWidth="1.2" />
+                        {/* Rotor mast */}
+                        <line x1="24" y1="12" x2="24" y2="6" />
+                        <line x1="14" y1="6" x2="34" y2="6" strokeWidth="1" />
+                        {/* Skids */}
+                        <line x1="17" y1="38" x2="17" y2="42" />
+                        <line x1="31" y1="38" x2="31" y2="42" />
+                        <line x1="14" y1="42" x2="20" y2="42" />
+                        <line x1="28" y1="42" x2="34" y2="42" />
+                        {/* Windshield */}
+                        <path d="M20 22L24 20L28 22" strokeWidth="1" />
+                      </>
+                    ) : isLight ? (
+                      /* Light piston: small, simple bubble shape */
+                      <>
+                        {/* Small bubble fuselage */}
+                        <ellipse cx="24" cy="26" rx="8" ry="9" />
+                        {/* Tail boom */}
+                        <line x1="24" y1="17" x2="24" y2="8" />
+                        <path d="M20 8L28 8" strokeWidth="1" />
+                        {/* Small tail rotor */}
+                        <line x1="24" y1="8" x2="22" y2="6" strokeWidth="1" />
+                        <line x1="24" y1="8" x2="26" y2="10" strokeWidth="1" />
+                        {/* Main rotor */}
+                        <line x1="12" y1="17" x2="36" y2="17" strokeWidth="1" />
+                        {/* Skids */}
+                        <line x1="19" y1="35" x2="19" y2="40" />
+                        <line x1="29" y1="35" x2="29" y2="40" />
+                        <line x1="16" y1="40" x2="22" y2="40" />
+                        <line x1="26" y1="40" x2="32" y2="40" />
+                        {/* Windshield */}
+                        <path d="M20 24L24 21L28 24" strokeWidth="1" />
+                      </>
+                    ) : isHeavy ? (
+                      /* Heavy/utility: large, boxy UH-1 style */
+                      <>
+                        {/* Large boxy fuselage */}
+                        <path d="M12 20L14 16L34 16L36 20V30L34 34H14L12 30V20Z" />
+                        {/* Tail boom */}
+                        <line x1="24" y1="16" x2="24" y2="6" strokeWidth="1.5" />
+                        <path d="M20 6L28 6" />
+                        {/* Tail rotor */}
+                        <line x1="24" y1="6" x2="21" y2="3" strokeWidth="1.2" />
+                        <line x1="24" y1="6" x2="27" y2="9" strokeWidth="1.2" />
+                        {/* Main rotor */}
+                        <line x1="8" y1="16" x2="40" y2="16" strokeWidth="1.2" />
+                        {/* Skids */}
+                        <line x1="15" y1="34" x2="15" y2="40" />
+                        <line x1="33" y1="34" x2="33" y2="40" />
+                        <line x1="12" y1="40" x2="18" y2="40" strokeWidth="1.5" />
+                        <line x1="30" y1="40" x2="36" y2="40" strokeWidth="1.5" />
+                        {/* Cargo door */}
+                        <line x1="30" y1="20" x2="30" y2="30" strokeWidth="1" strokeDasharray="2,2" />
+                        {/* Windshield */}
+                        <path d="M16 20L24 17L32 20" strokeWidth="1" />
+                      </>
+                    ) : (
+                      /* Standard turbine single */
+                      <>
+                        {/* Fuselage */}
+                        <path d="M16 22C16 18 19 15 24 13C29 15 32 18 32 22V28C32 32 29 35 24 37C19 35 16 32 16 28V22Z" />
+                        {/* Tail boom */}
+                        <line x1="24" y1="13" x2="24" y2="6" />
+                        <path d="M20 6L28 6" strokeWidth="1" />
+                        {/* Tail rotor */}
+                        <line x1="24" y1="6" x2="22" y2="4" strokeWidth="1" />
+                        <line x1="24" y1="6" x2="26" y2="8" strokeWidth="1" />
+                        {/* Engine */}
+                        <ellipse cx="24" cy="16" rx="3" ry="2" strokeWidth="1" />
+                        {/* Main rotor */}
+                        <line x1="12" y1="13" x2="36" y2="13" strokeWidth="1" />
+                        {/* Skids */}
+                        <line x1="18" y1="37" x2="18" y2="42" />
+                        <line x1="30" y1="37" x2="30" y2="42" />
+                        <line x1="15" y1="42" x2="21" y2="42" />
+                        <line x1="27" y1="42" x2="33" y2="42" />
+                        {/* Windshield */}
+                        <path d="M20 22L24 19L28 22" strokeWidth="1" />
+                      </>
+                    )}
                   </svg>
                   <div>
                     <p className="font-mono text-[9px] md:text-[10px] text-foreground font-semibold leading-tight">
@@ -146,13 +243,19 @@ const MassBalance = () => {
                     <p className="font-mono text-[8px] text-muted-foreground mt-0.5">
                       {a.maxGrossWeight.toLocaleString()} lbs
                     </p>
+                    <p className={`font-mono text-[7px] mt-0.5 tracking-wider ${
+                      isTwin ? 'text-accent' : isHeavy ? 'text-destructive' : isLight ? 'text-success' : 'text-primary'
+                    }`}>
+                      {categoryLabel}
+                    </p>
                   </div>
                 </div>
                 {selectedAircraft.name === a.name && (
                   <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary animate-pulse" />
                 )}
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
 
