@@ -13,8 +13,7 @@ function getTypeTotals(entries: LogbookEntry[]) {
     const type = e.aircraftType || 'Unknown';
     if (!map[type]) map[type] = { hours: 0, flights: 0 };
     map[type].flights += 1;
-    map[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0)
-      + (e.instrumentTime || 0) + (e.instructorDay || 0) + (e.instructorNight || 0);
+    map[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
   }
   return Object.entries(map).sort((a, b) => b[1].hours - a[1].hours);
 }
@@ -27,7 +26,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
     { title: 'Instructor', fields: ['instructorDay', 'instructorNight'] as NumericField[] },
   ], []);
 
-  const grandTotal = useMemo(() => Object.values(totals).reduce((a, b) => a + b, 0), [totals]);
+  const grandTotal = useMemo(() => (totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot), [totals]);
   const typeTotals = useMemo(() => getTypeTotals(entries), [entries]);
 
   return (
