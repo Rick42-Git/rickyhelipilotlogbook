@@ -31,7 +31,8 @@ serve(async (req) => {
 
 Input may be:
 1) A photo/screenshot of a flight logbook or aviation document, OR
-2) Raw spreadsheet table text (rows/columns converted to text).
+2) A Flight Folio / Tech Log / Flight & Defect Report (e.g. NAC format), OR
+3) Raw spreadsheet table text (rows/columns converted to text).
 
 Extract as many flight entries as possible and map each row to:
 - date (YYYY-MM-DD if possible; if uncertain keep best raw date string)
@@ -48,6 +49,20 @@ Extract as many flight entries as possible and map each row to:
 - instructorNight
 - confidence (0-100)
 
+FLIGHT FOLIO / TECH LOG EXTRACTION:
+When the image is a Flight Folio, Tech Log, or Flight & Defect Report:
+- "Registration" field → aircraftReg (e.g. "ZS-RUE")
+- "Aircraft Type" field → aircraftType (e.g. "B407", "R44", "BK117")
+- "Captain" or "Captains Acceptance" field → pilotInCommand (e.g. "R. Anderson")
+- "Date" field at top of folio → date
+- "Route" section → flightDetails (combine all route legs, e.g. "PNW - Recaps - Deployments - PNW, PNW - PNP, PNP - Tangvieta x2 - PNP")
+- The folio typically has a table with multiple flight legs. Each row has Route, HOBBS Start/End, HOBBS Time, Flight Time Start Up/Shut Down, Flight Time (hours). 
+- SUM all "Flight Time" values from ALL rows in the table to get the total flight hours for seDayPilot (if PIC) or seDayDual (if dual/student).
+- If the folio shows a "TOTALS" row, use that total flight time value.
+- If there are multiple legs, you may produce ONE combined entry with total hours, or separate entries per leg — prefer one combined entry with total hours.
+- "Total Time" or "Total Flight Time" at the bottom → use this as the authoritative flight time.
+- Flight times are often in decimal hours (e.g. 3.1, 0.6, 1.2 summing to 4.9).
+
 Rules:
 - Prioritize HOURS / numeric flight time columns over perfect date parsing.
 - If date is ambiguous, keep best guess but do not drop the row if hours are present.
@@ -56,14 +71,15 @@ Rules:
 - If no extractable flights exist, return entries: [].
 - Column header synonyms to recognise:
   * seDayDual: "SE Day Dual", "Single Engine Aircraft Day Dual", "Single Engine Aircraft Day Co-Pilot", "Multi Engine Aircraft Day Dual", "Day Dual", "Dual"
-  * seDayPilot: "SE Day Pilot", "Single Engine Aircraft Day PIC", "Single Engine Aircraft Day Picus", "Multi Engine Aircraft Day PIC", "Multi Engine Aircraft Day Picus", "Multi Engine Aircraft Day Co-Pilot", "Day PIC", "Day Picus"
+  * seDayPilot: "SE Day Pilot", "Single Engine Aircraft Day PIC", "Single Engine Aircraft Day Picus", "Multi Engine Aircraft Day PIC", "Multi Engine Aircraft Day Picus", "Multi Engine Aircraft Day Co-Pilot", "Day PIC", "Day Picus", "Flight Time", "Total Time"
   * seNightDual: "SE Night Dual", "Single Engine Aircraft Night Dual", "Single Engine Aircraft Night Co-Pilot", "Multi Engine Aircraft Night Dual", "Night Dual"
   * seNightPilot: "SE Night Pilot", "Single Engine Aircraft Night PIC", "Single Engine Aircraft Night Picus", "Multi Engine Aircraft Night PIC", "Multi Engine Aircraft Night Picus", "Multi Engine Aircraft Night Co-Pilot", "Night PIC", "Night Picus"
   * instrumentTime: "Instrument Time", "Instrument Time Place Co-Pilot", "Instrument Time Actual Time Co-Pilot", "Instrument Time FSTD Time Co-Pilot", "FSTD Actual Time FSTD Time Co-Pilot", "FSTD Time", "IFR Time"
   * instructorDay: "Instructor Day", "Instructor Time SE", "Instructor Time FSTD Time Co-Pilot"
   * instructorNight: "Instructor Night", "Instructor Time ME"
 - Map Multi Engine columns to the corresponding Single Engine fields.
-- "Remarks FSTD Time Co-Pilot" should be treated as flightDetails/remarks.`;
+- "Remarks FSTD Time Co-Pilot" should be treated as flightDetails/remarks.
+- When the Captain is listed as PIC and there is no "Other/Student", assign flight time to seDayPilot (PIC hours).`;
 
     const entrySchema = {
       type: "object",
