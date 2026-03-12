@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Save, FolderOpen, Printer } from 'lucide-react';
+import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Save, FolderOpen, Printer, Navigation } from 'lucide-react';
 import { FlightMap, MapLayer } from '@/components/flight-planning/FlightMap';
 import { FlightPlanPanel } from '@/components/flight-planning/FlightPlanPanel';
 import { FlightLogTable } from '@/components/flight-planning/FlightLogTable';
