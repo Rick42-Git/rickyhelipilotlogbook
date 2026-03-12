@@ -27,7 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { exportToNumbers } from '@/lib/exportLogbook';
+import { exportToNumbers, exportLast3Pages } from '@/lib/exportLogbook';
 import { useAuth } from '@/hooks/useAuth';
 import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
@@ -124,8 +124,8 @@ const Index = () => {
                   <DropdownMenuItem onClick={() => exportToNumbers(entries)}>
                     EXPORT ALL ({entries.length} entries)
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => exportToNumbers([...entries].sort((a, b) => a.date > b.date ? -1 : 1).slice(0, 72))}>
-                    LAST 3 PAGES (72 entries)
+                  <DropdownMenuItem onClick={() => exportLast3Pages(entries)}>
+                    LAST 3 PAGES (24 entries/page)
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -188,8 +188,8 @@ const Index = () => {
                 <DropdownMenuItem onClick={() => exportToNumbers(entries)}>
                   EXPORT ALL ({entries.length} entries)
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportToNumbers([...entries].sort((a, b) => a.date > b.date ? -1 : 1).slice(0, 72))}>
-                  LAST 3 PAGES (72 entries)
+                <DropdownMenuItem onClick={() => exportLast3Pages(entries)}>
+                  LAST 3 PAGES (24 entries/page)
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
