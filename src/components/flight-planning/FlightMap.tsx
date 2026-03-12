@@ -39,6 +39,10 @@ export function FlightMap({
   const baseLayerRef = useRef<L.TileLayer | null>(null);
   const airspaceLayerRef = useRef<L.TileLayer | null>(null);
   const boundaryLayerRef = useRef<L.TileLayer | null>(null);
+  const mapBounds = useMemo(
+    () => L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180)),
+    []
+  );
 
   const onMapClickRef = useRef(onMapClick);
   onMapClickRef.current = onMapClick;
