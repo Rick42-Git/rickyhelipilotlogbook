@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.admin-codes]
 verify_jwt = false
+
+[functions.weather-metar]
+verify_jwt = false
+
+[functions.ourairports]
+verify_jwt = false
