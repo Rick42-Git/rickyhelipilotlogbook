@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { LogbookEntry, numericFieldLabels, NumericField } from '@/types/logbook';
 
 interface SummaryPanelProps {
@@ -19,15 +20,15 @@ function getTypeTotals(entries: LogbookEntry[]) {
 }
 
 export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps) {
-  const groups = [
+  const groups = useMemo(() => [
     { title: 'Single Engine — Day', fields: ['seDayDual', 'seDayPilot'] as NumericField[] },
     { title: 'Single Engine — Night', fields: ['seNightDual', 'seNightPilot'] as NumericField[] },
     { title: 'Instrument', fields: ['instrumentTime'] as NumericField[] },
     { title: 'Instructor', fields: ['instructorDay', 'instructorNight'] as NumericField[] },
-  ];
+  ], []);
 
-  const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0);
-  const typeTotals = getTypeTotals(entries);
+  const grandTotal = useMemo(() => Object.values(totals).reduce((a, b) => a + b, 0), [totals]);
+  const typeTotals = useMemo(() => getTypeTotals(entries), [entries]);
 
   return (
     <div className="glass-panel p-5 glow-amber">
