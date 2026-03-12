@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { LogbookEntry } from '@/types/logbook';
 import helicopterWatermark from '@/assets/helicopter-watermark.png';
-import { ChevronLeft, ChevronRight, Pencil, Trash2, FileDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Trash2, FileDown, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,7 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [flipState, setFlipState] = useState<'idle' | 'flipping-forward' | 'flipping-backward'>('idle');
   const [exportOpen, setExportOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [exportFrom, setExportFrom] = useState(1);
   const [exportTo, setExportTo] = useState(1);
 
@@ -95,8 +96,8 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
   const tdClass = "px-1.5 py-[3px] font-mono text-[10px] border-r book-border-color text-center whitespace-nowrap";
   const tdLeftClass = "px-1.5 py-[3px] font-mono text-[10px] border-r book-border-color whitespace-nowrap";
 
-  return (
-    <div className="flex flex-col items-center gap-3 max-w-[96%] mx-auto">
+  const bookContent = (
+    <div className={`flex flex-col items-center gap-3 ${isFullscreen ? 'w-full h-full justify-center' : 'max-w-[96%] mx-auto'}`}>
       {/* Book container */}
       <div className="w-full" style={{ perspective: '2000px' }}>
         <div className="book-container relative">
@@ -359,6 +360,18 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
         <Button
           variant="ghost"
           size="sm"
+          onClick={() => setIsFullscreen(!isFullscreen)}
+          className="font-mono text-xs gap-1.5"
+        >
+          {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+          {isFullscreen ? 'EXIT' : 'FULLSCREEN'}
+        </Button>
+
+        <div className="w-px h-4 bg-border/50 mx-1" />
+
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => {
             setExportFrom(currentSpread + 1);
             setExportTo(totalSpreads);
@@ -423,4 +436,14 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
       </Dialog>
     </div>
   );
+
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 bg-background p-4 overflow-auto flex items-center justify-center">
+        {bookContent}
+      </div>
+    );
+  }
+
+  return bookContent;
 }
