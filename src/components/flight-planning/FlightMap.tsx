@@ -216,6 +216,46 @@ export function FlightMap({
     }
   }, [showBoundaries]);
 
+  // Day/Night terminator overlay
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (terminatorLayerRef.current) {
+      map.removeLayer(terminatorLayerRef.current);
+      terminatorLayerRef.current = null;
+    }
+
+    if (!showTerminator) return;
+
+    const updateTerminator = () => {
+      if (terminatorLayerRef.current) {
+        map.removeLayer(terminatorLayerRef.current);
+      }
+      const nightCoords = getNightPolygon(new Date());
+      terminatorLayerRef.current = L.polygon(nightCoords, {
+        fillColor: '#000',
+        fillOpacity: 0.35,
+        stroke: true,
+        color: 'hsl(38, 95%, 55%)',
+        weight: 1,
+        opacity: 0.5,
+        interactive: false,
+      }).addTo(map);
+    };
+
+    updateTerminator();
+    // Update every 5 minutes
+    const interval = setInterval(updateTerminator, 300000);
+    return () => {
+      clearInterval(interval);
+      if (terminatorLayerRef.current) {
+        map.removeLayer(terminatorLayerRef.current);
+        terminatorLayerRef.current = null;
+      }
+    };
+  }, [showTerminator]);
+
   // Update airport markers
   const filteredAirports = useMemo(() => {
     if (!showAirports) return [];
