@@ -122,6 +122,7 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
           </div>
         </DialogHeader>
 
+        <div className="space-y-4">
           {/* Grand totals */}
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center p-3 rounded border border-border bg-muted/20">
