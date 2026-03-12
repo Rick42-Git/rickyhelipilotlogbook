@@ -75,8 +75,11 @@ Rules:
   * seNightDual: "SE Night Dual", "Single Engine Aircraft Night Dual", "Single Engine Aircraft Night Co-Pilot", "Multi Engine Aircraft Night Dual", "Night Dual"
   * seNightPilot: "SE Night Pilot", "Single Engine Aircraft Night PIC", "Single Engine Aircraft Night Picus", "Multi Engine Aircraft Night PIC", "Multi Engine Aircraft Night Picus", "Multi Engine Aircraft Night Co-Pilot", "Night PIC", "Night Picus"
   * instrumentTime: "Instrument Time", "Instrument Time Place Co-Pilot", "Instrument Time Actual Time Co-Pilot", "Instrument Time FSTD Time Co-Pilot", "FSTD Actual Time FSTD Time Co-Pilot", "FSTD Time", "IFR Time"
-  * instructorDay: "Instructor Day", "Instructor Time SE", "Instructor Time FSTD Time Co-Pilot"
-  * instructorNight: "Instructor Night", "Instructor Time ME"
+  * instructorDay: "Instructor Day", "Instructor Time SE", "Instructor Time FSTD Time Co-Pilot", "Flying as Instructor Day", "As Instructor Day", "Instr Day", "Instructor SE Day", "Flying as Instr Day"
+   * instructorNight: "Instructor Night", "Instructor Time ME", "Flying as Instructor Night", "As Instructor Night", "Instr Night", "Instructor SE Night", "Flying as Instr Night"
+- IMPORTANT: If a column header says "Instructor", "As Instructor", "Flying as Instructor", or similar — these are INSTRUCTOR hours, not instrument hours. Do NOT confuse "Instructor" with "Instrument".
+- If a single "Instructor" column exists without Day/Night split, assign all instructor hours to instructorDay.
+- If the pilot is listed as an instructor or the flight is a training/dual flight where the PIC is instructing, the PIC's hours should go to instructorDay (or instructorNight for night flights) IN ADDITION to seDayPilot/seNightPilot.
 - Map Multi Engine columns to the corresponding Single Engine fields.
 - "Remarks FSTD Time Co-Pilot" should be treated as flightDetails/remarks.
 - When the Captain is listed as PIC and there is no "Other/Student", assign flight time to seDayPilot (PIC hours).`;
