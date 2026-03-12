@@ -4,26 +4,28 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Ruler, Map, Plane, FileText } from 'lucide-react';
-import { FlightMap } from '@/components/flight-planning/FlightMap';
+import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Globe } from 'lucide-react';
+import { FlightMap, MapLayer } from '@/components/flight-planning/FlightMap';
 import { FlightPlanPanel } from '@/components/flight-planning/FlightPlanPanel';
 import { FlightLogTable } from '@/components/flight-planning/FlightLogTable';
 import { Waypoint } from '@/types/flightPlan';
 import { Airport } from '@/data/africanAirports';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 const FlightPlanning = () => {
   const navigate = useNavigate();
 
-  // Waypoints & route
   const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
-
-  // Performance defaults (bush heli)
   const [groundSpeed, setGroundSpeed] = useState(90);
   const [fuelBurnRate, setFuelBurnRate] = useState(120);
   const [fuelOnBoard, setFuelOnBoard] = useState(0);
   const [reserveFuel, setReserveFuel] = useState(0);
-
-  // Aircraft info
   const [aircraftType, setAircraftType] = useState('');
   const [aircraftReg, setAircraftReg] = useState('');
   const [pilotInCommand, setPilotInCommand] = useState('');
@@ -34,6 +36,9 @@ const FlightPlanning = () => {
   const [filterCustoms, setFilterCustoms] = useState(false);
   const [filterFuel, setFilterFuel] = useState(false);
   const [measure, setMeasure] = useState<{ active: boolean; points: [number, number][] }>({ active: false, points: [] });
+  const [activeLayer, setActiveLayer] = useState<MapLayer>('dark');
+  const [showAirspaces, setShowAirspaces] = useState(false);
+  const [showBoundaries, setShowBoundaries] = useState(true);
 
   const handleMapClick = (lat: number, lng: number) => {
     const wp: Waypoint = {
@@ -65,6 +70,13 @@ const FlightPlanning = () => {
     setMeasure(prev => ({ active: !prev.active, points: prev.active ? [] : prev.points }));
   };
 
+  const layerLabels: Record<MapLayer, string> = {
+    dark: '🌑 DARK',
+    satellite: '🛰️ SATELLITE',
+    terrain: '🏔️ TERRAIN',
+    vfr: '🗺️ STREET',
+  };
+
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Top bar */}
@@ -80,8 +92,39 @@ const FlightPlanning = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Map filters */}
+        <div className="flex items-center gap-2">
+          {/* Map Layer Selector */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="font-mono text-[10px] gap-1 h-7">
+                <Layers className="h-3 w-3" />
+                <span className="hidden md:inline">{layerLabels[activeLayer]}</span>
+                <span className="md:hidden">MAP</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="font-mono text-xs">
+              {(Object.keys(layerLabels) as MapLayer[]).map(key => (
+                <DropdownMenuItem
+                  key={key}
+                  onClick={() => setActiveLayer(key)}
+                  className={activeLayer === key ? 'bg-primary/20 text-primary' : ''}
+                >
+                  {layerLabels[key]}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <div className="px-2 py-1.5 flex items-center justify-between gap-3">
+                <span className="text-[10px] text-muted-foreground">AIRSPACES</span>
+                <Switch checked={showAirspaces} onCheckedChange={setShowAirspaces} className="scale-[0.6]" />
+              </div>
+              <div className="px-2 py-1.5 flex items-center justify-between gap-3">
+                <span className="text-[10px] text-muted-foreground">BORDERS</span>
+                <Switch checked={showBoundaries} onCheckedChange={setShowBoundaries} className="scale-[0.6]" />
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Desktop filters */}
           <div className="hidden md:flex items-center gap-3">
             <div className="flex items-center gap-1.5">
               <Switch id="airports" checked={showAirports} onCheckedChange={setShowAirports} className="scale-75" />
@@ -127,7 +170,6 @@ const FlightPlanning = () => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* Map */}
         <div className="flex-1 min-h-[300px] md:min-h-0">
           <FlightMap
             waypoints={waypoints}
@@ -138,10 +180,12 @@ const FlightPlanning = () => {
             showAirports={showAirports}
             filterCustoms={filterCustoms}
             filterFuel={filterFuel}
+            activeLayer={activeLayer}
+            showAirspaces={showAirspaces}
+            showBoundaries={showBoundaries}
           />
         </div>
 
-        {/* Side panel */}
         <div className="w-full md:w-[380px] border-t md:border-t-0 md:border-l border-muted/30 flex flex-col overflow-hidden">
           <Tabs defaultValue="plan" className="flex-1 flex flex-col overflow-hidden">
             <TabsList className="w-full rounded-none bg-muted/20 border-b border-muted/30 flex-shrink-0">
