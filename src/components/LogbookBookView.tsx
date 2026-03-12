@@ -1,7 +1,11 @@
 import { useState, useMemo, useCallback } from 'react';
 import { LogbookEntry } from '@/types/logbook';
-import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Trash2, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { exportBookPagesPDF } from '@/lib/exportBookPages';
 
 interface LogbookBookViewProps {
   entries: LogbookEntry[];
