@@ -165,7 +165,12 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
                       const prevMonth = prevEntry ? getMonthDay(prevEntry.date).month : null;
                       const showMonth = month !== prevMonth;
                       return (
-                        <tr key={entry.id} className="border-b book-row-border group hover:!bg-[hsl(38_80%_85%_/_0.3)] transition-colors cursor-default">
+                        <tr
+                          key={entry.id}
+                          className={`border-b book-row-border cursor-default transition-colors ${hoveredRow === i ? 'book-row-highlight' : ''}`}
+                          onMouseEnter={() => setHoveredRow(i)}
+                          onMouseLeave={() => setHoveredRow(null)}
+                        >
                           <td className={tdLeftClass} style={{ color: 'hsl(30 15% 30%)' }}>
                             <span className="text-[10px]">{showMonth ? month : '"'}</span>
                           </td>
@@ -181,15 +186,16 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
                           </td>
                           <td className={`${tdLeftClass} border-r-0 relative`} style={{ color: 'hsl(30 15% 30%)' }}>
                             <span className="text-[9px] truncate block max-w-[140px] pr-10">{entry.flightDetails}</span>
-                            {/* Action buttons on hover */}
-                            <span className="absolute right-1 top-1/2 -translate-y-1/2 hidden group-hover:flex gap-0.5">
-                              <button onClick={() => onEdit(entry)} className="p-0.5 rounded hover:bg-black/10 transition-colors" style={{ color: 'hsl(30 15% 45%)' }}>
-                                <Pencil className="h-2.5 w-2.5" />
-                              </button>
-                              <button onClick={() => onDelete(entry.id)} className="p-0.5 rounded hover:bg-red-200/60 transition-colors" style={{ color: 'hsl(0 60% 45%)' }}>
-                                <Trash2 className="h-2.5 w-2.5" />
-                              </button>
-                            </span>
+                            {hoveredRow === i && (
+                              <span className="absolute right-1 top-1/2 -translate-y-1/2 flex gap-0.5">
+                                <button onClick={() => onEdit(entry)} className="p-0.5 rounded hover:bg-black/10 transition-colors" style={{ color: 'hsl(30 15% 45%)' }}>
+                                  <Pencil className="h-2.5 w-2.5" />
+                                </button>
+                                <button onClick={() => onDelete(entry.id)} className="p-0.5 rounded hover:bg-red-200/60 transition-colors" style={{ color: 'hsl(0 60% 45%)' }}>
+                                  <Trash2 className="h-2.5 w-2.5" />
+                                </button>
+                              </span>
+                            )}
                           </td>
                         </tr>
                       );
