@@ -147,10 +147,13 @@ export function FlightMap({
       maxZoom: layerConfig.maxZoom,
     }).addTo(map);
 
-    // Ensure overlays stay on top
-    airportLayerRef.current.bringToFront();
-    waypointLayerRef.current.bringToFront();
-    routeLayerRef.current.bringToFront();
+    // Ensure overlays stay on top by re-adding them
+    airportLayerRef.current.eachLayer(l => l.removeFrom(map));
+    airportLayerRef.current.addTo(map);
+    waypointLayerRef.current.eachLayer(l => l.removeFrom(map));
+    waypointLayerRef.current.addTo(map);
+    routeLayerRef.current.eachLayer(l => l.removeFrom(map));
+    routeLayerRef.current.addTo(map);
   }, [activeLayer]);
 
   // Toggle airspace overlay (OpenAIP)
