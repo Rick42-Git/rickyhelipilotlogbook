@@ -143,35 +143,7 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
               {/* ========== LEFT PAGE ========== */}
               <div className="flex-1 min-w-0 border-r relative" style={{ borderColor: 'hsl(30 15% 70% / 0.3)' }}>
                 {/* Helicopter watermark */}
-                <svg viewBox="0 0 240 100" className="absolute pointer-events-none z-[1]" style={{ width: '65%', left: '18%', top: '35%', opacity: 0.04 }}>
-                  <g fill="hsl(30 15% 30%)">
-                    {/* Main rotor blades */}
-                    <line x1="60" y1="22" x2="180" y2="18" stroke="hsl(30 15% 30%)" strokeWidth="2.5" strokeLinecap="round" />
-                    <line x1="95" y1="14" x2="145" y2="26" stroke="hsl(30 15% 30%)" strokeWidth="2.5" strokeLinecap="round" />
-                    {/* Rotor mast */}
-                    <rect x="118" y="20" width="4" height="12" rx="1" />
-                    {/* Fuselage - sleek body */}
-                    <path d="M70,42 C75,32 100,28 120,30 L155,32 C170,34 180,40 178,48 L175,55 C172,62 155,66 140,66 L95,64 C78,63 65,55 70,42 Z" />
-                    {/* Nose/cockpit - more pointed */}
-                    <path d="M70,42 C68,38 58,36 48,38 C40,40 35,46 38,50 C42,55 55,58 70,56 Z" />
-                    {/* Cockpit window hint */}
-                    <path d="M55,40 C52,42 50,46 53,49 C58,50 64,48 65,44 C64,41 58,39 55,40 Z" fill="hsl(30 15% 30%)" opacity="0.5" />
-                    {/* Tail boom */}
-                    <path d="M170,38 L210,30 C218,28 222,30 220,34 L215,42 C212,46 205,48 195,46 L175,55 Z" />
-                    {/* Tail fin */}
-                    <path d="M215,28 L222,15 C224,12 226,14 225,18 L220,30 Z" />
-                    {/* Tail rotor */}
-                    <line x1="222" y1="10" x2="222" y2="26" stroke="hsl(30 15% 30%)" strokeWidth="2" strokeLinecap="round" />
-                    {/* Engine housing */}
-                    <path d="M125,30 C130,25 150,24 160,28 L158,34 C150,30 132,30 125,34 Z" />
-                    {/* Landing gear - front */}
-                    <line x1="85" y1="64" x2="80" y2="76" stroke="hsl(30 15% 30%)" strokeWidth="2" />
-                    <circle cx="78" cy="78" r="3" />
-                    {/* Landing gear - rear */}
-                    <line x1="150" y1="64" x2="155" y2="76" stroke="hsl(30 15% 30%)" strokeWidth="2" />
-                    <circle cx="157" cy="78" r="3" />
-                  </g>
-                </svg>
+                <img src={helicopterWatermark} alt="" className="absolute pointer-events-none z-[1]" style={{ width: '70%', left: '15%', top: '30%', opacity: 0.06, mixBlendMode: 'multiply' }} />
                 {/* Header row */}
                 <div className="flex items-center justify-between px-3 pt-2 pb-1 border-b book-border-color">
                   <span className="font-mono text-[9px] tracking-[0.15em] uppercase" style={{ color: 'hsl(30 15% 35%)' }}>
