@@ -96,8 +96,8 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
   const tdClass = "px-1.5 py-[3px] font-mono text-[10px] border-r book-border-color text-center whitespace-nowrap";
   const tdLeftClass = "px-1.5 py-[3px] font-mono text-[10px] border-r book-border-color whitespace-nowrap";
 
-  return (
-    <div className="flex flex-col items-center gap-3 max-w-[96%] mx-auto">
+  const bookContent = (
+    <div className={`flex flex-col items-center gap-3 ${isFullscreen ? 'w-full h-full justify-center' : 'max-w-[96%] mx-auto'}`}>
       {/* Book container */}
       <div className="w-full" style={{ perspective: '2000px' }}>
         <div className="book-container relative">
