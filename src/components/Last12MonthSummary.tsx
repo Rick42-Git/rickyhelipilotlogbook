@@ -19,7 +19,7 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
   const totalPilot = filtered.reduce((s, e) => s + (e.seDayPilot || 0) + (e.seNightPilot || 0), 0);
   const totalInstrument = filtered.reduce((s, e) => s + (e.instrumentTime || 0), 0);
   const totalInstructor = filtered.reduce((s, e) => s + (e.instructorDay || 0) + (e.instructorNight || 0), 0);
-  const grandTotal = totalDual + totalPilot + totalInstrument + totalInstructor;
+  const grandTotal = totalDual + totalPilot;
 
   const breakdowns = [
     {
