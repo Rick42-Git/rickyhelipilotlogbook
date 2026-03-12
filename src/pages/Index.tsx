@@ -135,10 +135,6 @@ const Index = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button onClick={handleNew} className="font-mono gap-2">
-                <Plus className="h-4 w-4" />
-                NEW ENTRY
-              </Button>
               {isAdmin && (
                 <Button variant="outline" onClick={() => navigate('/admin')} className="font-mono gap-2 border-accent text-accent">
                   <Shield className="h-4 w-4" />
