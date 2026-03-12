@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import MassBalance from "./pages/MassBalance";
+import FlightPlanning from "./pages/FlightPlanning";
 import NotFound from "./pages/NotFound";
 import { OfflineBanner } from "@/components/OfflineBanner";
 
