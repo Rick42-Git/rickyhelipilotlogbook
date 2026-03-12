@@ -5,11 +5,12 @@ import { useIsAdmin } from '@/hooks/useIsAdmin';
 import helicopterIcon from '@/assets/helicopter-icon.png';
 import { LogbookEntry } from '@/types/logbook';
 import { LogbookTable } from '@/components/LogbookTable';
+import { LogbookBookView } from '@/components/LogbookBookView';
 import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane, List, BookOpen } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,6 +48,7 @@ const Index = () => {
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
   const { canInstall, install } = useInstallPrompt();
   const { templates } = useColumnTemplates();
+  const [viewMode, setViewMode] = useState<'list' | 'book'>('list');
 
   const handleEdit = (entry: LogbookEntry) => {
     setEditingEntry(entry);
@@ -242,10 +244,25 @@ const Index = () => {
             <span>entries</span>
           </span>
           <div className="flex-1 alt-line" />
+          {entries.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewMode(v => v === 'list' ? 'book' : 'list')}
+              className="font-mono text-[10px] gap-1.5 h-7 px-2 text-muted-foreground hover:text-foreground"
+            >
+              {viewMode === 'list' ? <BookOpen className="h-3.5 w-3.5" /> : <List className="h-3.5 w-3.5" />}
+              {viewMode === 'list' ? 'BOOK' : 'LIST'}
+            </Button>
+          )}
         </div>
 
-        {/* Table */}
-        <LogbookTable entries={entries} onEdit={handleEdit} onDelete={deleteEntry} onClearAll={clearAllEntries} />
+        {/* Entries view */}
+        {viewMode === 'list' ? (
+          <LogbookTable entries={entries} onEdit={handleEdit} onDelete={deleteEntry} onClearAll={clearAllEntries} />
+        ) : (
+          <LogbookBookView entries={entries} onEdit={handleEdit} onDelete={deleteEntry} />
+        )}
 
         {/* Entry Dialog */}
         <EntryFormDialog
