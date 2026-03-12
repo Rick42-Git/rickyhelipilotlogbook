@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { LogbookEntry, numericFieldLabels, NumericField } from '@/types/logbook';
+import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 
 interface SummaryPanelProps {
   totals: Record<NumericField, number>;
@@ -10,7 +11,7 @@ interface SummaryPanelProps {
 function getTypeTotals(entries: LogbookEntry[]) {
   const map: Record<string, { hours: number; flights: number }> = {};
   for (const e of entries) {
-    const type = e.aircraftType || 'Unknown';
+    const type = normalizeAircraftType(e.aircraftType || 'Unknown');
     if (!map[type]) map[type] = { hours: 0, flights: 0 };
     map[type].flights += 1;
     map[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
