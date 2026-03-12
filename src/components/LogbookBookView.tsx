@@ -29,6 +29,7 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [flipState, setFlipState] = useState<'idle' | 'flipping-forward' | 'flipping-backward'>('idle');
   const [exportOpen, setExportOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [exportFrom, setExportFrom] = useState(1);
   const [exportTo, setExportTo] = useState(1);
 
