@@ -185,7 +185,7 @@ export function FlightMap({
     }
   }, [showAirspaces]);
 
-  // Toggle country boundaries
+  // Toggle country boundaries — use a lightweight tile layer instead of 23MB GeoJSON
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -196,68 +196,15 @@ export function FlightMap({
     }
 
     if (showBoundaries) {
-      // If we already fetched the data, reuse it
-      if (boundaryDataRef.current) {
-        boundaryLayerRef.current = L.geoJSON(boundaryDataRef.current, {
-          style: () => boundaryStyle,
-          onEachFeature: (feature, layer) => {
-            if (feature.properties?.name) {
-              layer.bindTooltip(feature.properties.name, {
-                className: 'country-tooltip',
-                sticky: true,
-                direction: 'top',
-                opacity: 0.9,
-              });
-            }
-          },
-        }).addTo(map);
-      } else {
-        // Fetch African country boundaries from a public GeoJSON source
-        fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
-          .then(r => r.json())
-          .then(data => {
-            // Filter to African countries only
-            const africanCountries = [
-              'South Africa', 'Botswana', 'Namibia', 'Zimbabwe', 'Zambia', 'Mozambique',
-              'Tanzania', 'Kenya', 'Uganda', 'Rwanda', 'Burundi', 'Ethiopia', 'Somalia',
-              'Malawi', 'Madagascar', 'Angola', 'Democratic Republic of the Congo', 'Congo',
-              'Gabon', 'Cameroon', 'Nigeria', 'Ghana', 'Senegal', 'Mali', 'Niger',
-              'Chad', 'Sudan', 'South Sudan', 'Eritrea', 'Djibouti',
-              'Central African Republic', 'Equatorial Guinea',
-              'Ivory Coast', 'Burkina Faso', 'Benin', 'Togo', 'Sierra Leone', 'Liberia',
-              'Guinea', 'Guinea-Bissau', 'Gambia', 'Mauritania', 'Western Sahara',
-              'Morocco', 'Algeria', 'Tunisia', 'Libya', 'Egypt',
-              'Lesotho', 'Eswatini', 'Comoros', 'Mauritius', 'Seychelles',
-              'São Tomé and Príncipe', 'Cape Verde',
-            ];
-            const filtered = {
-              ...data,
-              features: data.features.filter((f: any) =>
-                africanCountries.some(c => 
-                  f.properties?.ADMIN?.includes(c) || f.properties?.name?.includes(c)
-                )
-              ),
-            };
-            boundaryDataRef.current = filtered;
-            if (mapRef.current && showBoundaries) {
-              boundaryLayerRef.current = L.geoJSON(filtered, {
-                style: () => boundaryStyle,
-                onEachFeature: (feature, layer) => {
-                  const name = feature.properties?.ADMIN || feature.properties?.name;
-                  if (name) {
-                    layer.bindTooltip(name, {
-                      className: 'country-tooltip',
-                      sticky: true,
-                      direction: 'top',
-                      opacity: 0.9,
-                    });
-                  }
-                },
-              }).addTo(mapRef.current);
-            }
-          })
-          .catch(err => console.warn('Could not load boundary data:', err));
-      }
+      // Use Stamen/Stadia boundary-only tiles (lightweight, no download)
+      boundaryLayerRef.current = L.tileLayer(
+        'https://stamen-tiles.a.ssl.fastly.net/toner-lines/{z}/{x}/{y}.png',
+        {
+          opacity: 0.25,
+          maxZoom: 18,
+          attribution: '&copy; Stamen',
+        }
+      ).addTo(map);
     }
   }, [showBoundaries]);
 
