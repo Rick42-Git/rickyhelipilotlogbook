@@ -295,13 +295,13 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
                     ))}
                     {/* Totals row */}
                     <tr style={{ background: 'hsl(40 20% 87%)' }}>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(pageTotals.seDayPilot)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(pageTotals.seDayDual)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(pageTotals.seNightDual)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(pageTotals.seNightPilot)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(30 15% 30%)' }}>{fmt(pageTotals.instrumentTime)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(pageTotals.instructorDay)}</td>
-                      <td className={`${tdClass} font-bold text-[9px] border-r-0`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(pageTotals.instructorNight)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(grandTotals.seDayPilot)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(grandTotals.seDayDual)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(grandTotals.seNightDual)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(grandTotals.seNightPilot)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(30 15% 30%)' }}>{fmt(grandTotals.instrumentTime)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(grandTotals.instructorDay)}</td>
+                      <td className={`${tdClass} font-bold text-[9px] border-r-0`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(grandTotals.instructorNight)}</td>
                     </tr>
                   </tbody>
                 </table>
