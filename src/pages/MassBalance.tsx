@@ -11,6 +11,7 @@ import { AircraftDataPanel } from '@/components/mass-balance/AircraftDataPanel';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Download } from 'lucide-react';
 import helicopterIcon from '@/assets/helicopter-icon.png';
+import { helicopterImages } from '@/data/helicopterImages';
 
 function isPointInPolygon(px: number, py: number, polygon: { station: number; weight: number }[]): boolean {
   let inside = false;
@@ -112,17 +113,38 @@ const MassBalance = () => {
             <div className="w-1 h-4 bg-accent" />
             <h2 className="font-mono text-xs text-muted-foreground tracking-widest uppercase">Select Aircraft Type</h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {aircraftTypes.map(a => (
-              <Button
+              <button
                 key={a.name}
-                variant={selectedAircraft.name === a.name ? 'default' : 'outline'}
-                size="sm"
                 onClick={() => handleAircraftChange(a)}
-                className="font-mono text-[10px] md:text-xs h-8 md:h-9 w-full"
+                className={`group relative rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                  selectedAircraft.name === a.name
+                    ? 'border-primary shadow-[0_0_12px_hsl(var(--primary)/0.4)] scale-[1.02]'
+                    : 'border-border/50 hover:border-primary/50 opacity-70 hover:opacity-100'
+                }`}
               >
-                {a.name}
-              </Button>
+                <div className="aspect-[4/3] overflow-hidden">
+                  <img
+                    src={helicopterImages[a.name]}
+                    alt={a.name}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                </div>
+                <div className={`absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent`} />
+                <div className="absolute bottom-0 left-0 right-0 p-1.5 md:p-2">
+                  <p className="font-mono text-[9px] md:text-[10px] text-foreground font-semibold leading-tight truncate">
+                    {a.name}
+                  </p>
+                  <p className="font-mono text-[8px] text-muted-foreground">
+                    {a.maxGrossWeight.toLocaleString()} lbs
+                  </p>
+                </div>
+                {selectedAircraft.name === a.name && (
+                  <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary animate-pulse" />
+                )}
+              </button>
             ))}
           </div>
         </div>
