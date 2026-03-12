@@ -31,7 +31,7 @@ interface FlightMapProps {
 export function FlightMap({
   waypoints, onMapClick, measure, setMeasure, onAirportClick,
   showAirports, filterCustoms, filterFuel,
-  activeLayer, showAirspaces, showBoundaries,
+  activeLayer, showAirspaces, showBoundaries, showTerminator,
 }: FlightMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,6 +39,7 @@ export function FlightMap({
   const waypointLayerRef = useRef<L.LayerGroup>(L.layerGroup());
   const routeLayerRef = useRef<L.LayerGroup>(L.layerGroup());
   const measureLayerRef = useRef<L.LayerGroup>(L.layerGroup());
+  const terminatorLayerRef = useRef<L.Polygon | null>(null);
   const baseLayerRef = useRef<L.TileLayer | null>(null);
   const airspaceLayerRef = useRef<L.TileLayer | null>(null);
   const boundaryLayerRef = useRef<L.TileLayer | null>(null);
