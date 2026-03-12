@@ -11,6 +11,7 @@ import { AircraftDataPanel } from '@/components/mass-balance/AircraftDataPanel';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Download } from 'lucide-react';
 import helicopterIcon from '@/assets/helicopter-icon.png';
+import { helicopterImages } from '@/data/helicopterImages';
 
 function isPointInPolygon(px: number, py: number, polygon: { station: number; weight: number }[]): boolean {
   let inside = false;
