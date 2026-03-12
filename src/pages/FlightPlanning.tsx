@@ -155,7 +155,7 @@ const FlightPlanning = () => {
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Top bar */}
-      <div className="glass-panel hud-border px-3 py-2 flex items-center justify-between gap-2 z-10 flex-shrink-0">
+      <div className="glass-panel hud-border px-3 py-2 flex items-center justify-between gap-2 z-20 flex-shrink-0 relative">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="h-8 w-8">
             <ArrowLeft className="h-4 w-4" />
