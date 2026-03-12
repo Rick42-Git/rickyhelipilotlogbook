@@ -334,7 +334,74 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
           NEXT PAGE
           <ChevronRight className="h-4 w-4" />
         </Button>
+
+        <div className="w-px h-4 bg-border/50 mx-1" />
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setExportFrom(currentSpread + 1);
+            setExportTo(totalSpreads);
+            setExportOpen(true);
+          }}
+          className="font-mono text-xs gap-1.5"
+        >
+          <FileDown className="h-3.5 w-3.5" />
+          EXPORT PDF
+        </Button>
       </div>
+
+      {/* Export dialog */}
+      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-mono text-sm">EXPORT PAGES TO PDF</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-3">
+            <div className="space-y-1.5">
+              <Label className="font-mono text-[10px] text-muted-foreground">FROM SPREAD</Label>
+              <Input
+                type="number"
+                min={1}
+                max={totalSpreads}
+                value={exportFrom}
+                onChange={e => setExportFrom(Math.max(1, Math.min(totalSpreads, parseInt(e.target.value) || 1)))}
+                className="font-mono h-9"
+              />
+              <span className="font-mono text-[9px] text-muted-foreground">Pages {(exportFrom - 1) * 2 + 1}–{exportFrom * 2}</span>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="font-mono text-[10px] text-muted-foreground">TO SPREAD</Label>
+              <Input
+                type="number"
+                min={exportFrom}
+                max={totalSpreads}
+                value={exportTo}
+                onChange={e => setExportTo(Math.max(exportFrom, Math.min(totalSpreads, parseInt(e.target.value) || exportFrom)))}
+                className="font-mono h-9"
+              />
+              <span className="font-mono text-[9px] text-muted-foreground">Pages {(exportTo - 1) * 2 + 1}–{exportTo * 2}</span>
+            </div>
+          </div>
+          <p className="font-mono text-[10px] text-muted-foreground">
+            {exportTo - exportFrom + 1} spread{exportTo - exportFrom + 1 !== 1 ? 's' : ''} · {(exportTo - exportFrom + 1) * ROWS_PER_SPREAD} entry slots
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExportOpen(false)} className="font-mono text-xs">CANCEL</Button>
+            <Button
+              onClick={() => {
+                exportBookPagesPDF(entries, exportFrom - 1, exportTo - 1);
+                setExportOpen(false);
+              }}
+              className="font-mono text-xs gap-1.5"
+            >
+              <FileDown className="h-3.5 w-3.5" />
+              GENERATE PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
