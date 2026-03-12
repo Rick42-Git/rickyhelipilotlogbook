@@ -315,7 +315,7 @@ const FlightPlanning = () => {
           />
         </div>
 
-        <div className="w-full md:w-[380px] border-t md:border-t-0 md:border-l border-muted/30 flex flex-col overflow-hidden">
+        <div className="w-full md:w-[380px] border-t md:border-t-0 md:border-l border-muted/30 flex flex-col overflow-hidden relative z-10 bg-background">
           <Tabs defaultValue="plan" className="flex-1 flex flex-col overflow-hidden">
             <TabsList className="w-full rounded-none bg-muted/20 border-b border-muted/30 flex-shrink-0">
               <TabsTrigger value="plan" className="flex-1 font-mono text-[10px] tracking-wider gap-1">
