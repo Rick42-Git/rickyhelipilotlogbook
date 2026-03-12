@@ -152,7 +152,7 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
                     <span className="font-mono text-xs text-foreground">{type}</span>
                     <div className="flex items-center gap-3">
                       <span className="font-mono text-[10px] text-muted-foreground">{data.flights} flights</span>
-                      <span className="font-mono text-sm font-bold text-primary" style={{ fontVariantNumeric: 'tabular-nums' }}>{data.hours.toFixed(1)}</span>
+                      <span className="font-mono text-sm font-bold text-primary" style={{ fontVariantNumeric: 'tabular-nums' }}>{(data.dual + data.pic + data.other).toFixed(1)}</span>
                     </div>
                   </div>
                 ))}
