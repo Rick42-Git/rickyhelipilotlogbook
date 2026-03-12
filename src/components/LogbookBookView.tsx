@@ -25,7 +25,6 @@ function getMonthDay(iso: string): { month: string; day: string; year: string } 
 }
 
 export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewProps) {
-  const [currentSpread, setCurrentSpread] = useState(0);
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [flipState, setFlipState] = useState<'idle' | 'flipping-forward' | 'flipping-backward'>('idle');
   const [exportOpen, setExportOpen] = useState(false);
@@ -33,11 +32,14 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
   const [exportTo, setExportTo] = useState(1);
 
   const sorted = useMemo(() =>
-    [...entries].sort((a, b) => (a.date > b.date ? -1 : 1)),
+    [...entries].sort((a, b) => (a.date > b.date ? 1 : -1)),
     [entries]
   );
 
   const totalSpreads = Math.max(1, Math.ceil(sorted.length / ROWS_PER_SPREAD));
+  const [currentSpread, setCurrentSpread] = useState(() =>
+    Math.max(0, Math.ceil(entries.length / ROWS_PER_SPREAD) - 1)
+  );
   const spreadEntries = sorted.slice(
     currentSpread * ROWS_PER_SPREAD,
     currentSpread * ROWS_PER_SPREAD + ROWS_PER_SPREAD

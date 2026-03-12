@@ -16,7 +16,7 @@ export function exportBookPagesPDF(
   fromSpread: number,
   toSpread: number,
 ) {
-  const sorted = [...entries].sort((a, b) => (a.date > b.date ? -1 : 1));
+  const sorted = [...entries].sort((a, b) => (a.date > b.date ? 1 : -1));
 
   let html = '';
 
