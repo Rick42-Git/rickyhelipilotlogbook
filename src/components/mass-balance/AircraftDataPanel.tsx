@@ -12,6 +12,7 @@ export function AircraftDataPanel({ aircraft }: AircraftDataPanelProps) {
     { label: 'Max Gross Weight', value: `${aircraft.maxGrossWeight.toLocaleString()} lbs` },
     { label: 'Basic Empty Weight', value: `${aircraft.emptyWeight.toLocaleString()} lbs` },
     { label: 'Useful Load', value: `${usefulLoad.toLocaleString()} lbs` },
+    { label: 'Lateral CG Limit', value: `±${aircraft.lateralCGLimit}" from CL` },
     { label: 'Stations', value: `${aircraft.stations.length}` },
   ];
 

@@ -6,6 +6,7 @@ import { CGEnvelopeChart } from '@/components/mass-balance/CGEnvelopeChart';
 import { ResultsPanel } from '@/components/mass-balance/ResultsPanel';
 import { FuelBurnPlanning } from '@/components/mass-balance/FuelBurnPlanning';
 import { LoadingDiagram } from '@/components/mass-balance/LoadingDiagram';
+import { LateralCGChart } from '@/components/mass-balance/LateralCGChart';
 import { AircraftDataPanel } from '@/components/mass-balance/AircraftDataPanel';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Download } from 'lucide-react';
@@ -40,16 +41,28 @@ const MassBalance = () => {
     });
   }, []);
 
-  const { totalWeight, totalMoment, cgStation, weightMargin, withinLimits } = useMemo(() => {
-    let tw = 0, tm = 0;
+  const { totalWeight, totalMoment, cgStation, lateralCG, lateralMoment, weightMargin, withinLimits, lateralWithinLimits } = useMemo(() => {
+    let tw = 0, tm = 0, latMoment = 0;
     selectedAircraft.stations.forEach((s, i) => {
       tw += weights[i];
       tm += weights[i] * s.station;
+      latMoment += weights[i] * s.buttline;
     });
     const cg = tw > 0 ? tm / tw : 0;
+    const latCG = tw > 0 ? latMoment / tw : 0;
     const margin = selectedAircraft.maxGrossWeight - tw;
-    const inLimits = tw <= selectedAircraft.maxGrossWeight && isPointInPolygon(cg, tw, selectedAircraft.cgEnvelope);
-    return { totalWeight: tw, totalMoment: tm, cgStation: cg, weightMargin: margin, withinLimits: inLimits };
+    const longInLimits = tw <= selectedAircraft.maxGrossWeight && isPointInPolygon(cg, tw, selectedAircraft.cgEnvelope);
+    const latInLimits = Math.abs(latCG) <= selectedAircraft.lateralCGLimit;
+    return {
+      totalWeight: tw,
+      totalMoment: tm,
+      cgStation: cg,
+      lateralCG: latCG,
+      lateralMoment: latMoment,
+      weightMargin: margin,
+      withinLimits: longInLimits && latInLimits,
+      lateralWithinLimits: latInLimits,
+    };
   }, [weights, selectedAircraft]);
 
   const fuelStationIndex = useMemo(() => {
@@ -65,7 +78,6 @@ const MassBalance = () => {
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Header */}
         <div className="glass-panel hud-border p-3 md:p-4 mb-6 relative overflow-hidden">
-          {/* Diagonal stripes background */}
           <div className="absolute inset-0 opacity-[0.03]" style={{
             backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, hsl(var(--primary)) 10px, hsl(var(--primary)) 11px)',
           }} />
@@ -124,6 +136,7 @@ const MassBalance = () => {
               onWeightChange={handleWeightChange}
               totalWeight={totalWeight}
               totalMoment={totalMoment}
+              lateralMoment={lateralMoment}
               maxGrossWeight={selectedAircraft.maxGrossWeight}
             />
             <FuelBurnPlanning
@@ -133,6 +146,7 @@ const MassBalance = () => {
               fuelWeightPerUnit={selectedAircraft.fuelWeightPerUnit || 6}
               maxGrossWeight={selectedAircraft.maxGrossWeight}
               cgEnvelope={selectedAircraft.cgEnvelope}
+              lateralCGLimit={selectedAircraft.lateralCGLimit}
               isPointInPolygon={isPointInPolygon}
             />
           </div>
@@ -140,6 +154,9 @@ const MassBalance = () => {
             <ResultsPanel
               withinLimits={withinLimits}
               cgStation={cgStation}
+              lateralCG={lateralCG}
+              lateralWithinLimits={lateralWithinLimits}
+              lateralCGLimit={selectedAircraft.lateralCGLimit}
               weightMargin={weightMargin}
               grossWeight={totalWeight}
               maxGrossWeight={selectedAircraft.maxGrossWeight}
@@ -150,6 +167,12 @@ const MassBalance = () => {
               currentStation={cgStation}
               currentWeight={totalWeight}
               withinLimits={withinLimits}
+            />
+            <LateralCGChart
+              lateralCG={lateralCG}
+              lateralCGLimit={selectedAircraft.lateralCGLimit}
+              stations={selectedAircraft.stations}
+              weights={weights}
             />
             <LoadingDiagram
               stations={selectedAircraft.stations}

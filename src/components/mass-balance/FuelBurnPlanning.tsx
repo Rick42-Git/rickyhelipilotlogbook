@@ -5,11 +5,12 @@ import { Sparkles } from 'lucide-react';
 
 interface FuelBurnPlanningProps {
   currentWeights: number[];
-  stations: { label: string; station: number; defaultWeight: number; editable: boolean }[];
+  stations: { label: string; station: number; buttline: number; defaultWeight: number; editable: boolean }[];
   fuelStationIndex: number;
   fuelWeightPerUnit: number;
   maxGrossWeight: number;
   cgEnvelope: { station: number; weight: number }[];
+  lateralCGLimit: number;
   isPointInPolygon: (px: number, py: number, polygon: { station: number; weight: number }[]) => boolean;
 }
 
@@ -20,43 +21,48 @@ export function FuelBurnPlanning({
   fuelWeightPerUnit,
   maxGrossWeight,
   cgEnvelope,
+  lateralCGLimit,
   isPointInPolygon,
 }: FuelBurnPlanningProps) {
   const [enabled, setEnabled] = useState(false);
-  const [burnRate, setBurnRate] = useState(30); // lbs/hr default
-  const [flightTime, setFlightTime] = useState(2); // hours
+  const [burnRate, setBurnRate] = useState(30);
+  const [flightTime, setFlightTime] = useState(2);
 
   const burnSteps = useMemo(() => {
     if (!enabled) return [];
     const steps = [];
-    const totalBurn = burnRate * flightTime;
     const currentFuel = currentWeights[fuelStationIndex];
-    const intervals = Math.min(Math.ceil(flightTime * 2), 10); // every 30 min, max 10
+    const intervals = Math.min(Math.ceil(flightTime * 2), 10);
 
     for (let i = 0; i <= intervals; i++) {
       const elapsed = (flightTime / intervals) * i;
       const fuelBurned = Math.min(burnRate * elapsed, currentFuel);
       const remainingFuel = currentFuel - fuelBurned;
 
-      let tw = 0, tm = 0;
+      let tw = 0, tm = 0, latMom = 0;
       stations.forEach((s, idx) => {
         const w = idx === fuelStationIndex ? remainingFuel : currentWeights[idx];
         tw += w;
         tm += w * s.station;
+        latMom += w * s.buttline;
       });
       const cg = tw > 0 ? tm / tw : 0;
-      const inLimits = tw <= maxGrossWeight && isPointInPolygon(cg, tw, cgEnvelope);
+      const latCG = tw > 0 ? latMom / tw : 0;
+      const longOk = tw <= maxGrossWeight && isPointInPolygon(cg, tw, cgEnvelope);
+      const latOk = Math.abs(latCG) <= lateralCGLimit;
 
       steps.push({
         time: elapsed,
         fuelRemaining: Math.round(remainingFuel),
         weight: Math.round(tw),
-        cg: cg,
-        withinLimits: inLimits,
+        cg,
+        latCG,
+        withinLimits: longOk && latOk,
+        latOk,
       });
     }
     return steps;
-  }, [enabled, burnRate, flightTime, currentWeights, fuelStationIndex, stations, maxGrossWeight, cgEnvelope, isPointInPolygon]);
+  }, [enabled, burnRate, flightTime, currentWeights, fuelStationIndex, stations, maxGrossWeight, cgEnvelope, lateralCGLimit, isPointInPolygon]);
 
   return (
     <div className="glass-panel hud-border p-4">
@@ -110,21 +116,23 @@ export function FuelBurnPlanning({
 
           {/* Burn table */}
           <div className="space-y-0.5">
-            <div className="grid grid-cols-[60px_1fr_1fr_1fr_40px] gap-1 font-mono text-[9px] text-muted-foreground tracking-widest uppercase px-1 mb-1">
+            <div className="grid grid-cols-[50px_1fr_1fr_1fr_1fr_36px] gap-1 font-mono text-[9px] text-muted-foreground tracking-widest uppercase px-1 mb-1">
               <span>Time</span>
               <span className="text-center">Fuel</span>
               <span className="text-center">Weight</span>
-              <span className="text-center">CG</span>
+              <span className="text-center">Long CG</span>
+              <span className="text-center">Lat CG</span>
               <span className="text-center">OK</span>
             </div>
             {burnSteps.map((step, i) => (
-              <div key={i} className={`grid grid-cols-[60px_1fr_1fr_1fr_40px] gap-1 items-center px-1 py-1 rounded text-xs font-mono ${
+              <div key={i} className={`grid grid-cols-[50px_1fr_1fr_1fr_1fr_36px] gap-1 items-center px-1 py-1 rounded text-xs font-mono ${
                 !step.withinLimits ? 'bg-destructive/10' : i === 0 ? 'bg-primary/5' : ''
               }`}>
                 <span className="text-muted-foreground">{step.time.toFixed(1)}h</span>
                 <span className="text-center">{step.fuelRemaining}</span>
                 <span className="text-center">{step.weight.toLocaleString()}</span>
                 <span className="text-center">{step.cg.toFixed(1)}"</span>
+                <span className={`text-center ${!step.latOk ? 'text-destructive' : ''}`}>{step.latCG.toFixed(2)}"</span>
                 <span className={`text-center ${step.withinLimits ? 'text-primary' : 'text-destructive'}`}>
                   {step.withinLimits ? '✓' : '✗'}
                 </span>
