@@ -3,6 +3,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Airport, africanAirports } from '@/data/africanAirports';
 import { Waypoint, calcDistanceNm } from '@/types/flightPlan';
+import { getNightPolygon } from '@/lib/solarTerminator';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MeasureState {
   active: boolean;
@@ -23,12 +25,13 @@ interface FlightMapProps {
   activeLayer: MapLayer;
   showAirspaces: boolean;
   showBoundaries: boolean;
+  showTerminator: boolean;
 }
 
 export function FlightMap({
   waypoints, onMapClick, measure, setMeasure, onAirportClick,
   showAirports, filterCustoms, filterFuel,
-  activeLayer, showAirspaces, showBoundaries,
+  activeLayer, showAirspaces, showBoundaries, showTerminator,
 }: FlightMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -36,6 +39,7 @@ export function FlightMap({
   const waypointLayerRef = useRef<L.LayerGroup>(L.layerGroup());
   const routeLayerRef = useRef<L.LayerGroup>(L.layerGroup());
   const measureLayerRef = useRef<L.LayerGroup>(L.layerGroup());
+  const terminatorLayerRef = useRef<L.Polygon | null>(null);
   const baseLayerRef = useRef<L.TileLayer | null>(null);
   const airspaceLayerRef = useRef<L.TileLayer | null>(null);
   const boundaryLayerRef = useRef<L.TileLayer | null>(null);
@@ -212,6 +216,46 @@ export function FlightMap({
     }
   }, [showBoundaries]);
 
+  // Day/Night terminator overlay
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (terminatorLayerRef.current) {
+      map.removeLayer(terminatorLayerRef.current);
+      terminatorLayerRef.current = null;
+    }
+
+    if (!showTerminator) return;
+
+    const updateTerminator = () => {
+      if (terminatorLayerRef.current) {
+        map.removeLayer(terminatorLayerRef.current);
+      }
+      const nightCoords = getNightPolygon(new Date());
+      terminatorLayerRef.current = L.polygon(nightCoords, {
+        fillColor: '#000',
+        fillOpacity: 0.35,
+        stroke: true,
+        color: 'hsl(38, 95%, 55%)',
+        weight: 1,
+        opacity: 0.5,
+        interactive: false,
+      }).addTo(map);
+    };
+
+    updateTerminator();
+    // Update every 5 minutes
+    const interval = setInterval(updateTerminator, 300000);
+    return () => {
+      clearInterval(interval);
+      if (terminatorLayerRef.current) {
+        map.removeLayer(terminatorLayerRef.current);
+        terminatorLayerRef.current = null;
+      }
+    };
+  }, [showTerminator]);
+
   // Update airport markers
   const filteredAirports = useMemo(() => {
     if (!showAirports) return [];
@@ -240,8 +284,9 @@ export function FlightMap({
       const marker = L.marker([airport.lat, airport.lng], { icon });
 
       const popupId = `add-apt-${airport.icao}`;
+      const weatherId = `wx-${airport.icao}`;
       const popupHtml = `
-        <div style="font-family:monospace;font-size:11px;min-width:180px;">
+        <div style="font-family:monospace;font-size:11px;min-width:200px;">
           <div style="font-weight:bold;font-size:13px;">${airport.icao}${airport.iata ? ` / ${airport.iata}` : ''}</div>
           <div>${airport.name}</div>
           <div style="color:#888;">${airport.city}, ${airport.country}</div>
@@ -253,10 +298,13 @@ export function FlightMap({
           ${airport.fuelTypes ? `<div>Fuel: ${airport.fuelTypes.join(', ')}</div>` : ''}
           ${airport.runwaySurface ? `<div>Surface: ${airport.runwaySurface}</div>` : ''}
           ${airport.notes ? `<div style="color:#999;font-style:italic;margin-top:4px;">${airport.notes}</div>` : ''}
+          <div id="${weatherId}" style="margin-top:6px;padding:4px;background:hsla(220,20%,10%,0.5);border-radius:4px;font-size:10px;color:#aaa;">
+            Loading METAR...
+          </div>
           <div style="margin-top:6px;"><button id="${popupId}" style="background:hsl(38,95%,55%);color:#111;border:none;padding:3px 8px;border-radius:4px;font-family:monospace;font-size:10px;cursor:pointer;font-weight:bold;">+ ADD TO ROUTE</button></div>
         </div>`;
 
-      marker.bindPopup(popupHtml);
+      marker.bindPopup(popupHtml, { maxWidth: 280 });
       marker.on('popupopen', () => {
         setTimeout(() => {
           const btn = document.getElementById(popupId);
@@ -264,6 +312,32 @@ export function FlightMap({
             btn.addEventListener('click', () => {
               onAirportClickRef.current(airport);
               marker.closePopup();
+            });
+          }
+          // Fetch METAR weather
+          const wxEl = document.getElementById(weatherId);
+          if (wxEl) {
+            supabase.functions.invoke('weather-metar', {
+              body: { icao: airport.icao, type: 'metar' },
+            }).then(({ data, error }) => {
+              if (error || !data?.data?.length) {
+                wxEl.textContent = 'No METAR available';
+                return;
+              }
+              const m = data.data[0];
+              const raw = m.raw_text || 'N/A';
+              const wind = m.wind ? `${m.wind.degrees || '---'}°/${m.wind.speed_kts || '0'}kt` : 'CALM';
+              const vis = m.visibility ? `${m.visibility.meters_float ? (m.visibility.meters_float / 1000).toFixed(1) + 'km' : m.visibility.miles + 'SM'}` : 'N/A';
+              const temp = m.temperature ? `${m.temperature.celsius}°C` : '';
+              const qnh = m.barometer ? `QNH ${m.barometer.hpa || '---'}` : '';
+              const cat = m.flight_category || '';
+              const catColor = cat === 'VFR' ? 'hsl(142,70%,45%)' : cat === 'MVFR' ? 'hsl(38,95%,55%)' : cat === 'IFR' ? 'hsl(0,70%,50%)' : '#aaa';
+              wxEl.innerHTML = `
+                <div style="font-weight:bold;color:${catColor};">${cat} <span style="color:#aaa;font-weight:normal;">— ${wind} | ${vis} | ${temp} | ${qnh}</span></div>
+                <div style="margin-top:2px;word-break:break-all;color:#888;font-size:9px;">${raw}</div>
+              `;
+            }).catch(() => {
+              wxEl.textContent = 'Weather unavailable';
             });
           }
         }, 50);
