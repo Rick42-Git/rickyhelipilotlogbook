@@ -45,9 +45,11 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
     currentSpread * ROWS_PER_SPREAD + ROWS_PER_SPREAD
   );
 
-  // Compute grand totals of ALL entries
-  const grandTotals = useMemo(() => {
-    return sorted.reduce((t, e) => ({
+  // Compute cumulative totals from first entry up to last entry on current page
+  const cumulativeTotals = useMemo(() => {
+    const endIndex = currentSpread * ROWS_PER_SPREAD + spreadEntries.length;
+    const entriesUpToHere = sorted.slice(0, endIndex);
+    return entriesUpToHere.reduce((t, e) => ({
       seDayPilot: t.seDayPilot + e.seDayPilot,
       seDayDual: t.seDayDual + e.seDayDual,
       seNightDual: t.seNightDual + e.seNightDual,
@@ -59,7 +61,7 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
       seDayPilot: 0, seDayDual: 0, seNightDual: 0, seNightPilot: 0,
       instrumentTime: 0, instructorDay: 0, instructorNight: 0,
     });
-  }, [sorted]);
+  }, [sorted, currentSpread, spreadEntries.length]);
 
   // Year for the header
   const spreadYear = spreadEntries.length > 0 ? getMonthDay(spreadEntries[0].date).year : '';
@@ -295,13 +297,13 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
                     ))}
                     {/* Totals row */}
                     <tr style={{ background: 'hsl(40 20% 87%)' }}>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(grandTotals.seDayPilot)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(grandTotals.seDayDual)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(grandTotals.seNightDual)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(grandTotals.seNightPilot)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(30 15% 30%)' }}>{fmt(grandTotals.instrumentTime)}</td>
-                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(grandTotals.instructorDay)}</td>
-                      <td className={`${tdClass} font-bold text-[9px] border-r-0`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(grandTotals.instructorNight)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(cumulativeTotals.seDayPilot)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(200 50% 30%)' }}>{fmt(cumulativeTotals.seDayDual)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(cumulativeTotals.seNightDual)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(0 50% 35%)' }}>{fmt(cumulativeTotals.seNightPilot)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(30 15% 30%)' }}>{fmt(cumulativeTotals.instrumentTime)}</td>
+                      <td className={`${tdClass} font-bold text-[9px]`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(cumulativeTotals.instructorDay)}</td>
+                      <td className={`${tdClass} font-bold text-[9px] border-r-0`} style={{ color: 'hsl(150 40% 25%)' }}>{fmt(cumulativeTotals.instructorNight)}</td>
                     </tr>
                   </tbody>
                 </table>
