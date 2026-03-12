@@ -55,7 +55,7 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
   // Per-type breakdown
   const typeMap: Record<string, { hours: number; flights: number }> = {};
   for (const e of filtered) {
-    const type = e.aircraftType || 'Unknown';
+    const type = normalizeAircraftType(e.aircraftType || 'Unknown');
     if (!typeMap[type]) typeMap[type] = { hours: 0, flights: 0 };
     typeMap[type].flights += 1;
     typeMap[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
