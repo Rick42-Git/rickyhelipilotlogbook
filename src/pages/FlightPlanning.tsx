@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Save, FolderOpen, Printer } from 'lucide-react';
+import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Save, FolderOpen, Printer, Navigation } from 'lucide-react';
 import { FlightMap, MapLayer } from '@/components/flight-planning/FlightMap';
 import { FlightPlanPanel } from '@/components/flight-planning/FlightPlanPanel';
 import { FlightLogTable } from '@/components/flight-planning/FlightLogTable';
@@ -15,6 +15,7 @@ import { Airport } from '@/data/africanAirports';
 import { useFlightPlans, SavedFlightPlan } from '@/hooks/useFlightPlans';
 import { toast } from '@/hooks/use-toast';
 import { exportFlightPlanPDF } from '@/lib/exportFlightPlan';
+import { FlyoverView } from '@/components/flight-planning/FlyoverView';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +47,7 @@ const FlightPlanning = () => {
   // Dialogs
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
+  const [showFlyover, setShowFlyover] = useState(false);
   const [saveName, setSaveName] = useState('');
 
   // Map controls
@@ -203,7 +205,17 @@ const FlightPlanning = () => {
             <Printer className="h-3 w-3" />
             <span className="hidden md:inline">PDF</span>
           </Button>
-
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowFlyover(true)}
+            className="font-mono text-[10px] gap-1 h-7"
+            disabled={waypoints.length < 2}
+            title="Animated flyover"
+          >
+            <Navigation className="h-3 w-3" />
+            <span className="hidden md:inline">FLYOVER</span>
+          </Button>
           {/* Map Layer Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -380,6 +392,15 @@ const FlightPlanning = () => {
         onLoad={handleLoad}
         onDelete={deletePlan}
       />
+
+      {/* Flyover view */}
+      {showFlyover && waypoints.length >= 2 && (
+        <FlyoverView
+          waypoints={waypoints}
+          groundSpeed={groundSpeed}
+          onClose={() => setShowFlyover(false)}
+        />
+      )}
     </div>
   );
 };
