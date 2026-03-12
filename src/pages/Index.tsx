@@ -5,11 +5,12 @@ import { useIsAdmin } from '@/hooks/useIsAdmin';
 import helicopterIcon from '@/assets/helicopter-icon.png';
 import { LogbookEntry } from '@/types/logbook';
 import { LogbookTable } from '@/components/LogbookTable';
+import { LogbookBookView } from '@/components/LogbookBookView';
 import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane, List, BookOpen } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
