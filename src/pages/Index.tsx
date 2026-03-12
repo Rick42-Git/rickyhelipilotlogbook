@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLogbook } from '@/hooks/useLogbook';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
@@ -66,7 +66,7 @@ const Index = () => {
     }
   };
 
-  const totals = getTotals();
+  const totals = useMemo(() => getTotals(), [getTotals]);
 
   return (
     <div className="min-h-screen bg-background grid-bg scanline">

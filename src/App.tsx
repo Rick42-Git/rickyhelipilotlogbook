@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,21 +8,31 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import Admin from "./pages/Admin";
-import MassBalance from "./pages/MassBalance";
-import FlightPlanning from "./pages/FlightPlanning";
 import NotFound from "./pages/NotFound";
 import { OfflineBanner } from "@/components/OfflineBanner";
 
-const queryClient = new QueryClient();
+// Lazy-load heavy pages to reduce initial bundle size
+const Admin = lazy(() => import("./pages/Admin"));
+const MassBalance = lazy(() => import("./pages/MassBalance"));
+const FlightPlanning = lazy(() => import("./pages/FlightPlanning"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const PageLoader = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center font-mono text-muted-foreground">Loading...</div>
+);
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { activatedUser, loading } = useAuth();
 
-  if (loading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center font-mono text-muted-foreground">Loading...</div>;
-  }
-
+  if (loading) return <PageLoader />;
   if (!activatedUser) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 }
@@ -30,10 +41,10 @@ function AdminRoute() {
   const { activatedUser, loading } = useAuth();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
 
-  if (loading || adminLoading) return <div className="min-h-screen bg-background flex items-center justify-center font-mono text-muted-foreground">Loading...</div>;
+  if (loading || adminLoading) return <PageLoader />;
   if (!activatedUser) return <Navigate to="/auth" replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
-  return <Admin />;
+  return <Suspense fallback={<PageLoader />}><Admin /></Suspense>;
 }
 
 function AuthRoute() {
@@ -55,8 +66,16 @@ const App = () => (
             <Route path="/auth" element={<AuthRoute />} />
             <Route path="/admin" element={<AdminRoute />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-            <Route path="/mass-balance" element={<ProtectedRoute><MassBalance /></ProtectedRoute>} />
-            <Route path="/flight-planning" element={<ProtectedRoute><FlightPlanning /></ProtectedRoute>} />
+            <Route path="/mass-balance" element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageLoader />}><MassBalance /></Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="/flight-planning" element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageLoader />}><FlightPlanning /></Suspense>
+              </ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

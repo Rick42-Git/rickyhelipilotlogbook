@@ -17,5 +17,23 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    // Force single React instance — prevents duplicate React contexts
+    dedupe: ["react", "react-dom", "react/jsx-runtime"],
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "@tanstack/react-query", "leaflet"],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          query: ["@tanstack/react-query"],
+          leaflet: ["leaflet"],
+          xlsx: ["xlsx"],
+          charts: ["recharts"],
+        },
+      },
+    },
   },
 }));

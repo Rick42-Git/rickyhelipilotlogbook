@@ -1,10 +1,13 @@
-const CACHE_NAME = 'heli-logbook-v3';
+const CACHE_NAME = 'heli-logbook-v4';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
 ];
+
+// Max cached items to prevent cache bloat
+const MAX_CACHE_ITEMS = 100;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -19,7 +22,7 @@ self.addEventListener('activate', (event) => {
       Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
     )
   );
-  clients.claim();
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
@@ -31,10 +34,24 @@ self.addEventListener('fetch', (event) => {
   // Never cache auth/oauth routes
   if (url.pathname.startsWith('/~oauth') || url.pathname.startsWith('/auth')) return;
 
-  // Never cache Supabase API calls — they need live data
+  // Never cache Supabase API calls
   if (url.hostname.includes('supabase')) return;
 
-  // For navigation requests (HTML pages) — network first, cache fallback
+  // Never cache map tile requests — they're too numerous and large
+  if (
+    url.hostname.includes('basemaps.cartocdn.com') ||
+    url.hostname.includes('tile.openstreetmap.org') ||
+    url.hostname.includes('tile.opentopomap.org') ||
+    url.hostname.includes('arcgisonline.com') ||
+    url.hostname.includes('openaip.net') ||
+    url.hostname.includes('stamen-tiles') ||
+    url.hostname.includes('fastly.net')
+  ) return;
+
+  // Never cache large GeoJSON files
+  if (url.pathname.endsWith('.geojson') || url.pathname.endsWith('.json') && url.hostname.includes('github')) return;
+
+  // For navigation requests — network first, cache fallback
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -48,7 +65,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For static assets (JS, CSS, images, fonts) — cache first, network fallback
+  // For static assets — cache first, network fallback
   if (
     url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|ico|woff2?|ttf|eot)$/) ||
     url.hostname.includes('fonts.googleapis.com') ||
@@ -67,14 +84,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Everything else — network first, cache fallback
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        return response;
-      })
-      .catch(() => caches.match(request))
-  );
+  // Everything else — just fetch, don't cache aggressively
+  // This prevents cache bloat from API calls, tile requests, etc.
 });
