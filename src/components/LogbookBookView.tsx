@@ -218,8 +218,8 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
                     ))}
                     {/* Totals row */}
                     <tr style={{ background: 'hsl(40 20% 87%)' }}>
-                      <td colSpan={6} className="px-2 py-[3px] font-mono text-[9px] italic border-r-0" style={{ color: 'hsl(30 15% 45%)' }}>
-                        Totals This Page
+                      <td colSpan={6} className="px-2 py-[3px] font-mono text-[9px] italic border-r-0 font-bold" style={{ color: 'hsl(30 15% 40%)' }}>
+                        Grand Totals
                       </td>
                     </tr>
                   </tbody>
