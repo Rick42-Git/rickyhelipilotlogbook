@@ -304,7 +304,7 @@ export function FlightMap({
           <div style="margin-top:6px;"><button id="${popupId}" style="background:hsl(38,95%,55%);color:#111;border:none;padding:3px 8px;border-radius:4px;font-family:monospace;font-size:10px;cursor:pointer;font-weight:bold;">+ ADD TO ROUTE</button></div>
         </div>`;
 
-      marker.bindPopup(popupHtml);
+      marker.bindPopup(popupHtml, { maxWidth: 280 });
       marker.on('popupopen', () => {
         setTimeout(() => {
           const btn = document.getElementById(popupId);
@@ -312,6 +312,32 @@ export function FlightMap({
             btn.addEventListener('click', () => {
               onAirportClickRef.current(airport);
               marker.closePopup();
+            });
+          }
+          // Fetch METAR weather
+          const wxEl = document.getElementById(weatherId);
+          if (wxEl) {
+            supabase.functions.invoke('weather-metar', {
+              body: { icao: airport.icao, type: 'metar' },
+            }).then(({ data, error }) => {
+              if (error || !data?.data?.length) {
+                wxEl.textContent = 'No METAR available';
+                return;
+              }
+              const m = data.data[0];
+              const raw = m.raw_text || 'N/A';
+              const wind = m.wind ? `${m.wind.degrees || '---'}°/${m.wind.speed_kts || '0'}kt` : 'CALM';
+              const vis = m.visibility ? `${m.visibility.meters_float ? (m.visibility.meters_float / 1000).toFixed(1) + 'km' : m.visibility.miles + 'SM'}` : 'N/A';
+              const temp = m.temperature ? `${m.temperature.celsius}°C` : '';
+              const qnh = m.barometer ? `QNH ${m.barometer.hpa || '---'}` : '';
+              const cat = m.flight_category || '';
+              const catColor = cat === 'VFR' ? 'hsl(142,70%,45%)' : cat === 'MVFR' ? 'hsl(38,95%,55%)' : cat === 'IFR' ? 'hsl(0,70%,50%)' : '#aaa';
+              wxEl.innerHTML = `
+                <div style="font-weight:bold;color:${catColor};">${cat} <span style="color:#aaa;font-weight:normal;">— ${wind} | ${vis} | ${temp} | ${qnh}</span></div>
+                <div style="margin-top:2px;word-break:break-all;color:#888;font-size:9px;">${raw}</div>
+              `;
+            }).catch(() => {
+              wxEl.textContent = 'Weather unavailable';
             });
           }
         }, 50);
