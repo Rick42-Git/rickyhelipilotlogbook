@@ -87,22 +87,19 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
       {/* Book container */}
       <div className="w-full" style={{ perspective: '2000px' }}>
         <div className="book-container relative">
-          {/* Flipping page overlay */}
+          {/* Page turn animation layers */}
           {flipState !== 'idle' && (
-            <div
-              className={`book-flip-page ${flipState}`}
-              style={{
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                width: '50%',
-                zIndex: 30,
-                ...(flipState === 'flipping-forward'
-                  ? { right: '0%', transformOrigin: 'left center' }
-                  : { left: '0%', transformOrigin: 'right center' }
-                ),
-              }}
-            />
+            <>
+              {/* Shadow cast on the underlying page */}
+              <div className={`book-flip-shadow ${flipState}`} />
+              {/* The turning page with front & back faces */}
+              <div
+                className={`book-flip-container ${flipState}`}
+              >
+                <div className="book-flip-front" />
+                <div className="book-flip-back" />
+              </div>
+            </>
           )}
 
           {/* Book spread */}
