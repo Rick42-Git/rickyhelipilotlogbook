@@ -48,6 +48,7 @@ const Index = () => {
   const [editingEntry, setEditingEntry] = useState<LogbookEntry | null>(null);
   const { canInstall, install } = useInstallPrompt();
   const { templates } = useColumnTemplates();
+  const [viewMode, setViewMode] = useState<'list' | 'book'>('list');
 
   const handleEdit = (entry: LogbookEntry) => {
     setEditingEntry(entry);
