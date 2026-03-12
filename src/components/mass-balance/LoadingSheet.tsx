@@ -44,17 +44,17 @@ export function LoadingSheet({ stations, weights, onWeightChange, totalWeight, t
                 </div>
               </div>
               <div>
-                {s.editable ? (
-                  <Input
+              <Input
                     type="number"
                     min={0}
                     value={weights[i] || ''}
                     onChange={(e) => onWeightChange(i, Number(e.target.value) || 0)}
-                    className="h-8 text-center font-mono text-xs bg-background/50 border-muted"
+                    className={`h-8 text-center font-mono text-xs border-muted ${
+                      s.label === 'Empty Weight'
+                        ? 'bg-primary/10 border-primary/30 text-primary font-semibold'
+                        : 'bg-background/50'
+                    }`}
                   />
-                ) : (
-                  <div className="font-mono text-xs text-center text-primary font-semibold">{weights[i].toLocaleString()}</div>
-                )}
               </div>
               <div className="font-mono text-[10px] text-muted-foreground text-center">lbs</div>
               <div className="font-mono text-xs text-right text-primary">{Math.round(longMoment).toLocaleString()}</div>
