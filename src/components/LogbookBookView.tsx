@@ -63,7 +63,7 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
     setTimeout(() => {
       setCurrentSpread(p => dir === 'forward' ? p + 1 : p - 1);
       setFlipState('idle');
-    }, 700);
+    }, 900);
   }, [flipState, currentSpread, totalSpreads]);
 
   if (entries.length === 0) {
