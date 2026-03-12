@@ -104,6 +104,57 @@ export type Database = {
         }
         Relationships: []
       }
+      flight_plans: {
+        Row: {
+          aircraft_reg: string
+          aircraft_type: string
+          created_at: string
+          fuel_burn_rate: number
+          fuel_on_board: number
+          ground_speed: number
+          id: string
+          name: string
+          notes: string
+          pilot_in_command: string
+          reserve_fuel: number
+          updated_at: string
+          user_id: string
+          waypoints: Json
+        }
+        Insert: {
+          aircraft_reg?: string
+          aircraft_type?: string
+          created_at?: string
+          fuel_burn_rate?: number
+          fuel_on_board?: number
+          ground_speed?: number
+          id?: string
+          name?: string
+          notes?: string
+          pilot_in_command?: string
+          reserve_fuel?: number
+          updated_at?: string
+          user_id: string
+          waypoints?: Json
+        }
+        Update: {
+          aircraft_reg?: string
+          aircraft_type?: string
+          created_at?: string
+          fuel_burn_rate?: number
+          fuel_on_board?: number
+          ground_speed?: number
+          id?: string
+          name?: string
+          notes?: string
+          pilot_in_command?: string
+          reserve_fuel?: number
+          updated_at?: string
+          user_id?: string
+          waypoints?: Json
+        }
+        Relationships: []
+      }
       logbook_entries: {
         Row: {
           aircraft_reg: string
