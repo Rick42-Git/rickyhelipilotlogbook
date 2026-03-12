@@ -199,10 +199,6 @@ const Index = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button size="sm" onClick={handleNew} className="font-mono text-[10px] gap-1 h-7">
-              <Plus className="h-3 w-3" />
-              NEW
-            </Button>
           </div>
         </div>
 
