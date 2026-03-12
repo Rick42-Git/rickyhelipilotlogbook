@@ -205,7 +205,17 @@ const FlightPlanning = () => {
             <Printer className="h-3 w-3" />
             <span className="hidden md:inline">PDF</span>
           </Button>
-
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowFlyover(true)}
+            className="font-mono text-[10px] gap-1 h-7"
+            disabled={waypoints.length < 2}
+            title="Animated flyover"
+          >
+            <Navigation className="h-3 w-3" />
+            <span className="hidden md:inline">FLYOVER</span>
+          </Button>
           {/* Map Layer Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
