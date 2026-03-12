@@ -281,7 +281,7 @@ const FlightPlanning = () => {
       </div>
 
       {/* Mobile filter bar */}
-      <div className="flex md:hidden items-center justify-center gap-4 py-1.5 bg-muted/20 border-b border-muted/30">
+      <div className="flex md:hidden items-center justify-center gap-4 py-1.5 bg-muted/20 border-b border-muted/30 relative z-20">
         <div className="flex items-center gap-1.5">
           <Switch id="airports-m" checked={showAirports} onCheckedChange={setShowAirports} className="scale-[0.65]" />
           <Label htmlFor="airports-m" className="font-mono text-[9px] text-muted-foreground">APT</Label>
