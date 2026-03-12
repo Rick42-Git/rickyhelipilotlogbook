@@ -55,14 +55,60 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
   ];
 
   // Per-type breakdown
-  const typeMap: Record<string, { hours: number; flights: number }> = {};
+  const typeMap: Record<string, { dual: number; pic: number; other: number; flights: number }> = {};
   for (const e of filtered) {
     const type = normalizeAircraftType(e.aircraftType || 'Unknown');
-    if (!typeMap[type]) typeMap[type] = { hours: 0, flights: 0 };
+    if (!typeMap[type]) typeMap[type] = { dual: 0, pic: 0, other: 0, flights: 0 };
     typeMap[type].flights += 1;
-    typeMap[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
+    typeMap[type].dual += (e.seDayDual || 0) + (e.seNightDual || 0);
+    typeMap[type].pic += (e.seDayPilot || 0) + (e.seNightPilot || 0);
+    typeMap[type].other += (e.instrumentTime || 0) + (e.instructorDay || 0) + (e.instructorNight || 0);
   }
-  const typeTotals = Object.entries(typeMap).sort((a, b) => b[1].hours - a[1].hours);
+  const typeTotals = Object.entries(typeMap).sort((a, b) => (b[1].dual + b[1].pic + b[1].other) - (a[1].dual + a[1].pic + a[1].other));
+
+  const exportSummary = () => {
+    const totalDualAll = typeTotals.reduce((s, [, d]) => s + d.dual, 0);
+    const totalPicAll = typeTotals.reduce((s, [, d]) => s + d.pic, 0);
+    const totalOtherAll = typeTotals.reduce((s, [, d]) => s + d.other, 0);
+    const grandTotalAll = totalDualAll + totalPicAll + totalOtherAll;
+    const startMonth = new Date(cutoff).toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' });
+
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Summary of Hours</title>
+<style>
+  @page { size: A4 portrait; margin: 20mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Courier New', monospace; font-size: 11pt; color: #000; }
+  h2 { text-align: center; text-decoration: underline; font-size: 13pt; margin-bottom: 10px; }
+  .subtitle { text-align: center; font-size: 10pt; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+  th, td { border: 2px solid #000; padding: 6px 12px; text-align: center; font-size: 11pt; }
+  th { font-weight: 700; text-transform: uppercase; background: #f0f0f0; }
+  .label-cell { text-align: left; font-weight: 600; }
+  .total-row td { border-top: 3px solid #000; font-weight: 700; }
+  .grand-row td { font-weight: 700; }
+  .grand-total { text-align: right; font-weight: 700; font-size: 12pt; margin-top: 4px; }
+  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>
+  <h2>SUMMARY OF HOURS</h2>
+  <p class="subtitle">Summary of hours flown in the last 12 months from (${startMonth})</p>
+  <table>
+    <thead><tr><th>Aircraft Type</th><th>Dual</th><th>PIC</th><th>Other</th></tr></thead>
+    <tbody>
+      ${typeTotals.map(([type, d]) => `<tr><td class="label-cell">${type}</td><td>${d.dual > 0 ? d.dual.toFixed(1) : '—'}</td><td>${d.pic > 0 ? d.pic.toFixed(1) : '—'}</td><td>${d.other > 0 ? d.other.toFixed(1) : '—'}</td></tr>`).join('')}
+      <tr class="total-row"><td class="label-cell">Total last 12 months</td><td>${totalDualAll > 0 ? totalDualAll.toFixed(1) : '—'}</td><td>${totalPicAll > 0 ? totalPicAll.toFixed(1) : '—'}</td><td>${totalOtherAll > 0 ? totalOtherAll.toFixed(1) : '—'}</td></tr>
+    </tbody>
+  </table>
+  <p class="grand-total">⇒ ${grandTotalAll.toFixed(1)}h</p>
+</body></html>`;
+
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+      setTimeout(() => win.print(), 400);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
