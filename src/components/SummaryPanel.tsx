@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { LogbookEntry, numericFieldLabels, NumericField } from '@/types/logbook';
+import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 
 interface SummaryPanelProps {
   totals: Record<NumericField, number>;
