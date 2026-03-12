@@ -3,6 +3,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Airport, africanAirports } from '@/data/africanAirports';
 import { Waypoint, calcDistanceNm } from '@/types/flightPlan';
+import { getNightPolygon } from '@/lib/solarTerminator';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MeasureState {
   active: boolean;
