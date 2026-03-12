@@ -236,6 +236,10 @@ const Index = () => {
             <span>entries</span>
           </span>
           <div className="flex-1 alt-line" />
+          <Button size="sm" onClick={handleNew} className="font-mono text-[10px] gap-1.5 h-7 px-2">
+            <Plus className="h-3.5 w-3.5" />
+            NEW ENTRY
+          </Button>
           {entries.length > 0 && (
             <Button
               variant="ghost"
