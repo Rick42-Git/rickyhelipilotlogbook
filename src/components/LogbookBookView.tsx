@@ -436,4 +436,14 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
       </Dialog>
     </div>
   );
+
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 bg-background p-4 overflow-auto flex items-center justify-center">
+        {bookContent}
+      </div>
+    );
+  }
+
+  return bookContent;
 }
