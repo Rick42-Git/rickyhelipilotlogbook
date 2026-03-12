@@ -104,6 +104,10 @@ const Index = () => {
                 <Scale className="h-4 w-4" />
                 M&B CALC
               </Button>
+              <Button variant="outline" onClick={() => navigate('/flight-planning')} className="font-mono gap-2">
+                <Plane className="h-4 w-4" />
+                FLT PLAN
+              </Button>
               <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
                 <Clock className="h-4 w-4" />
                 F&D CALC
