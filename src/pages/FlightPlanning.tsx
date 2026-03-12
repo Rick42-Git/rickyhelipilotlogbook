@@ -392,6 +392,15 @@ const FlightPlanning = () => {
         onLoad={handleLoad}
         onDelete={deletePlan}
       />
+
+      {/* Flyover view */}
+      {showFlyover && waypoints.length >= 2 && (
+        <FlyoverView
+          waypoints={waypoints}
+          groundSpeed={groundSpeed}
+          onClose={() => setShowFlyover(false)}
+        />
+      )}
     </div>
   );
 };
