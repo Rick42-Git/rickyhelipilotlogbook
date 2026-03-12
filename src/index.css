@@ -166,6 +166,31 @@
   }
 }
 
+/* Book page-turn animations */
+@keyframes page-turn-forward {
+  0% { transform: perspective(1200px) rotateY(0deg); }
+  30% { transform: perspective(1200px) rotateY(-3deg); }
+  60% { transform: perspective(1200px) rotateY(2deg); }
+  100% { transform: perspective(1200px) rotateY(0deg); }
+}
+
+@keyframes page-turn-backward {
+  0% { transform: perspective(1200px) rotateY(0deg); }
+  30% { transform: perspective(1200px) rotateY(3deg); }
+  60% { transform: perspective(1200px) rotateY(-2deg); }
+  100% { transform: perspective(1200px) rotateY(0deg); }
+}
+
+.animate-page-forward {
+  animation: page-turn-forward 0.5s ease-in-out;
+  transform-origin: left center;
+}
+
+.animate-page-backward {
+  animation: page-turn-backward 0.5s ease-in-out;
+  transform-origin: right center;
+}
+
 /* Contain Leaflet z-index within its container */
 .leaflet-container {
   z-index: 0 !important;

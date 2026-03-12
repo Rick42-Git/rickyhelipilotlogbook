@@ -244,10 +244,25 @@ const Index = () => {
             <span>entries</span>
           </span>
           <div className="flex-1 alt-line" />
+          {entries.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewMode(v => v === 'list' ? 'book' : 'list')}
+              className="font-mono text-[10px] gap-1.5 h-7 px-2 text-muted-foreground hover:text-foreground"
+            >
+              {viewMode === 'list' ? <BookOpen className="h-3.5 w-3.5" /> : <List className="h-3.5 w-3.5" />}
+              {viewMode === 'list' ? 'BOOK' : 'LIST'}
+            </Button>
+          )}
         </div>
 
-        {/* Table */}
-        <LogbookTable entries={entries} onEdit={handleEdit} onDelete={deleteEntry} onClearAll={clearAllEntries} />
+        {/* Entries view */}
+        {viewMode === 'list' ? (
+          <LogbookTable entries={entries} onEdit={handleEdit} onDelete={deleteEntry} onClearAll={clearAllEntries} />
+        ) : (
+          <LogbookBookView entries={entries} onEdit={handleEdit} onDelete={deleteEntry} />
+        )}
 
         {/* Entry Dialog */}
         <EntryFormDialog
