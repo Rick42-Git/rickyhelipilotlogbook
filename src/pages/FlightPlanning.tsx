@@ -14,6 +14,7 @@ import { Waypoint } from '@/types/flightPlan';
 import { Airport } from '@/data/africanAirports';
 import { useFlightPlans, SavedFlightPlan } from '@/hooks/useFlightPlans';
 import { toast } from '@/hooks/use-toast';
+import { exportFlightPlanPDF } from '@/lib/exportFlightPlan';
 import {
   DropdownMenu,
   DropdownMenuContent,
