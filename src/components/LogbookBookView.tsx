@@ -22,6 +22,7 @@ function getMonthDay(iso: string): { month: string; day: string; year: string } 
 
 export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewProps) {
   const [currentSpread, setCurrentSpread] = useState(0);
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [flipState, setFlipState] = useState<'idle' | 'flipping-forward' | 'flipping-backward'>('idle');
 
   const sorted = useMemo(() =>
