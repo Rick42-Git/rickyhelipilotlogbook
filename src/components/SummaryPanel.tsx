@@ -26,7 +26,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
     { title: 'Instructor', fields: ['instructorDay', 'instructorNight'] as NumericField[] },
   ], []);
 
-  const grandTotal = useMemo(() => Object.values(totals).reduce((a, b) => a + b, 0), [totals]);
+  const grandTotal = useMemo(() => (totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot), [totals]);
   const typeTotals = useMemo(() => getTypeTotals(entries), [entries]);
 
   return (

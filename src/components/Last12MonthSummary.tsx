@@ -57,8 +57,7 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
     const type = e.aircraftType || 'Unknown';
     if (!typeMap[type]) typeMap[type] = { hours: 0, flights: 0 };
     typeMap[type].flights += 1;
-    typeMap[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0)
-      + (e.instrumentTime || 0) + (e.instructorDay || 0) + (e.instructorNight || 0);
+    typeMap[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
   }
   const typeTotals = Object.entries(typeMap).sort((a, b) => b[1].hours - a[1].hours);
 
