@@ -45,9 +45,11 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
     currentSpread * ROWS_PER_SPREAD + ROWS_PER_SPREAD
   );
 
-  // Compute grand totals of ALL entries
-  const grandTotals = useMemo(() => {
-    return sorted.reduce((t, e) => ({
+  // Compute cumulative totals from first entry up to last entry on current page
+  const cumulativeTotals = useMemo(() => {
+    const endIndex = currentSpread * ROWS_PER_SPREAD + spreadEntries.length;
+    const entriesUpToHere = sorted.slice(0, endIndex);
+    return entriesUpToHere.reduce((t, e) => ({
       seDayPilot: t.seDayPilot + e.seDayPilot,
       seDayDual: t.seDayDual + e.seDayDual,
       seNightDual: t.seNightDual + e.seNightDual,
@@ -59,7 +61,7 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
       seDayPilot: 0, seDayDual: 0, seNightDual: 0, seNightPilot: 0,
       instrumentTime: 0, instructorDay: 0, instructorNight: 0,
     });
-  }, [sorted]);
+  }, [sorted, currentSpread, spreadEntries.length]);
 
   // Year for the header
   const spreadYear = spreadEntries.length > 0 ? getMonthDay(spreadEntries[0].date).year : '';
