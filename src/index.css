@@ -173,6 +173,9 @@
 .book-row-border {
   border-color: hsl(200 40% 70% / 0.25);
 }
+.book-row-highlight {
+  background: hsl(38 80% 85% / 0.3) !important;
+}
 
 /* ===== Realistic Page Turn ===== */
 .book-flip-container {

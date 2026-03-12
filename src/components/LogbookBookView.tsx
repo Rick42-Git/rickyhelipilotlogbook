@@ -260,8 +260,13 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
                       <td className={tdClass} style={{ color: 'hsl(30 15% 50%)' }}></td>
                       <td className={`${tdClass} border-r-0`} style={{ color: 'hsl(30 15% 50%)' }}></td>
                     </tr>
-                    {spreadEntries.map((entry) => (
-                      <tr key={entry.id} className="border-b book-row-border group hover:!bg-[hsl(38_80%_85%_/_0.3)] transition-colors">
+                    {spreadEntries.map((entry, i) => (
+                      <tr
+                        key={entry.id}
+                        className={`border-b book-row-border transition-colors ${hoveredRow === i ? 'book-row-highlight' : ''}`}
+                        onMouseEnter={() => setHoveredRow(i)}
+                        onMouseLeave={() => setHoveredRow(null)}
+                      >
                         <td className={tdClass} style={{ color: 'hsl(200 50% 35%)' }}>{fmt(entry.seDayPilot)}</td>
                         <td className={tdClass} style={{ color: 'hsl(200 50% 35%)' }}>{fmt(entry.seDayDual)}</td>
                         <td className={tdClass} style={{ color: 'hsl(0 50% 40%)' }}>{fmt(entry.seNightDual)}</td>
