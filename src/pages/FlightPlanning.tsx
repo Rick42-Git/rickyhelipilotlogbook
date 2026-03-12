@@ -307,6 +307,7 @@ const FlightPlanning = () => {
             activeLayer={activeLayer}
             showAirspaces={showAirspaces}
             showBoundaries={showBoundaries}
+            showTerminator={showTerminator}
           />
         </div>
 
