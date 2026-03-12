@@ -323,9 +323,19 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
           <ChevronLeft className="h-4 w-4" />
           PREV PAGE
         </Button>
-        <span className="font-mono text-[10px] text-muted-foreground">
-          Spread {currentSpread + 1} of {totalSpreads}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] text-muted-foreground">Spread</span>
+          <select
+            value={currentSpread}
+            onChange={e => setCurrentSpread(Number(e.target.value))}
+            className="font-mono text-[10px] bg-transparent border border-border/50 rounded px-1.5 py-0.5 text-foreground appearance-none cursor-pointer"
+          >
+            {Array.from({ length: totalSpreads }).map((_, i) => (
+              <option key={i} value={i}>{i + 1}</option>
+            ))}
+          </select>
+          <span className="font-mono text-[10px] text-muted-foreground">of {totalSpreads}</span>
+        </div>
         <Button
           variant="ghost"
           size="sm"
