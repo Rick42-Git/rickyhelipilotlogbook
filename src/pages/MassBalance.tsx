@@ -12,7 +12,6 @@ import { AircraftDataPanel } from '@/components/mass-balance/AircraftDataPanel';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Download } from 'lucide-react';
 import helicopterIcon from '@/assets/helicopter-icon.png';
-import { helicopterImages } from '@/data/helicopterImages';
 
 function isPointInPolygon(px: number, py: number, polygon: { station: number; weight: number }[]): boolean {
   let inside = false;
@@ -130,28 +129,24 @@ const MassBalance = () => {
               <button
                 key={a.name}
                 onClick={() => handleAircraftChange(a)}
-                className={`group relative rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                className={`group relative rounded-lg overflow-hidden border-2 transition-all duration-200 p-3 text-center ${
                   selectedAircraft.name === a.name
-                    ? 'border-primary shadow-[0_0_12px_hsl(var(--primary)/0.4)] scale-[1.02]'
-                    : 'border-border/50 hover:border-primary/50 opacity-70 hover:opacity-100'
+                    ? 'border-primary shadow-[0_0_12px_hsl(var(--primary)/0.4)] bg-primary/10'
+                    : 'border-border/50 hover:border-primary/50 bg-card/50 hover:bg-card'
                 }`}
               >
-                <div className="aspect-[4/3] overflow-hidden">
-                  <img
-                    src={helicopterImages[a.name]}
-                    alt={a.name}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    loading="lazy"
-                  />
-                </div>
-                <div className={`absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent`} />
-                <div className="absolute bottom-0 left-0 right-0 p-1.5 md:p-2">
-                  <p className="font-mono text-[9px] md:text-[10px] text-foreground font-semibold leading-tight truncate">
-                    {a.name}
-                  </p>
-                  <p className="font-mono text-[8px] text-muted-foreground">
-                    {a.maxGrossWeight.toLocaleString()} lbs
-                  </p>
+                <div className="flex flex-col items-center gap-2">
+                  <svg viewBox="0 0 24 24" className={`w-8 h-8 transition-colors ${selectedAircraft.name === a.name ? 'text-primary' : 'text-muted-foreground group-hover:text-primary/70'}`} fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M12 2C12 2 10 6 10 8V11L4 14V16L10 14.5V18L8 19.5V21L12 20L16 21V19.5L14 18V14.5L20 16V14L14 11V8C14 6 12 2 12 2Z" />
+                  </svg>
+                  <div>
+                    <p className="font-mono text-[9px] md:text-[10px] text-foreground font-semibold leading-tight">
+                      {a.name}
+                    </p>
+                    <p className="font-mono text-[8px] text-muted-foreground mt-0.5">
+                      {a.maxGrossWeight.toLocaleString()} lbs
+                    </p>
+                  </div>
                 </div>
                 {selectedAircraft.name === a.name && (
                   <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary animate-pulse" />
