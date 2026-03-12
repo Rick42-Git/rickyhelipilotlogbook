@@ -82,12 +82,19 @@ export function FlightMap({
       center: [-5, 25],
       zoom: 4,
       zoomControl: true,
+      minZoom: 3,
+      maxZoom: 18,
+      maxBounds: mapBounds,
+      maxBoundsViscosity: 1,
+      worldCopyJump: true,
     });
 
     const layer = baseLayers.dark;
     baseLayerRef.current = L.tileLayer(layer.url, {
       attribution: layer.attribution,
-      maxZoom: layer.maxZoom,
+      maxZoom: layer.maxZoom ?? 18,
+      noWrap: true,
+      bounds: mapBounds,
     }).addTo(map);
 
     airportLayerRef.current.addTo(map);
