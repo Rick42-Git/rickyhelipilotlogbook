@@ -39,6 +39,10 @@ export function FlightMap({
   const baseLayerRef = useRef<L.TileLayer | null>(null);
   const airspaceLayerRef = useRef<L.TileLayer | null>(null);
   const boundaryLayerRef = useRef<L.TileLayer | null>(null);
+  const mapBounds = useMemo(
+    () => L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180)),
+    []
+  );
 
   const onMapClickRef = useRef(onMapClick);
   onMapClickRef.current = onMapClick;
@@ -78,12 +82,19 @@ export function FlightMap({
       center: [-5, 25],
       zoom: 4,
       zoomControl: true,
+      minZoom: 3,
+      maxZoom: 18,
+      maxBounds: mapBounds,
+      maxBoundsViscosity: 1,
+      worldCopyJump: true,
     });
 
     const layer = baseLayers.dark;
     baseLayerRef.current = L.tileLayer(layer.url, {
       attribution: layer.attribution,
-      maxZoom: layer.maxZoom,
+      maxZoom: layer.maxZoom ?? 18,
+      noWrap: true,
+      bounds: mapBounds,
     }).addTo(map);
 
     airportLayerRef.current.addTo(map);
@@ -134,7 +145,9 @@ export function FlightMap({
     const layerConfig = baseLayers[activeLayer];
     baseLayerRef.current = L.tileLayer(layerConfig.url, {
       attribution: layerConfig.attribution,
-      maxZoom: layerConfig.maxZoom,
+      maxZoom: layerConfig.maxZoom ?? 18,
+      noWrap: true,
+      bounds: mapBounds,
     }).addTo(map);
 
     // Ensure overlays stay on top by re-adding them
@@ -166,6 +179,8 @@ export function FlightMap({
           opacity: 0.6,
           tms: true,
           subdomains: '12',
+          noWrap: true,
+          bounds: mapBounds,
           attribution: '&copy; <a href="https://www.openaip.net">openAIP</a>',
         }
       ).addTo(map);
@@ -189,6 +204,8 @@ export function FlightMap({
         {
           opacity: 0.25,
           maxZoom: 18,
+          noWrap: true,
+          bounds: mapBounds,
           attribution: '&copy; Stamen',
         }
       ).addTo(map);
