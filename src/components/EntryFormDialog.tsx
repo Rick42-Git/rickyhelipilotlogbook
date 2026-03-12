@@ -19,15 +19,11 @@ const fields: { key: keyof Omit<LogbookEntry, 'id'>; label: string; type: string
   { key: 'aircraftReg', label: 'Registration', type: 'text', half: true },
   { key: 'pilotInCommand', label: 'Pilot in Command', type: 'text' },
   { key: 'flightDetails', label: 'Flight Details', type: 'text' },
-
   { key: 'seDayDual', label: 'Dual (1)', type: 'number', half: true, section: 'Single Engine — Day' },
   { key: 'seDayPilot', label: 'Pilot (2)', type: 'number', half: true },
-
   { key: 'seNightDual', label: 'Dual (3)', type: 'number', half: true, section: 'Single Engine — Night' },
   { key: 'seNightPilot', label: 'Pilot (4)', type: 'number', half: true },
-
   { key: 'instrumentTime', label: 'Time (13)', type: 'number', half: true, section: 'Instrument Flying' },
-
   { key: 'instructorDay', label: 'Day (14)', type: 'number', half: true, section: 'Flying as Instructor' },
   { key: 'instructorNight', label: 'Night (15)', type: 'number', half: true },
 ];
@@ -41,8 +37,10 @@ const autoCompleteKeys = ['aircraftType', 'aircraftReg', 'pilotInCommand', 'flig
 
 export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEntries = [] }: EntryFormDialogProps) {
   const [form, setForm] = useState<Omit<LogbookEntry, 'id'>>(entry ? { ...entry } : { ...emptyEntry });
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const dropdownInteracting = useRef(false);
+  // Track which field is focused — this alone controls dropdown visibility
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const isPickingRef = useRef(false);
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const suggestions = useMemo(() => {
     const map: Record<string, string[]> = {};
@@ -56,12 +54,15 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
   }, [existingEntries]);
 
   useEffect(() => {
-    if (open) setForm(entry ? { ...entry } : { ...emptyEntry });
+    if (open) {
+      setForm(entry ? { ...entry } : { ...emptyEntry });
+      setFocusedField(null);
+    }
   }, [entry, open]);
 
   const handleOpen = (o: boolean) => {
     if (o) setForm(entry ? { ...entry } : { ...emptyEntry });
-    setActiveDropdown(null);
+    setFocusedField(null);
     onOpenChange(o);
   };
 
@@ -70,10 +71,6 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
       ...prev,
       [key]: numericKeys.includes(key) ? (value === '' ? 0 : parseFloat(value) || 0) : value,
     }));
-    // Re-open dropdown when typing in autocomplete fields
-    if (autoCompleteKeys.includes(key)) {
-      setActiveDropdown(key);
-    }
   };
 
   const displayValue = (key: string, val: string | number) => {
@@ -86,12 +83,29 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
   const handleSave = () => { onSave(form); onOpenChange(false); };
 
   const getFilteredSuggestions = (key: string) => {
+    const all = suggestions[key] || [];
     const currentVal = (form[key as keyof Omit<LogbookEntry, 'id'>] as string || '').toLowerCase().trim();
-    // Show all suggestions when empty, filter as user types
-    if (!currentVal) return suggestions[key] || [];
-    return (suggestions[key] || []).filter(s =>
-      s.toLowerCase().includes(currentVal)
-    );
+    if (!currentVal) return all;
+    return all.filter(s => s.toLowerCase().includes(currentVal));
+  };
+
+  const handlePickSuggestion = (key: string, value: string) => {
+    isPickingRef.current = true;
+    setForm(prev => ({ ...prev, [key]: value }));
+    // Keep focus on the input — dropdown stays open because focusedField remains set
+    setTimeout(() => {
+      inputRefs.current[key]?.focus();
+      isPickingRef.current = false;
+    }, 10);
+  };
+
+  const handleBlur = (key: string) => {
+    // Delay to allow suggestion clicks to register
+    setTimeout(() => {
+      if (!isPickingRef.current) {
+        setFocusedField(prev => prev === key ? null : prev);
+      }
+    }, 250);
   };
 
   return (
@@ -111,36 +125,22 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
               <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{f.label}</Label>
               <div className="relative">
                 <Input
+                  ref={el => { inputRefs.current[f.key] = el; }}
                   type={f.type}
                   step={f.type === 'number' ? '0.1' : undefined}
                   placeholder={numericKeys.includes(f.key) ? '0' : ''}
                   value={displayValue(f.key, form[f.key] as string | number)}
                   onChange={e => handleChange(f.key, e.target.value)}
                   onFocus={e => {
-                    if (numericKeys.includes(f.key)) {
-                      e.target.select();
-                    }
-                    if (autoCompleteKeys.includes(f.key)) {
-                      setActiveDropdown(f.key);
-                    }
+                    if (numericKeys.includes(f.key)) e.target.select();
+                    if (autoCompleteKeys.includes(f.key)) setFocusedField(f.key);
                   }}
-                  onBlur={() => {
-                    // Only close if not interacting with the dropdown
-                    setTimeout(() => {
-                      if (!dropdownInteracting.current) {
-                        setActiveDropdown(null);
-                      }
-                    }, 200);
-                  }}
+                  onBlur={() => handleBlur(f.key)}
                   className="font-mono bg-muted/50 border-border focus:border-primary text-sm min-w-0 w-full"
                   autoComplete="off"
                 />
-                {activeDropdown === f.key && getFilteredSuggestions(f.key).length > 0 && (
-                  <div
-                    className="absolute z-50 top-full left-0 right-0 mt-1 max-h-40 overflow-y-auto rounded-md border border-border bg-popover shadow-lg"
-                    onMouseEnter={() => { dropdownInteracting.current = true; }}
-                    onMouseLeave={() => { dropdownInteracting.current = false; }}
-                  >
+                {focusedField === f.key && autoCompleteKeys.includes(f.key) && getFilteredSuggestions(f.key).length > 0 && (
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 max-h-40 overflow-y-auto rounded-md border border-border bg-popover shadow-lg">
                     {getFilteredSuggestions(f.key).map(s => (
                       <button
                         key={s}
@@ -148,9 +148,7 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
                         className="w-full text-left px-3 py-2 text-sm font-mono text-popover-foreground hover:bg-primary/20 hover:text-primary hover:scale-[1.02] origin-left transition-all duration-150"
                         onMouseDown={e => {
                           e.preventDefault();
-                          handleChange(f.key, s);
-                          setActiveDropdown(null);
-                          dropdownInteracting.current = false;
+                          handlePickSuggestion(f.key, s);
                         }}
                       >
                         {s}
