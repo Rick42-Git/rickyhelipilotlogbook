@@ -351,7 +351,7 @@ const FlightPlanning = () => {
       </div>
 
       {/* Map legend */}
-      <div className="glass-panel px-3 py-1.5 flex items-center justify-center gap-4 text-[9px] font-mono text-muted-foreground flex-shrink-0 border-t border-muted/30">
+      <div className="glass-panel px-3 py-1.5 flex items-center justify-center gap-4 text-[9px] font-mono text-muted-foreground flex-shrink-0 border-t border-muted/30 relative z-20">
         <span className="flex items-center gap-1">
           <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" /> Customs
         </span>
