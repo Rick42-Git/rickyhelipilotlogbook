@@ -64,6 +64,7 @@ When the image is a Flight Folio, Tech Log, or Flight & Defect Report:
 - Flight times are often in decimal hours (e.g. 3.1, 0.6, 1.2 summing to 4.9).
 
 Rules:
+- CRITICAL: Scan the ENTIRE width of the image, especially the FAR RIGHT columns. Logbooks often have "Instructor" or "Flying as Instructor" columns on the rightmost edge of the page. Do NOT ignore or miss these columns.
 - Prioritize HOURS / numeric flight time columns over perfect date parsing.
 - If date is ambiguous, keep best guess but do not drop the row if hours are present.
 - Missing numeric fields must be 0.
@@ -75,11 +76,12 @@ Rules:
   * seNightDual: "SE Night Dual", "Single Engine Aircraft Night Dual", "Single Engine Aircraft Night Co-Pilot", "Multi Engine Aircraft Night Dual", "Night Dual"
   * seNightPilot: "SE Night Pilot", "Single Engine Aircraft Night PIC", "Single Engine Aircraft Night Picus", "Multi Engine Aircraft Night PIC", "Multi Engine Aircraft Night Picus", "Multi Engine Aircraft Night Co-Pilot", "Night PIC", "Night Picus"
   * instrumentTime: "Instrument Time", "Instrument Time Place Co-Pilot", "Instrument Time Actual Time Co-Pilot", "Instrument Time FSTD Time Co-Pilot", "FSTD Actual Time FSTD Time Co-Pilot", "FSTD Time", "IFR Time"
-  * instructorDay: "Instructor Day", "Instructor Time SE", "Instructor Time FSTD Time Co-Pilot", "Flying as Instructor Day", "As Instructor Day", "Instr Day", "Instructor SE Day", "Flying as Instr Day"
-   * instructorNight: "Instructor Night", "Instructor Time ME", "Flying as Instructor Night", "As Instructor Night", "Instr Night", "Instructor SE Night", "Flying as Instr Night"
+  * instructorDay: "Instructor Day", "Instructor Time SE", "Instructor Time FSTD Time Co-Pilot", "Flying as Instructor Day", "As Instructor Day", "Instr Day", "Instructor SE Day", "Flying as Instr Day", "Col 14", "Column 14"
+  * instructorNight: "Instructor Night", "Instructor Time ME", "Flying as Instructor Night", "As Instructor Night", "Instr Night", "Instructor SE Night", "Flying as Instr Night", "Col 15", "Column 15"
 - IMPORTANT: If a column header says "Instructor", "As Instructor", "Flying as Instructor", or similar — these are INSTRUCTOR hours, not instrument hours. Do NOT confuse "Instructor" with "Instrument".
 - If a single "Instructor" column exists without Day/Night split, assign all instructor hours to instructorDay.
 - If the pilot is listed as an instructor or the flight is a training/dual flight where the PIC is instructing, the PIC's hours should go to instructorDay (or instructorNight for night flights) IN ADDITION to seDayPilot/seNightPilot.
+- SACAA logbook format: The rightmost columns (columns 14 and 15) are "Flying as Instructor" Day and Night. These often contain decimal hours like 1.0, 0.5, etc. Always check for values in these far-right columns.
 - Map Multi Engine columns to the corresponding Single Engine fields.
 - "Remarks FSTD Time Co-Pilot" should be treated as flightDetails/remarks.
 - When the Captain is listed as PIC and there is no "Other/Student", assign flight time to seDayPilot (PIC hours).`;
