@@ -204,6 +204,8 @@ export function FlightMap({
         {
           opacity: 0.25,
           maxZoom: 18,
+          noWrap: true,
+          bounds: mapBounds,
           attribution: '&copy; Stamen',
         }
       ).addTo(map);
