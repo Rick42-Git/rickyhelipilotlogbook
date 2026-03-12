@@ -120,8 +120,8 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
               <FileDown className="h-3.5 w-3.5 mr-1" /> Export
             </Button>
           </div>
+        </DialogHeader>
 
-        <div className="space-y-4">
           {/* Grand totals */}
           <div className="grid grid-cols-3 gap-3">
             <div className="text-center p-3 rounded border border-border bg-muted/20">
