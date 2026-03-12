@@ -187,6 +187,22 @@ const FlightPlanning = () => {
             <FolderOpen className="h-3 w-3" />
             <span className="hidden md:inline">LOAD</span>
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportFlightPlanPDF({
+              name: planName,
+              aircraftType, aircraftReg, pilotInCommand,
+              groundSpeed, fuelBurnRate, fuelOnBoard, reserveFuel,
+              waypoints, notes: planNotes,
+            })}
+            className="font-mono text-[10px] gap-1 h-7"
+            disabled={waypoints.length === 0}
+            title="Export as PDF"
+          >
+            <Printer className="h-3 w-3" />
+            <span className="hidden md:inline">PDF</span>
+          </Button>
 
           {/* Map Layer Selector */}
           <DropdownMenu>
