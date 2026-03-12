@@ -50,8 +50,7 @@ export function FlightMap({
   const measureLayerRef = useRef<L.LayerGroup>(L.layerGroup());
   const baseLayerRef = useRef<L.TileLayer | null>(null);
   const airspaceLayerRef = useRef<L.TileLayer | null>(null);
-  const boundaryLayerRef = useRef<L.GeoJSON | null>(null);
-  const boundaryDataRef = useRef<any>(null);
+  const boundaryLayerRef = useRef<L.TileLayer | null>(null);
 
   const onMapClickRef = useRef(onMapClick);
   onMapClickRef.current = onMapClick;
