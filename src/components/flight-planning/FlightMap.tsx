@@ -179,6 +179,8 @@ export function FlightMap({
           opacity: 0.6,
           tms: true,
           subdomains: '12',
+          noWrap: true,
+          bounds: mapBounds,
           attribution: '&copy; <a href="https://www.openaip.net">openAIP</a>',
         }
       ).addTo(map);
