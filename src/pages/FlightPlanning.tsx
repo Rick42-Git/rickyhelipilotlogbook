@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Save, FolderOpen } from 'lucide-react';
+import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Save, FolderOpen, Printer } from 'lucide-react';
 import { FlightMap, MapLayer } from '@/components/flight-planning/FlightMap';
 import { FlightPlanPanel } from '@/components/flight-planning/FlightPlanPanel';
 import { FlightLogTable } from '@/components/flight-planning/FlightLogTable';
@@ -14,6 +14,7 @@ import { Waypoint } from '@/types/flightPlan';
 import { Airport } from '@/data/africanAirports';
 import { useFlightPlans, SavedFlightPlan } from '@/hooks/useFlightPlans';
 import { toast } from '@/hooks/use-toast';
+import { exportFlightPlanPDF } from '@/lib/exportFlightPlan';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -185,6 +186,22 @@ const FlightPlanning = () => {
           >
             <FolderOpen className="h-3 w-3" />
             <span className="hidden md:inline">LOAD</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportFlightPlanPDF({
+              name: planName,
+              aircraftType, aircraftReg, pilotInCommand,
+              groundSpeed, fuelBurnRate, fuelOnBoard, reserveFuel,
+              waypoints, notes: planNotes,
+            })}
+            className="font-mono text-[10px] gap-1 h-7"
+            disabled={waypoints.length === 0}
+            title="Export as PDF"
+          >
+            <Printer className="h-3 w-3" />
+            <span className="hidden md:inline">PDF</span>
           </Button>
 
           {/* Map Layer Selector */}
