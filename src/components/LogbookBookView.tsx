@@ -33,7 +33,7 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
   const [exportTo, setExportTo] = useState(1);
 
   const sorted = useMemo(() =>
-    [...entries].sort((a, b) => (a.date > b.date ? -1 : 1)),
+    [...entries].sort((a, b) => (a.date > b.date ? 1 : -1)),
     [entries]
   );
 
