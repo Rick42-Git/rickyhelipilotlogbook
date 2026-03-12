@@ -4,9 +4,6 @@ import 'leaflet/dist/leaflet.css';
 import { Airport, africanAirports } from '@/data/africanAirports';
 import { Waypoint, calcDistanceNm } from '@/types/flightPlan';
 
-// Abort controller for any pending fetches
-let boundaryAbortController: AbortController | null = null;
-
 interface MeasureState {
   active: boolean;
   points: [number, number][];
@@ -27,15 +24,6 @@ interface FlightMapProps {
   showAirspaces: boolean;
   showBoundaries: boolean;
 }
-
-// Country border style for GeoJSON
-const boundaryStyle: L.PathOptions = {
-  color: 'hsl(38, 80%, 50%)',
-  weight: 1.5,
-  opacity: 0.5,
-  fillOpacity: 0,
-  dashArray: '6, 4',
-};
 
 export function FlightMap({
   waypoints, onMapClick, measure, setMeasure, onAirportClick,
