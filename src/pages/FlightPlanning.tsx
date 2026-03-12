@@ -155,7 +155,7 @@ const FlightPlanning = () => {
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Top bar */}
-      <div className="glass-panel hud-border px-3 py-2 flex items-center justify-between gap-2 z-10 flex-shrink-0">
+      <div className="glass-panel hud-border px-3 py-2 flex items-center justify-between gap-2 z-20 flex-shrink-0 relative">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="h-8 w-8">
             <ArrowLeft className="h-4 w-4" />
@@ -281,7 +281,7 @@ const FlightPlanning = () => {
       </div>
 
       {/* Mobile filter bar */}
-      <div className="flex md:hidden items-center justify-center gap-4 py-1.5 bg-muted/20 border-b border-muted/30">
+      <div className="flex md:hidden items-center justify-center gap-4 py-1.5 bg-muted/20 border-b border-muted/30 relative z-20">
         <div className="flex items-center gap-1.5">
           <Switch id="airports-m" checked={showAirports} onCheckedChange={setShowAirports} className="scale-[0.65]" />
           <Label htmlFor="airports-m" className="font-mono text-[9px] text-muted-foreground">APT</Label>
@@ -297,8 +297,8 @@ const FlightPlanning = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        <div className="flex-1 min-h-[300px] md:min-h-0">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative z-0">
+        <div className="flex-1 min-h-[300px] md:min-h-0 relative" style={{ zIndex: 0 }}>
           <FlightMap
             waypoints={waypoints}
             onMapClick={handleMapClick}
@@ -315,7 +315,7 @@ const FlightPlanning = () => {
           />
         </div>
 
-        <div className="w-full md:w-[380px] border-t md:border-t-0 md:border-l border-muted/30 flex flex-col overflow-hidden">
+        <div className="w-full md:w-[380px] border-t md:border-t-0 md:border-l border-muted/30 flex flex-col overflow-hidden relative z-10 bg-background">
           <Tabs defaultValue="plan" className="flex-1 flex flex-col overflow-hidden">
             <TabsList className="w-full rounded-none bg-muted/20 border-b border-muted/30 flex-shrink-0">
               <TabsTrigger value="plan" className="flex-1 font-mono text-[10px] tracking-wider gap-1">
@@ -351,7 +351,7 @@ const FlightPlanning = () => {
       </div>
 
       {/* Map legend */}
-      <div className="glass-panel px-3 py-1.5 flex items-center justify-center gap-4 text-[9px] font-mono text-muted-foreground flex-shrink-0 border-t border-muted/30">
+      <div className="glass-panel px-3 py-1.5 flex items-center justify-center gap-4 text-[9px] font-mono text-muted-foreground flex-shrink-0 border-t border-muted/30 relative z-20">
         <span className="flex items-center gap-1">
           <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" /> Customs
         </span>
