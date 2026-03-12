@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { LogbookEntry } from '@/types/logbook';
+import helicopterWatermark from '@/assets/helicopter-watermark.png';
 import { ChevronLeft, ChevronRight, Pencil, Trash2, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
