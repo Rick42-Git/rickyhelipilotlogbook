@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import MassBalance from "./pages/MassBalance";
+import FlightPlanning from "./pages/FlightPlanning";
 import NotFound from "./pages/NotFound";
 import { OfflineBanner } from "@/components/OfflineBanner";
 
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/admin" element={<AdminRoute />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/mass-balance" element={<ProtectedRoute><MassBalance /></ProtectedRoute>} />
+            <Route path="/flight-planning" element={<ProtectedRoute><FlightPlanning /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
