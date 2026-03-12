@@ -58,6 +58,7 @@ const FlightPlanning = () => {
   const [activeLayer, setActiveLayer] = useState<MapLayer>('dark');
   const [showAirspaces, setShowAirspaces] = useState(false);
   const [showBoundaries, setShowBoundaries] = useState(true);
+  const [showTerminator, setShowTerminator] = useState(false);
 
   const handleMapClick = useCallback((lat: number, lng: number) => {
     setWaypoints(prev => [...prev, {
