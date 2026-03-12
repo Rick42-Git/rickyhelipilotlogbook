@@ -135,10 +135,6 @@ const Index = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button onClick={handleNew} className="font-mono gap-2">
-                <Plus className="h-4 w-4" />
-                NEW ENTRY
-              </Button>
               {isAdmin && (
                 <Button variant="outline" onClick={() => navigate('/admin')} className="font-mono gap-2 border-accent text-accent">
                   <Shield className="h-4 w-4" />
@@ -203,10 +199,6 @@ const Index = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button size="sm" onClick={handleNew} className="font-mono text-[10px] gap-1 h-7">
-              <Plus className="h-3 w-3" />
-              NEW
-            </Button>
           </div>
         </div>
 
@@ -244,6 +236,10 @@ const Index = () => {
             <span>entries</span>
           </span>
           <div className="flex-1 alt-line" />
+          <Button size="sm" onClick={handleNew} className="font-mono text-[10px] gap-1.5 h-7 px-2">
+            <Plus className="h-3.5 w-3.5" />
+            NEW ENTRY
+          </Button>
           {entries.length > 0 && (
             <Button
               variant="ghost"
