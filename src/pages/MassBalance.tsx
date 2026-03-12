@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { exportMassBalancePDF } from '@/lib/exportMassBalance';
 import { aircraftTypes, AircraftType } from '@/data/aircraftData';
 import { LoadingSheet } from '@/components/mass-balance/LoadingSheet';
 import { CGEnvelopeChart } from '@/components/mass-balance/CGEnvelopeChart';
