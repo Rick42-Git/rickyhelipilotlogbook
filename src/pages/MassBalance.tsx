@@ -119,7 +119,6 @@ const MassBalance = () => {
               <Download className="h-3.5 w-3.5" />
               EXPORT PDF
             </Button>
-            </Button>
           </div>
         </div>
 
