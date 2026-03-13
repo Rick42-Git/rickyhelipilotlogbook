@@ -223,6 +223,7 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
                     </Button>
                   </td>
                 </tr>
+              ))}
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-primary/30 bg-muted/30">
