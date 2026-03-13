@@ -97,6 +97,29 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
     );
   }, [entries, search]);
 
+  const totals = useMemo(() => {
+    const src = filteredEntries;
+    return {
+      seDayDual: src.reduce((s, e) => s + (e.seDayDual || 0), 0),
+      seDayPilot: src.reduce((s, e) => s + (e.seDayPilot || 0), 0),
+      seNightDual: src.reduce((s, e) => s + (e.seNightDual || 0), 0),
+      seNightPilot: src.reduce((s, e) => s + (e.seNightPilot || 0), 0),
+      instrumentTime: src.reduce((s, e) => s + (e.instrumentTime || 0), 0),
+      instructorDay: src.reduce((s, e) => s + (e.instructorDay || 0), 0),
+      instructorNight: src.reduce((s, e) => s + (e.instructorNight || 0), 0),
+    };
+  }, [filteredEntries]);
+
+  const totalMapping: Record<string, number> = {
+    seDayDual: totals.seDayDual,
+    seDayPilot: totals.seDayPilot,
+    seNightDual: totals.seNightDual,
+    seNightPilot: totals.seNightPilot,
+    instrTm: totals.instrumentTime,
+    instDay: totals.instructorDay,
+    instNgt: totals.instructorNight,
+  };
+
   if (entries.length === 0) {
     return (
       <div className="glass-panel p-12 text-center">
@@ -202,6 +225,16 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
                 </tr>
               ))}
           </tbody>
+          <tfoot>
+            <tr className="border-t-2 border-primary/30 bg-muted/30">
+              {activeCols.map(col => (
+                <td key={col.key} className="px-2 py-2 font-mono text-xs font-bold whitespace-nowrap text-primary">
+                  {col.key === 'date' ? `${filteredEntries.length} flights` : totalMapping[col.key] !== undefined ? fmt(totalMapping[col.key]) : ''}
+                </td>
+              ))}
+              <td />
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
