@@ -109,7 +109,7 @@ export function ExtractedDataReview({ open, onOpenChange, entries: initialEntrie
             return (
               <div
                 key={i}
-                className={`grid grid-cols-[36px_90px_70px_70px_1fr_65px_65px_65px_65px_65px_65px_50px_28px] gap-1 items-center py-1 rounded transition-colors ${
+                className={`grid grid-cols-[36px_110px_70px_70px_1fr_65px_65px_65px_65px_65px_65px_50px_28px] gap-1 items-center py-1 rounded transition-colors ${
                   accepted
                     ? 'bg-primary/10 border border-primary/30'
                     : flagged
