@@ -70,7 +70,9 @@ const MassBalance = () => {
     return selectedAircraft.stations.findIndex(s => s.label.toLowerCase().includes('fuel'));
   }, [selectedAircraft]);
 
-  const handleExportPDF = () => {
+  const [signatureOpen, setSignatureOpen] = useState(false);
+
+  const handleExportPDF = (signature?: { imageDataUrl: string; name: string; title: string }) => {
     exportMassBalancePDF({
       aircraft: selectedAircraft,
       weights,
@@ -82,6 +84,7 @@ const MassBalance = () => {
       weightMargin,
       withinLimits,
       lateralWithinLimits,
+      signature,
     });
   };
 
