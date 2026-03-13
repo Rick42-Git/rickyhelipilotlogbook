@@ -19,6 +19,18 @@ function getTypeTotals(entries: LogbookEntry[]) {
   return Object.entries(map).sort((a, b) => b[1].hours - a[1].hours);
 }
 
+function getGameTotals(entries: LogbookEntry[]) {
+  let hours = 0;
+  let flights = 0;
+  for (const e of entries) {
+    if ((e.flightDetails || '').toLowerCase().includes('game')) {
+      flights += 1;
+      hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
+    }
+  }
+  return { hours, flights };
+}
+
 export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps) {
   const groups = useMemo(() => [
     { title: 'Single Engine — Day', fields: ['seDayDual', 'seDayPilot'] as NumericField[] },
@@ -29,6 +41,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
 
   const grandTotal = useMemo(() => (totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot), [totals]);
   const typeTotals = useMemo(() => getTypeTotals(entries), [entries]);
+  const gameTotals = useMemo(() => getGameTotals(entries), [entries]);
 
   return (
     <div className="glass-panel p-5 glow-amber">
