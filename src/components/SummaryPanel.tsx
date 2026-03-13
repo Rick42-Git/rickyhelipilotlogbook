@@ -19,6 +19,21 @@ function getTypeTotals(entries: LogbookEntry[]) {
   return Object.entries(map).sort((a, b) => b[1].hours - a[1].hours);
 }
 
+const PISTON_TYPES = new Set(['RH-22', 'RH-44', 'FNTP II']);
+
+function getTurbineTotals(entries: LogbookEntry[]) {
+  let hours = 0;
+  let flights = 0;
+  for (const e of entries) {
+    const type = normalizeAircraftType(e.aircraftType || '');
+    if (!PISTON_TYPES.has(type.toUpperCase()) && !PISTON_TYPES.has(type)) {
+      flights += 1;
+      hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
+    }
+  }
+  return { hours, flights };
+}
+
 function getGameTotals(entries: LogbookEntry[]) {
   let hours = 0;
   let flights = 0;
