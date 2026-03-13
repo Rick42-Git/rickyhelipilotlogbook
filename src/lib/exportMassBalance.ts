@@ -16,6 +16,7 @@ interface MassBalanceExportData {
     name: string;
     title: string;
   };
+  aircraftReg?: string;
 }
 
 export function exportMassBalancePDF(data: MassBalanceExportData) {
