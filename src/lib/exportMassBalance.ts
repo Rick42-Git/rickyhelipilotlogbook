@@ -11,6 +11,11 @@ interface MassBalanceExportData {
   weightMargin: number;
   withinLimits: boolean;
   lateralWithinLimits: boolean;
+  signature?: {
+    imageDataUrl: string;
+    name: string;
+    title: string;
+  };
 }
 
 export function exportMassBalancePDF(data: MassBalanceExportData) {
