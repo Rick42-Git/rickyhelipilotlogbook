@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { exportMassBalancePDF } from '@/lib/exportMassBalance';
+import { SignatureDialog } from '@/components/mass-balance/SignatureDialog';
 import { aircraftTypes, AircraftType } from '@/data/aircraftData';
 import { LoadingSheet } from '@/components/mass-balance/LoadingSheet';
 import { CGEnvelopeChart } from '@/components/mass-balance/CGEnvelopeChart';
