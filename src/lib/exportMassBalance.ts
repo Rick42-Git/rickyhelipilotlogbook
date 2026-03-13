@@ -16,12 +16,13 @@ interface MassBalanceExportData {
     name: string;
     title: string;
   };
+  aircraftReg?: string;
 }
 
 export function exportMassBalancePDF(data: MassBalanceExportData) {
   const {
     aircraft, weights, totalWeight, totalMoment, cgStation,
-    lateralCG, lateralMoment, weightMargin, withinLimits, lateralWithinLimits, signature,
+    lateralCG, lateralMoment, weightMargin, withinLimits, lateralWithinLimits, signature, aircraftReg,
   } = data;
 
   const now = new Date();
@@ -89,6 +90,7 @@ export function exportMassBalancePDF(data: MassBalanceExportData) {
     </div>
     <div class="meta">
       <div><strong>${aircraft.name}</strong></div>
+      ${aircraftReg ? `<div style="font-size:12px;font-weight:700;letter-spacing:2px;">${aircraftReg}</div>` : ''}
       <div>${dateStr} · ${timeStr} UTC</div>
       <div>Max GW: ${aircraft.maxGrossWeight.toLocaleString()} lbs</div>
     </div>

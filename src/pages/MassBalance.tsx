@@ -29,6 +29,7 @@ const MassBalance = () => {
   const navigate = useNavigate();
   const [selectedAircraft, setSelectedAircraft] = useState<AircraftType>(aircraftTypes[0]);
   const [weights, setWeights] = useState<number[]>(aircraftTypes[0].stations.map(s => s.defaultWeight));
+  const [aircraftReg, setAircraftReg] = useState('');
 
   const handleAircraftChange = useCallback((aircraft: AircraftType) => {
     setSelectedAircraft(aircraft);
@@ -86,6 +87,7 @@ const MassBalance = () => {
       withinLimits,
       lateralWithinLimits,
       signature,
+      aircraftReg,
     });
   };
 
@@ -108,6 +110,16 @@ const MassBalance = () => {
                   MASS & BALANCE <span className="text-[10px] md:text-xs bg-accent/20 text-accent px-1.5 py-0.5 rounded ml-1">CALCULATOR</span>
                 </h1>
                 <p className="font-mono text-[9px] md:text-xs text-muted-foreground tracking-widest">ROTARY WING AIRCRAFT LOADING COMPUTER</p>
+              </div>
+              <div className="ml-4">
+                <label className="font-mono text-[9px] text-muted-foreground tracking-widest uppercase block mb-0.5">REG.</label>
+                <input
+                  type="text"
+                  value={aircraftReg}
+                  onChange={e => setAircraftReg(e.target.value.toUpperCase())}
+                  placeholder="ZS-XXX"
+                  className="font-mono text-xs h-8 w-24 md:w-28 bg-background/50 border border-border rounded px-2 text-foreground placeholder:text-muted-foreground/50 tracking-wider uppercase"
+                />
               </div>
             </div>
             <Button
