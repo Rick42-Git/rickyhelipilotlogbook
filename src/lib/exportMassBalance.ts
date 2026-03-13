@@ -11,12 +11,17 @@ interface MassBalanceExportData {
   weightMargin: number;
   withinLimits: boolean;
   lateralWithinLimits: boolean;
+  signature?: {
+    imageDataUrl: string;
+    name: string;
+    title: string;
+  };
 }
 
 export function exportMassBalancePDF(data: MassBalanceExportData) {
   const {
     aircraft, weights, totalWeight, totalMoment, cgStation,
-    lateralCG, lateralMoment, weightMargin, withinLimits, lateralWithinLimits,
+    lateralCG, lateralMoment, weightMargin, withinLimits, lateralWithinLimits, signature,
   } = data;
 
   const now = new Date();
@@ -145,6 +150,23 @@ export function exportMassBalancePDF(data: MassBalanceExportData) {
       <div class="limit-row"><span>Stations Defined</span><span>${aircraft.stations.length}</span></div>
     </div>
   </div>
+
+  ${signature ? `
+  <div class="section-title">Authorization</div>
+  <div style="display:flex;align-items:flex-end;gap:24px;margin-top:8px;">
+    <div style="flex:1;">
+      <img src="${signature.imageDataUrl}" style="max-height:60px;max-width:200px;" />
+      <div style="border-top:1px solid #333;margin-top:4px;padding-top:4px;">
+        <div style="font-size:11px;font-weight:700;">${signature.name || ''}</div>
+        <div style="font-size:9px;color:#666;">${signature.title || ''}</div>
+      </div>
+    </div>
+    <div style="flex:1;text-align:right;">
+      <div style="font-size:10px;color:#666;">Date & Time</div>
+      <div style="font-size:11px;font-weight:600;">${dateStr} ${timeStr} UTC</div>
+    </div>
+  </div>
+  ` : ''}
 
   <div class="footer">
     <div>FOR REFERENCE ONLY — VERIFY WITH OFFICIAL AIRCRAFT DOCUMENTATION</div>

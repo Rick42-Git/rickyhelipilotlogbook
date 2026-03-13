@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { exportMassBalancePDF } from '@/lib/exportMassBalance';
+import { SignatureDialog } from '@/components/mass-balance/SignatureDialog';
 import { aircraftTypes, AircraftType } from '@/data/aircraftData';
 import { LoadingSheet } from '@/components/mass-balance/LoadingSheet';
 import { CGEnvelopeChart } from '@/components/mass-balance/CGEnvelopeChart';
@@ -70,7 +71,9 @@ const MassBalance = () => {
     return selectedAircraft.stations.findIndex(s => s.label.toLowerCase().includes('fuel'));
   }, [selectedAircraft]);
 
-  const handleExportPDF = () => {
+  const [signatureOpen, setSignatureOpen] = useState(false);
+
+  const handleExportPDF = (signature?: { imageDataUrl: string; name: string; title: string }) => {
     exportMassBalancePDF({
       aircraft: selectedAircraft,
       weights,
@@ -82,6 +85,7 @@ const MassBalance = () => {
       weightMargin,
       withinLimits,
       lateralWithinLimits,
+      signature,
     });
   };
 
@@ -109,7 +113,7 @@ const MassBalance = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleExportPDF}
+              onClick={() => setSignatureOpen(true)}
               className="font-mono text-[10px] md:text-xs h-8 md:h-9 gap-1.5"
             >
               <Download className="h-3.5 w-3.5" />
@@ -324,6 +328,11 @@ const MassBalance = () => {
           </p>
         </div>
       </div>
+      <SignatureDialog
+        open={signatureOpen}
+        onOpenChange={setSignatureOpen}
+        onConfirm={(sig) => handleExportPDF(sig)}
+      />
     </div>
   );
 };
