@@ -224,7 +224,16 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
                   </td>
                 </tr>
               ))}
-          </tbody>
+          <tfoot>
+            <tr className="border-t-2 border-primary/30 bg-muted/30">
+              {activeCols.map(col => (
+                <td key={col.key} className="px-2 py-2 font-mono text-xs font-bold whitespace-nowrap text-primary">
+                  {col.key === 'date' ? `${filteredEntries.length} flights` : totalMapping[col.key] !== undefined ? fmt(totalMapping[col.key]) : ''}
+                </td>
+              ))}
+              <td />
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
