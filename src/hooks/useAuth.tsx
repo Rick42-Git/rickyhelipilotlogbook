@@ -36,7 +36,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: { code },
       });
 
-      if (error || !data?.success) {
+      console.log('[activate] response:', { data, error });
+
+      if (error) {
+        // supabase.functions.invoke wraps non-2xx as FunctionsHttpError
+        // Try to extract the body from the error context
+        let errorMessage = 'Invalid access code';
+        if (error instanceof Error && 'context' in error) {
+          try {
+            const ctx = (error as any).context;
+            if (ctx?.json) {
+              const body = await ctx.json();
+              errorMessage = body?.error || errorMessage;
+            }
+          } catch {}
+        }
+        return { success: false, error: errorMessage };
+      }
+
+      if (!data?.success) {
         return { success: false, error: data?.error || 'Invalid access code' };
       }
 
@@ -44,7 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setActivatedUser(u);
       setUser(u);
       return { success: true };
-    } catch {
+    } catch (e) {
+      console.error('[activate] caught error:', e);
       return { success: false, error: 'Network error — you need internet for first-time activation' };
     }
   };
