@@ -111,6 +111,16 @@ const MassBalance = () => {
                 </h1>
                 <p className="font-mono text-[9px] md:text-xs text-muted-foreground tracking-widest">ROTARY WING AIRCRAFT LOADING COMPUTER</p>
               </div>
+              <div className="ml-4">
+                <label className="font-mono text-[9px] text-muted-foreground tracking-widest uppercase block mb-0.5">REG.</label>
+                <input
+                  type="text"
+                  value={aircraftReg}
+                  onChange={e => setAircraftReg(e.target.value.toUpperCase())}
+                  placeholder="ZS-XXX"
+                  className="font-mono text-xs h-8 w-24 md:w-28 bg-background/50 border border-border rounded px-2 text-foreground placeholder:text-muted-foreground/50 tracking-wider uppercase"
+                />
+              </div>
             </div>
             <Button
               variant="outline"
