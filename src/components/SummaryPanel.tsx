@@ -78,6 +78,16 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
         </div>
       )}
 
+      {gameTotals.flights > 0 && (
+        <div className="mb-4 flex items-center justify-between rounded border border-accent/20 bg-accent/5 px-4 py-2">
+          <p className="font-mono text-[9px] text-accent uppercase tracking-widest">Game Flights</p>
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-xs font-semibold text-foreground">{gameTotals.hours.toFixed(1)} <span className="text-muted-foreground font-normal text-[9px]">HRS</span></span>
+            <span className="font-mono text-[10px] text-muted-foreground">({gameTotals.flights} flights)</span>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {groups.map(g => (
           <div key={g.title} className="space-y-1">
