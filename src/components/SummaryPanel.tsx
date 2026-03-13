@@ -19,6 +19,21 @@ function getTypeTotals(entries: LogbookEntry[]) {
   return Object.entries(map).sort((a, b) => b[1].hours - a[1].hours);
 }
 
+const PISTON_TYPES = new Set(['RH-22', 'RH-44', 'FNTP II']);
+
+function getTurbineTotals(entries: LogbookEntry[]) {
+  let hours = 0;
+  let flights = 0;
+  for (const e of entries) {
+    const type = normalizeAircraftType(e.aircraftType || '');
+    if (!PISTON_TYPES.has(type.toUpperCase()) && !PISTON_TYPES.has(type)) {
+      flights += 1;
+      hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
+    }
+  }
+  return { hours, flights };
+}
+
 function getGameTotals(entries: LogbookEntry[]) {
   let hours = 0;
   let flights = 0;
@@ -41,6 +56,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
 
   const grandTotal = useMemo(() => (totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot), [totals]);
   const typeTotals = useMemo(() => getTypeTotals(entries), [entries]);
+  const turbineTotals = useMemo(() => getTurbineTotals(entries), [entries]);
   const gameTotals = useMemo(() => getGameTotals(entries), [entries]);
 
   return (
@@ -74,6 +90,16 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {turbineTotals.flights > 0 && (
+        <div className="mb-4 flex items-center justify-between rounded border border-accent/20 bg-accent/5 px-4 py-2">
+          <p className="font-mono text-[9px] text-accent uppercase tracking-widest">Turbine</p>
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-xs font-semibold text-foreground">{turbineTotals.hours.toFixed(1)} <span className="text-muted-foreground font-normal text-[9px]">HRS</span></span>
+            <span className="font-mono text-[10px] text-muted-foreground">({turbineTotals.flights} flights)</span>
           </div>
         </div>
       )}
