@@ -329,6 +329,11 @@ const MassBalance = () => {
           </p>
         </div>
       </div>
+      <SignatureDialog
+        open={signatureOpen}
+        onOpenChange={setSignatureOpen}
+        onConfirm={(sig) => handleExportPDF(sig)}
+      />
     </div>
   );
 };
