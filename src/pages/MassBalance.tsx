@@ -113,11 +113,12 @@ const MassBalance = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleExportPDF}
+              onClick={() => setSignatureOpen(true)}
               className="font-mono text-[10px] md:text-xs h-8 md:h-9 gap-1.5"
             >
               <Download className="h-3.5 w-3.5" />
               EXPORT PDF
+            </Button>
             </Button>
           </div>
         </div>
