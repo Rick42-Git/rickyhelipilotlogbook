@@ -231,15 +231,6 @@ const Index = () => {
         </div>
 
         <div className="flex items-center gap-3 my-6 sticky top-0 z-30 bg-background py-3 -mx-4 px-4">
-          <div className="flex-1 alt-line" />
-          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2">
-            <span>entries</span>
-          </span>
-          <div className="flex-1 alt-line" />
-          <Button size="sm" onClick={handleNew} className="font-mono text-[10px] gap-1.5 h-7 px-2">
-            <Plus className="h-3.5 w-3.5" />
-            NEW ENTRY
-          </Button>
           {entries.length > 0 && (
             <Button
               variant="ghost"
@@ -251,6 +242,15 @@ const Index = () => {
               {viewMode === 'list' ? 'BOOK' : 'LIST'}
             </Button>
           )}
+          <div className="flex-1 alt-line" />
+          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2">
+            <span>entries</span>
+          </span>
+          <div className="flex-1 alt-line" />
+          <Button size="sm" onClick={handleNew} className="font-mono text-[10px] gap-1.5 h-7 px-2">
+            <Plus className="h-3.5 w-3.5" />
+            NEW ENTRY
+          </Button>
         </div>
 
         {/* Entries view */}
