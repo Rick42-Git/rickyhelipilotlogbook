@@ -87,6 +87,7 @@ const MassBalance = () => {
       withinLimits,
       lateralWithinLimits,
       signature,
+      aircraftReg,
     });
   };
 
