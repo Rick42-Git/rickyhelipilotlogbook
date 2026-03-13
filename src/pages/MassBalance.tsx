@@ -29,6 +29,7 @@ const MassBalance = () => {
   const navigate = useNavigate();
   const [selectedAircraft, setSelectedAircraft] = useState<AircraftType>(aircraftTypes[0]);
   const [weights, setWeights] = useState<number[]>(aircraftTypes[0].stations.map(s => s.defaultWeight));
+  const [aircraftReg, setAircraftReg] = useState('');
 
   const handleAircraftChange = useCallback((aircraft: AircraftType) => {
     setSelectedAircraft(aircraft);
