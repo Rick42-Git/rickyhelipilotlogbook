@@ -22,7 +22,7 @@ interface MassBalanceExportData {
 export function exportMassBalancePDF(data: MassBalanceExportData) {
   const {
     aircraft, weights, totalWeight, totalMoment, cgStation,
-    lateralCG, lateralMoment, weightMargin, withinLimits, lateralWithinLimits, signature,
+    lateralCG, lateralMoment, weightMargin, withinLimits, lateralWithinLimits, signature, aircraftReg,
   } = data;
 
   const now = new Date();
