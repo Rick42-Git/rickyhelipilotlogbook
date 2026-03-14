@@ -15,6 +15,7 @@ interface AccessCode {
   email: string;
   activated: boolean;
   is_admin: boolean;
+  extraction_limit: number;
   created_at: string;
 }
 
@@ -34,6 +35,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
+  const [newExtractionLimit, setNewExtractionLimit] = useState(5);
   const [creating, setCreating] = useState(false);
 
   const adminId = activatedUser?.id;
@@ -61,7 +63,7 @@ export default function Admin() {
 
     const code = generateCode();
     const { data, error } = await supabase.functions.invoke('admin-codes', {
-      body: { action: 'create', adminId, code, display_name: newName.trim(), email: newEmail.trim() },
+      body: { action: 'create', adminId, code, display_name: newName.trim(), email: newEmail.trim(), extraction_limit: newExtractionLimit },
     });
 
     if (error) {
@@ -70,6 +72,7 @@ export default function Admin() {
       toast.success(`Code created: ${code}`);
       setNewName('');
       setNewEmail('');
+      setNewExtractionLimit(5);
       fetchCodes();
     }
     setCreating(false);
@@ -136,6 +139,14 @@ export default function Admin() {
               onChange={e => setNewEmail(e.target.value)}
               className="font-mono text-xs flex-1"
             />
+            <Input
+              type="number"
+              min={1}
+              placeholder="Extractions"
+              value={newExtractionLimit}
+              onChange={e => setNewExtractionLimit(Math.max(1, parseInt(e.target.value) || 5))}
+              className="font-mono text-xs w-28"
+            />
             <Button onClick={createCode} disabled={creating || !newName.trim()} className="font-mono text-xs gap-1">
               <Plus className="h-3 w-3" />
               GENERATE
@@ -151,21 +162,23 @@ export default function Admin() {
             <p className="font-mono text-xs text-muted-foreground text-center py-8">No access codes yet. Generate one above.</p>
           ) : (
             <div className="space-y-2">
-              <div className="grid grid-cols-[1fr_120px_80px_60px_60px] gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider pb-2 border-b border-primary/20">
+              <div className="grid grid-cols-[1fr_120px_60px_80px_60px_60px] gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider pb-2 border-b border-primary/20">
                 <span>Pilot</span>
                 <span>Code</span>
+                <span>Limit</span>
                 <span>Status</span>
                 <span>Copy</span>
                 <span className="text-right">Del</span>
               </div>
               {codes.map(c => (
-                <div key={c.id} className="grid grid-cols-[1fr_120px_80px_60px_60px] gap-2 items-center py-2 border-b border-border/30">
+                <div key={c.id} className="grid grid-cols-[1fr_120px_60px_80px_60px_60px] gap-2 items-center py-2 border-b border-border/30">
                   <div>
                     <span className="font-mono text-xs text-foreground block truncate">{c.display_name}</span>
                     {c.email && <span className="font-mono text-[10px] text-muted-foreground block truncate">{c.email}</span>}
                     {c.is_admin && <span className="font-mono text-[9px] text-primary">ADMIN</span>}
                   </div>
                   <span className="font-mono text-xs text-primary tracking-widest">{c.code}</span>
+                  <span className="font-mono text-xs text-accent">{c.extraction_limit}</span>
                   <span className={`font-mono text-[10px] uppercase tracking-wider ${c.activated ? 'text-green-400' : 'text-muted-foreground/50'}`}>
                     {c.activated ? 'ACTIVE' : 'PENDING'}
                   </span>

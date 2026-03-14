@@ -1,0 +1,1 @@
+ALTER TABLE public.access_codes ADD COLUMN extraction_limit integer NOT NULL DEFAULT 5;

@@ -22,9 +22,47 @@ serve(async (req) => {
 
     const { imageBase64, spreadsheetText, fileName, userId } = await req.json();
 
-    // Usage tracking (no limit enforced)
     if (!imageBase64 && !spreadsheetText) {
       throw new Error("No image or spreadsheet payload provided");
+    }
+
+    // Enforce per-user extraction limit
+    if (userId) {
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+      const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+      const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+      // Get user's extraction limit from access_codes
+      const { data: userCode } = await sb
+        .from("access_codes")
+        .select("extraction_limit, is_admin")
+        .eq("id", userId)
+        .maybeSingle();
+
+      // Admins bypass the limit
+      if (!userCode?.is_admin) {
+        const limit = userCode?.extraction_limit ?? 5;
+
+        // Count how many extractions this user has already used
+        const { count } = await sb
+          .from("ai_usage")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId);
+
+        const used = count ?? 0;
+        if (used >= limit) {
+          return new Response(
+            JSON.stringify({
+              error: `Extraction limit reached (${used}/${limit}). Contact your admin for more extractions.`,
+              limitReached: true,
+              used,
+              limit,
+            }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+      }
     }
 
     const isSpreadsheet = Boolean(spreadsheetText);
@@ -206,13 +244,15 @@ Rules:
       confidence: Math.min(100, Math.max(0, toNumber(e.confidence))),
     }));
 
-    // Record usage (no limit)
+    // Record usage
     if (userId && entries.length > 0) {
-      const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-      const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-      const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-      await sb.from("ai_usage").insert({ user_id: userId });
+      try {
+        const SUPABASE_URL2 = Deno.env.get("SUPABASE_URL")!;
+        const SUPABASE_SERVICE_ROLE_KEY2 = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        const { createClient: createClient2 } = await import("https://esm.sh/@supabase/supabase-js@2");
+        const sb2 = createClient2(SUPABASE_URL2, SUPABASE_SERVICE_ROLE_KEY2);
+        await sb2.from("ai_usage").insert({ user_id: userId });
+      } catch (_) { /* don't fail extraction over usage tracking */ }
     }
 
     return new Response(JSON.stringify({ entries }), {

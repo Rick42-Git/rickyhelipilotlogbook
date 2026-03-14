@@ -21,6 +21,7 @@ export type Database = {
           created_at: string
           display_name: string
           email: string
+          extraction_limit: number
           id: string
           is_admin: boolean
         }
@@ -30,6 +31,7 @@ export type Database = {
           created_at?: string
           display_name: string
           email?: string
+          extraction_limit?: number
           id?: string
           is_admin?: boolean
         }
@@ -39,6 +41,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           email?: string
+          extraction_limit?: number
           id?: string
           is_admin?: boolean
         }
