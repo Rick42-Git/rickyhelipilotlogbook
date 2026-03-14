@@ -125,6 +125,42 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_requests: {
+        Row: {
+          admin_note: string
+          approved_amount: number | null
+          created_at: string
+          id: string
+          requested_amount: number
+          status: string
+          updated_at: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          admin_note?: string
+          approved_amount?: number | null
+          created_at?: string
+          id?: string
+          requested_amount?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          admin_note?: string
+          approved_amount?: number | null
+          created_at?: string
+          id?: string
+          requested_amount?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: []
+      }
       flight_plans: {
         Row: {
           aircraft_reg: string
