@@ -109,7 +109,7 @@ export function useLogbook() {
 
           const { data, error } = await supabase
             .from('logbook_entries')
-            .insert(action.entry)
+            .insert(action.entry as any)
             .select()
             .single();
 
