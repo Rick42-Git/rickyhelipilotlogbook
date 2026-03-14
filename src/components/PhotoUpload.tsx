@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { LogbookEntry } from '@/types/logbook';
 import { ExtractedDataReview, ExtractedEntry } from '@/components/ExtractedDataReview';
+import { CreditRequestDialog } from '@/components/CreditRequestDialog';
 
 interface PhotoUploadProps {
   onEntriesExtracted: (entries: Omit<LogbookEntry, 'id'>[]) => void;
