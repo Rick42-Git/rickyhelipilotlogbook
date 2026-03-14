@@ -200,7 +200,7 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
                             <span className="text-[9px] truncate block max-w-[100px]">{entry.pilotInCommand}</span>
                           </td>
                           <td className={`${tdLeftClass} border-r-0 relative`} style={{ color: 'hsl(30 15% 30%)' }}>
-                            <span className="text-[9px] truncate block max-w-[140px] pr-10">{entry.flightDetails}</span>
+                            <span className="text-[9px] truncate block max-w-[260px] pr-10">{entry.flightDetails}</span>
                             {hoveredRow === i && (
                               <span className="absolute right-1 top-1/2 -translate-y-1/2 flex gap-0.5">
                                 <button onClick={() => onEdit(entry)} className="p-0.5 rounded hover:bg-black/10 transition-colors" style={{ color: 'hsl(30 15% 45%)' }}>
