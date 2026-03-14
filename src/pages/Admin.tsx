@@ -171,13 +171,14 @@ export default function Admin() {
                 <span className="text-right">Del</span>
               </div>
               {codes.map(c => (
-                <div key={c.id} className="grid grid-cols-[1fr_120px_80px_60px_60px] gap-2 items-center py-2 border-b border-border/30">
+                <div key={c.id} className="grid grid-cols-[1fr_120px_60px_80px_60px_60px] gap-2 items-center py-2 border-b border-border/30">
                   <div>
                     <span className="font-mono text-xs text-foreground block truncate">{c.display_name}</span>
                     {c.email && <span className="font-mono text-[10px] text-muted-foreground block truncate">{c.email}</span>}
                     {c.is_admin && <span className="font-mono text-[9px] text-primary">ADMIN</span>}
                   </div>
                   <span className="font-mono text-xs text-primary tracking-widest">{c.code}</span>
+                  <span className="font-mono text-xs text-accent">{c.extraction_limit}</span>
                   <span className={`font-mono text-[10px] uppercase tracking-wider ${c.activated ? 'text-green-400' : 'text-muted-foreground/50'}`}>
                     {c.activated ? 'ACTIVE' : 'PENDING'}
                   </span>
