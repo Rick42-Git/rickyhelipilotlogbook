@@ -20,7 +20,32 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const { imageBase64, spreadsheetText, fileName } = await req.json();
+    const { imageBase64, spreadsheetText, fileName, userId } = await req.json();
+
+    // Rate limit: 5 extractions per user per day
+    if (userId) {
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+      const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+      const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+
+      const { count } = await sb
+        .from("ai_usage")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .gte("used_at", todayStart.toISOString());
+
+      const DAILY_LIMIT = 5;
+      if ((count ?? 0) >= DAILY_LIMIT) {
+        return new Response(
+          JSON.stringify({ error: `Daily limit reached (${DAILY_LIMIT} extractions per day). Try again tomorrow.`, remaining: 0 }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
     if (!imageBase64 && !spreadsheetText) {
       throw new Error("No image or spreadsheet payload provided");
     }
@@ -203,6 +228,28 @@ Rules:
       instructorNight: toNumber(e.instructorNight),
       confidence: Math.min(100, Math.max(0, toNumber(e.confidence))),
     }));
+
+    // Record usage
+    if (userId && entries.length > 0) {
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+      const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+      const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      await sb.from("ai_usage").insert({ user_id: userId });
+
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+      const { count: newCount } = await sb
+        .from("ai_usage")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .gte("used_at", todayStart.toISOString());
+
+      const remaining = Math.max(0, 5 - (newCount ?? 0));
+      return new Response(JSON.stringify({ entries, remaining }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     return new Response(JSON.stringify({ entries }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
