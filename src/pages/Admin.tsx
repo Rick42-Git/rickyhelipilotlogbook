@@ -162,9 +162,10 @@ export default function Admin() {
             <p className="font-mono text-xs text-muted-foreground text-center py-8">No access codes yet. Generate one above.</p>
           ) : (
             <div className="space-y-2">
-              <div className="grid grid-cols-[1fr_120px_80px_60px_60px] gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider pb-2 border-b border-primary/20">
+              <div className="grid grid-cols-[1fr_120px_60px_80px_60px_60px] gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider pb-2 border-b border-primary/20">
                 <span>Pilot</span>
                 <span>Code</span>
+                <span>Limit</span>
                 <span>Status</span>
                 <span>Copy</span>
                 <span className="text-right">Del</span>
