@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { X, ArrowLeft, RefreshCw, Plus, Copy } from 'lucide-react';
+import { X, ArrowLeft, RefreshCw, Plus, Copy, Check, Edit2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import helicopterIcon from '@/assets/helicopter-icon.png';
@@ -16,6 +16,16 @@ interface AccessCode {
   activated: boolean;
   is_admin: boolean;
   extraction_limit: number;
+  created_at: string;
+}
+
+interface CreditRequest {
+  id: string;
+  user_id: string;
+  user_name: string;
+  requested_amount: number;
+  approved_amount: number | null;
+  status: string;
   created_at: string;
 }
 
@@ -38,6 +48,10 @@ export default function Admin() {
   const [newExtractionLimit, setNewExtractionLimit] = useState(5);
   const [creating, setCreating] = useState(false);
 
+  // Credit requests
+  const [creditRequests, setCreditRequests] = useState<CreditRequest[]>([]);
+  const [editingAmount, setEditingAmount] = useState<Record<string, number>>({});
+
   const adminId = activatedUser?.id;
 
   const fetchCodes = async () => {
@@ -55,14 +69,23 @@ export default function Admin() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchCodes(); }, [adminId]);
+  const fetchCreditRequests = async () => {
+    const { data } = await supabase
+      .from('credit_requests')
+      .select('*')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true });
+    setCreditRequests((data as any[]) || []);
+  };
+
+  useEffect(() => { fetchCodes(); fetchCreditRequests(); }, [adminId]);
 
   const createCode = async () => {
     if (!newName.trim() || !adminId) { toast.error('Name is required'); return; }
     setCreating(true);
 
     const code = generateCode();
-    const { data, error } = await supabase.functions.invoke('admin-codes', {
+    const { error } = await supabase.functions.invoke('admin-codes', {
       body: { action: 'create', adminId, code, display_name: newName.trim(), email: newEmail.trim(), extraction_limit: newExtractionLimit },
     });
 
@@ -97,6 +120,30 @@ export default function Admin() {
     toast.success('Code copied to clipboard');
   };
 
+  const handleCreditAction = async (request: CreditRequest, action: 'approve' | 'reject') => {
+    if (!adminId) return;
+    const approvedAmount = action === 'approve' ? (editingAmount[request.id] ?? request.requested_amount) : 0;
+
+    const { error } = await supabase.functions.invoke('admin-codes', {
+      body: {
+        action: 'credit_response',
+        adminId,
+        requestId: request.id,
+        userId: request.user_id,
+        approvedAmount,
+        status: action === 'approve' ? 'approved' : 'rejected',
+      },
+    });
+
+    if (error) {
+      toast.error('Failed to process request');
+    } else {
+      toast.success(action === 'approve' ? `Approved ${approvedAmount} credits` : 'Request rejected');
+      fetchCreditRequests();
+      fetchCodes();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background grid-bg scanline">
       <div className="max-w-3xl mx-auto px-4 py-6 md:py-8">
@@ -115,13 +162,60 @@ export default function Admin() {
                 <ArrowLeft className="h-3 w-3" />
                 BACK
               </Button>
-              <Button variant="outline" size="sm" onClick={fetchCodes} className="font-mono text-xs gap-1">
+              <Button variant="outline" size="sm" onClick={() => { fetchCodes(); fetchCreditRequests(); }} className="font-mono text-xs gap-1">
                 <RefreshCw className="h-3 w-3" />
                 REFRESH
               </Button>
             </div>
           </div>
         </div>
+
+        {/* Credit Requests */}
+        {creditRequests.length > 0 && (
+          <div className="glass-panel hud-border p-4 mb-6 border-accent/30">
+            <h2 className="font-mono text-xs text-accent tracking-wider mb-3">
+              PENDING CREDIT REQUESTS ({creditRequests.length})
+            </h2>
+            <div className="space-y-3">
+              {creditRequests.map(cr => (
+                <div key={cr.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded border border-border/50 bg-background/50">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-mono text-xs text-foreground truncate">{cr.user_name}</p>
+                    <p className="font-mono text-[10px] text-muted-foreground">
+                      Requested <span className="text-accent">{cr.requested_amount}</span> additional extractions
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      value={editingAmount[cr.id] ?? cr.requested_amount}
+                      onChange={e => setEditingAmount(prev => ({ ...prev, [cr.id]: Math.max(1, parseInt(e.target.value) || 1) }))}
+                      className="font-mono text-xs w-20 h-7"
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => handleCreditAction(cr, 'approve')}
+                      className="font-mono text-[10px] h-7 gap-1 bg-green-600 hover:bg-green-700"
+                    >
+                      <Check className="h-3 w-3" />
+                      APPROVE
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleCreditAction(cr, 'reject')}
+                      className="font-mono text-[10px] h-7 gap-1"
+                    >
+                      <X className="h-3 w-3" />
+                      REJECT
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Create new code */}
         <div className="glass-panel hud-border p-4 mb-6">

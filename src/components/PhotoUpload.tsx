@@ -134,7 +134,9 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
     if (!processing) handleFiles(e.dataTransfer.files);
   }, [handleFiles, processing]);
 
+  const [creditRequestOpen, setCreditRequestOpen] = useState(false);
   const isDisabled = processing || (remaining !== null && remaining <= 0);
+  const limitReached = remaining !== null && remaining <= 0;
 
   return (
     <>
@@ -144,7 +146,13 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
         }`}
         onDrop={handleDrop}
         onDragOver={e => e.preventDefault()}
-        onClick={() => !isDisabled && inputRef.current?.click()}
+        onClick={() => {
+          if (limitReached && !processing) {
+            setCreditRequestOpen(true);
+          } else if (!isDisabled) {
+            inputRef.current?.click();
+          }
+        }}
       >
         <input
           ref={inputRef}
@@ -170,15 +178,15 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
             <p className="font-mono text-sm text-foreground">
               {processing
                 ? 'EXTRACTING FLIGHT DATA...'
-                : remaining !== null && remaining <= 0
-                  ? 'EXTRACTION LIMIT REACHED'
+                : limitReached
+                  ? 'EXTRACTION LIMIT REACHED — TAP TO REQUEST MORE'
                   : 'UPLOAD LOGBOOK PHOTOS / PDF'}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {processing
                 ? 'AI is reading your logbook — this may take a moment'
-                : remaining !== null && remaining <= 0
-                  ? 'Contact your admin for more AI extractions'
+                : limitReached
+                  ? 'Click here to request additional AI extraction credits'
                   : remaining !== null
                     ? `${remaining} of ${limit} AI extractions remaining`
                     : 'Drag & drop or click — supports images and PDFs'}
@@ -193,6 +201,17 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
         entries={extractedEntries}
         onConfirm={handleConfirm}
       />
+
+      {activatedUser && (
+        <CreditRequestDialog
+          open={creditRequestOpen}
+          onOpenChange={setCreditRequestOpen}
+          userId={activatedUser.id}
+          userName={activatedUser.displayName || 'Unknown'}
+          used={limit ?? 0}
+          limit={limit ?? 0}
+        />
+      )}
     </>
   );
 }

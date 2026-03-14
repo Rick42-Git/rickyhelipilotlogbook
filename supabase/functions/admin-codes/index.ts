@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { action, adminId } = body;
 
-    // Verify the caller is an admin by checking their activation record
+    // Verify the caller is an admin
     const { data: adminCheck } = await supabase
       .from("access_codes")
       .select("is_admin")
@@ -73,6 +73,40 @@ Deno.serve(async (req) => {
         .eq("id", id);
 
       if (error) throw error;
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "credit_response") {
+      const { requestId, userId, approvedAmount, status } = body;
+
+      // Update the credit request status
+      const { error: reqError } = await supabase
+        .from("credit_requests")
+        .update({ status, approved_amount: approvedAmount, updated_at: new Date().toISOString() })
+        .eq("id", requestId);
+
+      if (reqError) throw reqError;
+
+      // If approved, increase the user's extraction_limit
+      if (status === "approved" && approvedAmount > 0) {
+        // Get current limit
+        const { data: userData } = await supabase
+          .from("access_codes")
+          .select("extraction_limit")
+          .eq("id", userId)
+          .maybeSingle();
+
+        const currentLimit = userData?.extraction_limit ?? 5;
+        const { error: updateError } = await supabase
+          .from("access_codes")
+          .update({ extraction_limit: currentLimit + approvedAmount })
+          .eq("id", userId);
+
+        if (updateError) throw updateError;
+      }
+
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
