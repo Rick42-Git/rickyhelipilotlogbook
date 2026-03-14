@@ -46,10 +46,16 @@ Deno.serve(async (req) => {
     }
 
     if (action === "create") {
-      const { code, display_name, email, is_admin } = body;
+      const { code, display_name, email, is_admin, extraction_limit } = body;
       const { data, error } = await supabase
         .from("access_codes")
-        .insert({ code, display_name, email: email || "", is_admin: is_admin || false })
+        .insert({
+          code,
+          display_name,
+          email: email || "",
+          is_admin: is_admin || false,
+          extraction_limit: extraction_limit ?? 5,
+        })
         .select()
         .single();
 
