@@ -159,7 +159,7 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
               {processing
                 ? 'AI is reading your logbook — this may take a moment'
                 : isLimited
-                  ? 'You've used all 5 daily extractions — try again tomorrow'
+                  : "You\u2019ve used all 5 daily extractions \u2014 try again tomorrow"}
                   : 'Drag & drop or click — supports images and PDFs'}
             </p>
             {remaining !== null && (
