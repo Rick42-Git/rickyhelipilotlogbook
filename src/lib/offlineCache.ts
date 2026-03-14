@@ -54,11 +54,17 @@ export function getOfflineQueue(): OfflineAction[] {
   }
 }
 
+export function setOfflineQueue(actions: OfflineAction[]) {
+  try {
+    localStorage.setItem(QUEUE_KEY, JSON.stringify(actions));
+  } catch {}
+}
+
 export function pushOfflineAction(action: OfflineAction) {
   try {
     const queue = getOfflineQueue();
     queue.push(action);
-    localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+    setOfflineQueue(queue);
   } catch {}
 }
 
