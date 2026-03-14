@@ -15,6 +15,7 @@ interface AccessCode {
   email: string;
   activated: boolean;
   is_admin: boolean;
+  extraction_limit: number;
   created_at: string;
 }
 
