@@ -29,21 +29,27 @@ serve(async (req) => {
       const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
       const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-      const todayStart = new Date();
-      todayStart.setUTCHours(0, 0, 0, 0);
+      // Check if user is admin (admins bypass rate limit)
+      const { data: adminCheck } = await sb.rpc("is_admin", { _user_id: userId });
+      const isAdmin = adminCheck === true;
 
-      const { count } = await sb
-        .from("ai_usage")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .gte("used_at", todayStart.toISOString());
+      if (!isAdmin) {
+        const todayStart = new Date();
+        todayStart.setUTCHours(0, 0, 0, 0);
 
-      const DAILY_LIMIT = 5;
-      if ((count ?? 0) >= DAILY_LIMIT) {
-        return new Response(
-          JSON.stringify({ error: `Daily limit reached (${DAILY_LIMIT} extractions per day). Try again tomorrow.`, remaining: 0 }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
+        const { count } = await sb
+          .from("ai_usage")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .gte("used_at", todayStart.toISOString());
+
+        const DAILY_LIMIT = 5;
+        if ((count ?? 0) >= DAILY_LIMIT) {
+          return new Response(
+            JSON.stringify({ error: `Daily limit reached (${DAILY_LIMIT} extractions per day). Try again tomorrow.`, remaining: 0 }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
       }
     }
     if (!imageBase64 && !spreadsheetText) {
