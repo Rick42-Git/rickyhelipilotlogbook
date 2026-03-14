@@ -206,26 +206,13 @@ Rules:
       confidence: Math.min(100, Math.max(0, toNumber(e.confidence))),
     }));
 
-    // Record usage
+    // Record usage (no limit)
     if (userId && entries.length > 0) {
       const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
       const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
       const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
       await sb.from("ai_usage").insert({ user_id: userId });
-
-      const todayStart = new Date();
-      todayStart.setUTCHours(0, 0, 0, 0);
-      const { count: newCount } = await sb
-        .from("ai_usage")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .gte("used_at", todayStart.toISOString());
-
-      const remaining = Math.max(0, 5 - (newCount ?? 0));
-      return new Response(JSON.stringify({ entries, remaining }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
     }
 
     return new Response(JSON.stringify({ entries }), {
