@@ -63,7 +63,7 @@ export default function Admin() {
 
     const code = generateCode();
     const { data, error } = await supabase.functions.invoke('admin-codes', {
-      body: { action: 'create', adminId, code, display_name: newName.trim(), email: newEmail.trim() },
+      body: { action: 'create', adminId, code, display_name: newName.trim(), email: newEmail.trim(), extraction_limit: newExtractionLimit },
     });
 
     if (error) {
