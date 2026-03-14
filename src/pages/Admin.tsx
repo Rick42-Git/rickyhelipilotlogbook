@@ -72,6 +72,7 @@ export default function Admin() {
       toast.success(`Code created: ${code}`);
       setNewName('');
       setNewEmail('');
+      setNewExtractionLimit(5);
       fetchCodes();
     }
     setCreating(false);
