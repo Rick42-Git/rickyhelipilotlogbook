@@ -139,6 +139,14 @@ export default function Admin() {
               onChange={e => setNewEmail(e.target.value)}
               className="font-mono text-xs flex-1"
             />
+            <Input
+              type="number"
+              min={1}
+              placeholder="Extractions"
+              value={newExtractionLimit}
+              onChange={e => setNewExtractionLimit(Math.max(1, parseInt(e.target.value) || 5))}
+              className="font-mono text-xs w-28"
+            />
             <Button onClick={createCode} disabled={creating || !newName.trim()} className="font-mono text-xs gap-1">
               <Plus className="h-3 w-3" />
               GENERATE
