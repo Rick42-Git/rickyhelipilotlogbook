@@ -35,6 +35,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
+  const [newExtractionLimit, setNewExtractionLimit] = useState(5);
   const [creating, setCreating] = useState(false);
 
   const adminId = activatedUser?.id;
