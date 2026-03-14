@@ -9,12 +9,16 @@ import {
   pushOfflineAction,
   getOfflineQueue,
   clearOfflineQueue,
+  setOfflineQueue,
+  OfflineAction,
 } from '@/lib/offlineCache';
 
 const numericFields: NumericField[] = [
   'seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot',
   'instrumentTime', 'instructorDay', 'instructorNight',
 ];
+
+const FETCH_PAGE_SIZE = 1000;
 
 // Map between camelCase (frontend) and snake_case (DB)
 function toDbEntry(e: Omit<LogbookEntry, 'id'>, userId: string) {
@@ -53,6 +57,30 @@ function fromDbEntry(row: any): LogbookEntry {
   };
 }
 
+async function fetchAllEntriesForUser(userId: string): Promise<LogbookEntry[]> {
+  let from = 0;
+  const rows: any[] = [];
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('logbook_entries')
+      .select('*')
+      .eq('user_id', userId)
+      .order('date', { ascending: true })
+      .range(from, from + FETCH_PAGE_SIZE - 1);
+
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+
+    rows.push(...data);
+
+    if (data.length < FETCH_PAGE_SIZE) break;
+    from += FETCH_PAGE_SIZE;
+  }
+
+  return rows.map(fromDbEntry);
+}
+
 export function useLogbook() {
   const { user } = useAuth();
   const [entries, setEntries] = useState<LogbookEntry[]>([]);
@@ -65,55 +93,87 @@ export function useLogbook() {
     if (queue.length === 0) return;
 
     let syncedCount = 0;
+    const remainingQueue: OfflineAction[] = [];
     const tempIdMap = new Map<string, string>(); // tempId -> real DB id
 
-    for (const action of queue) {
+    for (let i = 0; i < queue.length; i += 1) {
+      const action = queue[i];
+
       try {
         if (action.type === 'add') {
+          const actionUserId = String(action.entry?.user_id || '');
+          if (actionUserId && actionUserId !== userId) {
+            remainingQueue.push(action);
+            continue;
+          }
+
           const { data, error } = await supabase
             .from('logbook_entries')
-            .insert({ ...action.entry, user_id: userId })
+            .insert(action.entry)
             .select()
             .single();
+
           if (!error && data) {
             tempIdMap.set(action.tempId, data.id);
             syncedCount++;
+          } else {
+            remainingQueue.push(action);
           }
         } else if (action.type === 'update') {
+          const actionUserId = String(action.entry?.user_id || '');
+          if (actionUserId && actionUserId !== userId) {
+            remainingQueue.push(action);
+            continue;
+          }
+
           // If updating a temp entry, resolve the real id
           const realId = tempIdMap.get(action.id) || action.id;
           const { error } = await supabase
             .from('logbook_entries')
-            .update({ ...action.entry, user_id: userId })
-            .eq('id', realId);
-          if (!error) syncedCount++;
+            .update(action.entry)
+            .eq('id', realId)
+            .eq('user_id', userId);
+
+          if (!error) {
+            syncedCount++;
+          } else {
+            remainingQueue.push(action);
+          }
         } else if (action.type === 'delete') {
           const realId = tempIdMap.get(action.id) || action.id;
           const { error } = await supabase
             .from('logbook_entries')
             .delete()
-            .eq('id', realId);
-          if (!error) syncedCount++;
+            .eq('id', realId)
+            .eq('user_id', userId);
+
+          if (!error) {
+            syncedCount++;
+          } else {
+            remainingQueue.push(action);
+          }
         }
       } catch {
-        // Network still down — stop trying
+        remainingQueue.push(action, ...queue.slice(i + 1));
         break;
       }
     }
 
-    if (syncedCount > 0) {
+    if (remainingQueue.length === 0) {
       clearOfflineQueue();
+    } else {
+      setOfflineQueue(remainingQueue);
+    }
+
+    if (syncedCount > 0) {
       toast.success(`Synced ${syncedCount} offline change${syncedCount > 1 ? 's' : ''}`);
-      // Re-fetch to get clean server state
-      const { data } = await supabase
-        .from('logbook_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: true });
-      if (data) {
-        const mapped = data.map(fromDbEntry);
+
+      try {
+        const mapped = await fetchAllEntriesForUser(userId);
         setEntries(mapped);
         setCachedEntries(mapped);
+      } catch (error) {
+        console.error('Failed to re-fetch entries after sync:', error);
       }
     }
   }, []);
@@ -149,13 +209,11 @@ export function useLogbook() {
       // Sync any pending offline changes first
       await syncOfflineQueue(user.id);
 
-      const { data, error } = await supabase
-        .from('logbook_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('date', { ascending: true });
-
-      if (error) {
+      try {
+        const mapped = await fetchAllEntriesForUser(user.id);
+        setEntries(mapped);
+        setCachedEntries(mapped);
+      } catch (error) {
         console.error('Failed to load entries:', error);
         const cached = getCachedEntries<LogbookEntry>();
         if (cached) {
@@ -164,11 +222,8 @@ export function useLogbook() {
         } else {
           toast.error('Failed to load entries');
         }
-      } else {
-        const mapped = (data || []).map(fromDbEntry);
-        setEntries(mapped);
-        setCachedEntries(mapped);
       }
+
       setLoading(false);
     };
 
@@ -224,7 +279,8 @@ export function useLogbook() {
     const { error } = await supabase
       .from('logbook_entries')
       .update(toDbEntry(entry, user.id))
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id);
 
     if (error) { toast.error('Failed to update entry'); return; }
     setEntries(prev => {
@@ -251,7 +307,8 @@ export function useLogbook() {
     const { error } = await supabase
       .from('logbook_entries')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id);
 
     if (error) { toast.error('Failed to delete entry'); return; }
     setEntries(prev => {
@@ -304,11 +361,16 @@ export function useLogbook() {
     const { error } = await supabase
       .from('logbook_entries')
       .delete()
+      .eq('user_id', user.id)
       .in('id', lastImportIds);
 
     if (error) { toast.error('Failed to undo import'); return; }
     const idsToRemove = new Set(lastImportIds);
-    setEntries(prev => prev.filter(e => !idsToRemove.has(e.id)));
+    setEntries(prev => {
+      const updated = prev.filter(e => !idsToRemove.has(e.id));
+      setCachedEntries(updated);
+      return updated;
+    });
     toast.success(`Removed ${lastImportIds.length} entries`);
     setLastImportIds(null);
   }, [user, lastImportIds]);
@@ -323,11 +385,19 @@ export function useLogbook() {
     const ids = unknownEntries.map(e => e.id);
     for (let i = 0; i < ids.length; i += 100) {
       const batch = ids.slice(i, i + 100);
-      const { error } = await supabase.from('logbook_entries').delete().in('id', batch);
+      const { error } = await supabase
+        .from('logbook_entries')
+        .delete()
+        .eq('user_id', user.id)
+        .in('id', batch);
       if (error) { toast.error('Failed to delete unknown entries'); return; }
     }
     const idSet = new Set(ids);
-    setEntries(prev => prev.filter(e => !idSet.has(e.id)));
+    setEntries(prev => {
+      const updated = prev.filter(e => !idSet.has(e.id));
+      setCachedEntries(updated);
+      return updated;
+    });
     toast.success(`Removed ${ids.length} unknown entries`);
   }, [user, entries]);
 
@@ -339,10 +409,12 @@ export function useLogbook() {
       const { error } = await supabase
         .from('logbook_entries')
         .delete()
+        .eq('user_id', user.id)
         .in('id', batch);
       if (error) { toast.error('Failed to clear entries'); return; }
     }
     setEntries([]);
+    setCachedEntries([]);
     setLastImportIds(null);
     toast.success(`Cleared ${ids.length} entries`);
   }, [user, entries]);
