@@ -70,7 +70,8 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
   const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title></title>
 <style>
-  @page { size: A4 portrait; margin: 22mm 20mm; }
+  @page { size: A4 portrait; margin: 15mm 18mm; }
+  html, body { height: 100%; overflow: hidden; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; color: #1a1a1a; line-height: 1.5; }
   
