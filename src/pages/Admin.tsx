@@ -52,6 +52,7 @@ export default function Admin() {
   // Credit requests
   const [creditRequests, setCreditRequests] = useState<CreditRequest[]>([]);
   const [editingAmount, setEditingAmount] = useState<Record<string, number>>({});
+  const [editingName, setEditingName] = useState<Record<string, string>>({});
 
   const adminId = activatedUser?.id;
 
