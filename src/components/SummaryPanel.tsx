@@ -55,6 +55,9 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
   ], []);
 
   const grandTotal = useMemo(() => (totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot), [totals]);
+  const totalDay = useMemo(() => totals.seDayDual + totals.seDayPilot, [totals]);
+  const totalNight = useMemo(() => totals.seNightDual + totals.seNightPilot, [totals]);
+  const totalInstruction = useMemo(() => totals.instructorDay + totals.instructorNight, [totals]);
   const typeTotals = useMemo(() => getTypeTotals(entries), [entries]);
   const turbineTotals = useMemo(() => getTurbineTotals(entries), [entries]);
   const gameTotals = useMemo(() => getGameTotals(entries), [entries]);
