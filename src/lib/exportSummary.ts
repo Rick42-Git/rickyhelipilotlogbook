@@ -74,37 +74,55 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; color: #1a1a1a; line-height: 1.5; }
   
-  .header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #1a1a1a; }
-  .header h1 { font-size: 18pt; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
-  .header .pilot-name { font-size: 13pt; font-weight: 600; color: #333; margin-bottom: 2px; }
+  .header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 3px solid #0f4c75; }
+  .header h1 { font-size: 18pt; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; color: #0f4c75; }
+  .header .pilot-name { font-size: 13pt; font-weight: 600; color: #1a1a1a; margin-bottom: 2px; }
   .header .date-range { font-size: 9pt; color: #666; letter-spacing: 1px; }
   
-  .hero { display: flex; justify-content: center; gap: 32px; margin: 20px 0 24px; }
-  .hero-card { text-align: center; padding: 14px 28px; border: 1.5px solid #1a1a1a; border-radius: 4px; min-width: 130px; }
-  .hero-card .value { font-size: 22pt; font-weight: 700; color: #1a1a1a; }
-  .hero-card .label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 2px; color: #666; margin-top: 2px; }
+  .hero { display: flex; justify-content: center; gap: 20px; margin: 20px 0 24px; }
+  .hero-card { text-align: center; padding: 14px 24px; border-radius: 6px; min-width: 120px; }
+  .hero-primary { background: #0f4c75; color: #fff; }
+  .hero-primary .value { font-size: 22pt; font-weight: 700; color: #fff; }
+  .hero-primary .label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+  .hero-secondary { background: #f0f7fc; border: 1.5px solid #0f4c75; }
+  .hero-secondary .value { font-size: 22pt; font-weight: 700; color: #0f4c75; }
+  .hero-secondary .label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 2px; color: #555; margin-top: 2px; }
+  .hero-accent { background: #f0faf0; border: 1.5px solid #2e7d32; }
+  .hero-accent .value { font-size: 22pt; font-weight: 700; color: #2e7d32; }
+  .hero-accent .label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 2px; color: #555; margin-top: 2px; }
   
   .section { margin-bottom: 18px; }
-  .section-title { font-size: 8pt; text-transform: uppercase; letter-spacing: 2.5px; font-weight: 700; color: #1a1a1a; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 8px; }
+  .section-title { font-size: 8pt; text-transform: uppercase; letter-spacing: 2.5px; font-weight: 700; color: #0f4c75; border-bottom: 2px solid #0f4c75; padding-bottom: 4px; margin-bottom: 8px; }
   
   table { width: 100%; border-collapse: collapse; }
-  th { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; text-align: left; padding: 6px 10px; border-bottom: 1.5px solid #1a1a1a; color: #333; }
+  th { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; text-align: left; padding: 6px 10px; border-bottom: 2px solid #0f4c75; color: #0f4c75; background: #f0f7fc; }
   th.num { text-align: right; }
   td { font-size: 9.5pt; padding: 5px 10px; border-bottom: 1px solid #e5e5e5; }
   td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:nth-child(even) { background: #fafcfe; }
   tr:last-child td { border-bottom: none; }
-  .total-row td { font-weight: 700; border-top: 1.5px solid #1a1a1a; border-bottom: none; padding-top: 8px; }
+  .total-row td { font-weight: 700; border-top: 2px solid #0f4c75; border-bottom: none; padding-top: 8px; background: #f0f7fc; }
   
   .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 18px; }
-  .breakdown-card { border: 1px solid #ddd; border-radius: 4px; padding: 12px 14px; }
-  .breakdown-card .card-title { font-size: 8pt; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-bottom: 8px; color: #333; }
+  .breakdown-card { border: 1.5px solid #dde6ed; border-radius: 6px; padding: 12px 14px; background: #fafcfe; }
+  .breakdown-card .card-title { font-size: 8pt; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-bottom: 8px; color: #0f4c75; }
   .breakdown-row { display: flex; justify-content: space-between; padding: 3px 0; }
   .breakdown-row .lbl { font-size: 9pt; color: #555; }
   .breakdown-row .val { font-size: 9.5pt; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .breakdown-subtotal { border-top: 1px solid #ccc; margin-top: 4px; padding-top: 4px; }
-  .breakdown-subtotal .val { font-weight: 700; }
+  .breakdown-subtotal { border-top: 1.5px solid #0f4c75; margin-top: 4px; padding-top: 4px; }
+  .breakdown-subtotal .val { font-weight: 700; color: #0f4c75; }
   
-  .footer { margin-top: 28px; padding-top: 12px; border-top: 1px solid #ccc; display: flex; justify-content: space-between; align-items: flex-end; }
+  .highlight-bar { display: flex; gap: 16px; margin-bottom: 18px; }
+  .highlight-item { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 6px; border-left: 4px solid; }
+  .highlight-turbine { background: #f0f7fc; border-left-color: #0f4c75; }
+  .highlight-game { background: #f5f0e6; border-left-color: #8b6914; }
+  .highlight-item .hi-label { font-size: 8pt; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; color: #333; }
+  .highlight-item .hi-detail { font-size: 8pt; color: #888; }
+  .highlight-item .hi-value { font-size: 14pt; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .highlight-turbine .hi-value { color: #0f4c75; }
+  .highlight-game .hi-value { color: #8b6914; }
+  
+  .footer { margin-top: 28px; padding-top: 12px; border-top: 2px solid #0f4c75; display: flex; justify-content: space-between; align-items: flex-end; }
   .footer .date { font-size: 8pt; color: #999; }
   .footer .sig { text-align: right; }
   .footer .sig-line { width: 180px; border-bottom: 1px solid #999; margin-bottom: 4px; margin-left: auto; }
@@ -120,19 +138,23 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
   </div>
 
   <div class="hero">
-    <div class="hero-card">
+    <div class="hero-card hero-primary">
       <div class="value">${grandTotal.toFixed(1)}</div>
       <div class="label">Total Hours</div>
     </div>
-    <div class="hero-card">
+    <div class="hero-card hero-secondary">
       <div class="value">${totalPIC.toFixed(1)}</div>
       <div class="label">Pilot in Command</div>
     </div>
-    ${turbine.flights > 0 ? `<div class="hero-card">
+    ${turbine.flights > 0 ? `<div class="hero-card hero-secondary">
       <div class="value">${turbine.hours.toFixed(1)}</div>
       <div class="label">Turbine Hours</div>
     </div>` : ''}
-    <div class="hero-card">
+    ${gameCapture.flights > 0 ? `<div class="hero-card hero-accent">
+      <div class="value">${gameCapture.hours.toFixed(1)}</div>
+      <div class="label">Game Capture</div>
+    </div>` : ''}
+    <div class="hero-card hero-secondary">
       <div class="value">${entries.length}</div>
       <div class="label">Total Flights</div>
     </div>
@@ -178,6 +200,17 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
     </table>
   </div>
 
+  ${(turbine.flights > 0 || gameCapture.flights > 0) ? `<div class="highlight-bar">
+    ${turbine.flights > 0 ? `<div class="highlight-item highlight-turbine">
+      <div><div class="hi-label">Turbine Hours</div><div class="hi-detail">${turbine.flights} flights</div></div>
+      <div class="hi-value">${turbine.hours.toFixed(1)}h</div>
+    </div>` : ''}
+    ${gameCapture.flights > 0 ? `<div class="highlight-item highlight-game">
+      <div><div class="hi-label">Game Capture</div><div class="hi-detail">${gameCapture.flights} flights</div></div>
+      <div class="hi-value">${gameCapture.hours.toFixed(1)}h</div>
+    </div>` : ''}
+  </div>` : ''}
+
   <div class="breakdown-grid">
     <div class="breakdown-card">
       <div class="card-title">Day / Night Breakdown</div>
@@ -194,9 +227,6 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
       <div class="breakdown-row"><span class="lbl">Instructor — Day</span><span class="val">${fmt(entries.reduce((s, e) => s + (e.instructorDay || 0), 0))}</span></div>
       <div class="breakdown-row"><span class="lbl">Instructor — Night</span><span class="val">${fmt(entries.reduce((s, e) => s + (e.instructorNight || 0), 0))}</span></div>
       <div class="breakdown-row breakdown-subtotal"><span class="lbl">Total Instruction</span><span class="val">${totalInstructor.toFixed(1)}</span></div>
-      ${turbine.flights > 0 ? `
-      <div class="breakdown-row" style="margin-top:6px"><span class="lbl">Turbine Hours</span><span class="val">${turbine.hours.toFixed(1)}</span></div>
-      <div class="breakdown-row"><span class="lbl">Turbine Flights</span><span class="val">${turbine.flights}</span></div>` : ''}
     </div>
   </div>
 
