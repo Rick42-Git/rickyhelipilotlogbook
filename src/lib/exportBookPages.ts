@@ -20,12 +20,28 @@ export function exportBookPagesPDF(
 
   let spreadsHtml = '';
 
+  // Compute carried-forward totals from all entries before the first exported spread
+  const preEntries = sorted.slice(0, fromSpread * ROWS_PER_SPREAD);
+  const initTotals = { seDayPilot: 0, seDayDual: 0, seNightDual: 0, seNightPilot: 0, instrumentTime: 0, instructorDay: 0, instructorNight: 0 };
+  let runningTotals = preEntries.reduce((t, e) => ({
+    seDayPilot: t.seDayPilot + e.seDayPilot,
+    seDayDual: t.seDayDual + e.seDayDual,
+    seNightDual: t.seNightDual + e.seNightDual,
+    seNightPilot: t.seNightPilot + e.seNightPilot,
+    instrumentTime: t.instrumentTime + e.instrumentTime,
+    instructorDay: t.instructorDay + e.instructorDay,
+    instructorNight: t.instructorNight + e.instructorNight,
+  }), { ...initTotals });
+
   for (let s = fromSpread; s <= toSpread; s++) {
     const spreadEntries = sorted.slice(s * ROWS_PER_SPREAD, s * ROWS_PER_SPREAD + ROWS_PER_SPREAD);
     const emptyRows = ROWS_PER_SPREAD - spreadEntries.length;
     const year = spreadEntries.length > 0 ? getMonthDay(spreadEntries[0].date).year : '';
 
-    const totals = spreadEntries.reduce((t, e) => ({
+    // Carried forward = running totals before this spread
+    const cf = { ...runningTotals };
+
+    const pageTotals = spreadEntries.reduce((t, e) => ({
       seDayPilot: t.seDayPilot + e.seDayPilot,
       seDayDual: t.seDayDual + e.seDayDual,
       seNightDual: t.seNightDual + e.seNightDual,
@@ -33,7 +49,18 @@ export function exportBookPagesPDF(
       instrumentTime: t.instrumentTime + e.instrumentTime,
       instructorDay: t.instructorDay + e.instructorDay,
       instructorNight: t.instructorNight + e.instructorNight,
-    }), { seDayPilot: 0, seDayDual: 0, seNightDual: 0, seNightPilot: 0, instrumentTime: 0, instructorDay: 0, instructorNight: 0 });
+    }), { ...initTotals });
+
+    // Update running totals (carried forward + this page)
+    runningTotals = {
+      seDayPilot: cf.seDayPilot + pageTotals.seDayPilot,
+      seDayDual: cf.seDayDual + pageTotals.seDayDual,
+      seNightDual: cf.seNightDual + pageTotals.seNightDual,
+      seNightPilot: cf.seNightPilot + pageTotals.seNightPilot,
+      instrumentTime: cf.instrumentTime + pageTotals.instrumentTime,
+      instructorDay: cf.instructorDay + pageTotals.instructorDay,
+      instructorNight: cf.instructorNight + pageTotals.instructorNight,
+    };
 
     // Build left-page rows
     let leftRows = '';
