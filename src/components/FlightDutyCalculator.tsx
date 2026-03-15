@@ -147,7 +147,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
+        <DialogHeader className="flex-row items-center justify-between gap-4">
           <DialogTitle className="font-mono text-primary tracking-wider">
             ▸ FLIGHT & DUTY CALCULATOR (SACAA)
           </DialogTitle>
