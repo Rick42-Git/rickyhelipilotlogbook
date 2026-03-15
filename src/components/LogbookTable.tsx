@@ -130,8 +130,8 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
   }
 
   return (
-    <div className="bg-card/80 backdrop-blur-sm border border-border rounded-lg max-h-[70vh] overflow-auto relative">
-      <div className="sticky top-0 z-40 bg-card border-b border-border/50">
+    <div className="bg-card/80 backdrop-blur-sm border border-border rounded-lg relative">
+      <div className="sticky top-[44px] z-40 bg-card border-b border-border/50 rounded-t-lg">
         <div className="flex items-center justify-between gap-2 p-2">
           <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
