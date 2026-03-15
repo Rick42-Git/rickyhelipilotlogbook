@@ -154,19 +154,19 @@ export function exportBookPagesPDF(
             </thead>
             <tbody>
               <tr class="cf-row">
-                <td class="td-c"></td><td class="td-c"></td><td class="td-c"></td>
-                <td class="td-c"></td><td class="td-c"></td><td class="td-c"></td>
-                <td class="td-c last-col"></td>
+                <td class="td-c cf-val">${fmt(cf.seDayPilot)}</td><td class="td-c cf-val">${fmt(cf.seDayDual)}</td><td class="td-c cf-val">${fmt(cf.seNightDual)}</td>
+                <td class="td-c cf-val">${fmt(cf.seNightPilot)}</td><td class="td-c cf-val">${fmt(cf.instrumentTime)}</td><td class="td-c cf-val">${fmt(cf.instructorDay)}</td>
+                <td class="td-c cf-val last-col">${fmt(cf.instructorNight)}</td>
               </tr>
               ${rightRows}
               <tr class="totals-row">
-                <td class="td-c total-val day-val">${fmt(totals.seDayPilot)}</td>
-                <td class="td-c total-val day-val">${fmt(totals.seDayDual)}</td>
-                <td class="td-c total-val night-val">${fmt(totals.seNightDual)}</td>
-                <td class="td-c total-val night-val">${fmt(totals.seNightPilot)}</td>
-                <td class="td-c total-val">${fmt(totals.instrumentTime)}</td>
-                <td class="td-c total-val inst-val">${fmt(totals.instructorDay)}</td>
-                <td class="td-c total-val inst-val last-col">${fmt(totals.instructorNight)}</td>
+                <td class="td-c total-val day-val">${fmt(runningTotals.seDayPilot)}</td>
+                <td class="td-c total-val day-val">${fmt(runningTotals.seDayDual)}</td>
+                <td class="td-c total-val night-val">${fmt(runningTotals.seNightDual)}</td>
+                <td class="td-c total-val night-val">${fmt(runningTotals.seNightPilot)}</td>
+                <td class="td-c total-val">${fmt(runningTotals.instrumentTime)}</td>
+                <td class="td-c total-val inst-val">${fmt(runningTotals.instructorDay)}</td>
+                <td class="td-c total-val inst-val last-col">${fmt(runningTotals.instructorNight)}</td>
               </tr>
             </tbody>
           </table>
