@@ -74,12 +74,12 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; color: #1a1a1a; line-height: 1.5; }
   
-  .header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 3px solid #0f4c75; }
+  .header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 3px solid #0f4c75; page-break-inside: avoid; }
   .header h1 { font-size: 18pt; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; color: #0f4c75; }
   .header .pilot-name { font-size: 13pt; font-weight: 600; color: #1a1a1a; margin-bottom: 2px; }
   .header .date-range { font-size: 9pt; color: #666; letter-spacing: 1px; }
   
-  .hero { display: flex; justify-content: center; gap: 20px; margin: 20px 0 24px; }
+  .hero { display: flex; justify-content: center; gap: 20px; margin: 20px 0 24px; flex-wrap: wrap; page-break-inside: avoid; }
   .hero-card { text-align: center; padding: 14px 24px; border-radius: 6px; min-width: 120px; }
   .hero-primary { background: #0f4c75; color: #fff; }
   .hero-primary .value { font-size: 22pt; font-weight: 700; color: #fff; }
@@ -91,7 +91,7 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
   .hero-accent .value { font-size: 22pt; font-weight: 700; color: #2e7d32; }
   .hero-accent .label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 2px; color: #555; margin-top: 2px; }
   
-  .section { margin-bottom: 18px; }
+  .section { margin-bottom: 18px; page-break-inside: avoid; }
   .section-title { font-size: 8pt; text-transform: uppercase; letter-spacing: 2.5px; font-weight: 700; color: #0f4c75; border-bottom: 2px solid #0f4c75; padding-bottom: 4px; margin-bottom: 8px; }
   
   table { width: 100%; border-collapse: collapse; }
@@ -103,8 +103,8 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
   tr:last-child td { border-bottom: none; }
   .total-row td { font-weight: 700; border-top: 2px solid #0f4c75; border-bottom: none; padding-top: 8px; background: #f0f7fc; }
   
-  .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 18px; }
-  .breakdown-card { border: 1.5px solid #dde6ed; border-radius: 6px; padding: 12px 14px; background: #fafcfe; }
+  .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 18px; page-break-inside: avoid; }
+  .breakdown-card { border: 1.5px solid #dde6ed; border-radius: 6px; padding: 12px 14px; background: #fafcfe; page-break-inside: avoid; }
   .breakdown-card .card-title { font-size: 8pt; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-bottom: 8px; color: #0f4c75; }
   .breakdown-row { display: flex; justify-content: space-between; padding: 3px 0; }
   .breakdown-row .lbl { font-size: 9pt; color: #555; }
@@ -112,7 +112,7 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
   .breakdown-subtotal { border-top: 1.5px solid #0f4c75; margin-top: 4px; padding-top: 4px; }
   .breakdown-subtotal .val { font-weight: 700; color: #0f4c75; }
   
-  .highlight-bar { display: flex; gap: 16px; margin-bottom: 18px; }
+  .highlight-bar { display: flex; gap: 16px; margin-bottom: 18px; page-break-inside: avoid; }
   .highlight-item { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 6px; border-left: 4px solid; }
   .highlight-turbine { background: #f0f7fc; border-left-color: #0f4c75; }
   .highlight-game { background: #f5f0e6; border-left-color: #8b6914; }
@@ -122,7 +122,7 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
   .highlight-turbine .hi-value { color: #0f4c75; }
   .highlight-game .hi-value { color: #8b6914; }
   
-  .footer { margin-top: 28px; padding-top: 12px; border-top: 2px solid #0f4c75; display: flex; justify-content: space-between; align-items: flex-end; }
+  .footer { margin-top: 28px; padding-top: 12px; border-top: 2px solid #0f4c75; display: flex; justify-content: space-between; align-items: flex-end; page-break-inside: avoid; }
   .footer .date { font-size: 8pt; color: #999; }
   .footer .sig { text-align: right; }
   .footer .sig-line { width: 180px; border-bottom: 1px solid #999; margin-bottom: 4px; margin-left: auto; }
@@ -236,6 +236,7 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
       <div class="sig-line"></div>
       <div class="sig-label">${pilotName}</div>
       <div class="sig-label" style="margin-top:2px">Pilot Signature</div>
+    </div>
   </div>
 
 </body></html>`;
