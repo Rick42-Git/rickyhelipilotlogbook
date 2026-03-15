@@ -1,0 +1,1 @@
+UPDATE public.logbook_entries SET pilot_in_command = 'Self' WHERE lower(trim(pilot_in_command)) = 's';
