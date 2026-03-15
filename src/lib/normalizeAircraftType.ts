@@ -4,6 +4,7 @@ const AIRCRAFT_TYPE_ALIASES: Record<string, string[]> = {
   'FNTP II': ['FNTP II', 'FNTP-II', 'FNTP 2', 'FNTPII', 'FNTP2', 'FSTD I', 'FSTD-I', 'FSTD 1', 'FSTDI', 'FSTD1', 'FSTD II', 'FSTD-II', 'FSTD 2', 'FSTDII', 'FSTD2'],
   'SA341': ['GAZ', 'GAZELLE', 'SA341', 'SA342', 'SA 341', 'SA 342', 'SA-341', 'SA-342'],
   'BH206': ['BA206', 'BA 206', 'BH206', 'B206', 'BH 206', 'B 206', 'BA-206', 'BH-206', 'B-206'],
+  'Huey UH-1': ['UH-1H', 'UH-1', 'UH1', 'HUEY', 'UH 1H', 'UH 1', 'HUEY UH-1', 'UH1H'],
 };
 
 const aliasMap = new Map<string, string>();
