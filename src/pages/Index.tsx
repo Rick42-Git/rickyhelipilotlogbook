@@ -111,6 +111,10 @@ const Index = () => {
                 <Plane className="h-4 w-4" />
                 FLT PLAN
               </Button>
+              <Button variant="outline" onClick={() => navigate('/frequency-chart')} className="font-mono gap-2">
+                <Radio className="h-4 w-4" />
+                FREQ
+              </Button>
               <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
                 <Clock className="h-4 w-4" />
                 F&D CALC
