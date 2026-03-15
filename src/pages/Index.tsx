@@ -39,7 +39,7 @@ import { ColumnTemplateManager } from '@/components/ColumnTemplateManager';
 import { useColumnTemplates } from '@/hooks/useColumnTemplates';
 
 const Index = () => {
-  const { user, signOut } = useAuth();
+  const { user, activatedUser, signOut } = useAuth();
   const navigate = useNavigate();
   const { isAdmin } = useIsAdmin();
   const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, clearAllEntries, deleteUnknownEntries, getTotals } = useLogbook();
