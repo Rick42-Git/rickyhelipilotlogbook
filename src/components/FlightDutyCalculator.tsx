@@ -139,8 +139,8 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
   const totalFlightHours = monthData.reduce((sum, d) => sum + d.totalFlightHours, 0);
   const totalDutyHours = monthData.reduce((sum, d) => sum + d.actualFDP, 0);
   const totalFlights = monthData.reduce((sum, d) => sum + d.flights.length, 0);
-  const exceedCount = monthData.filter(d => d.exceeded).length;
-  const flyingDays = monthData.length;
+  const exceedCount = monthData.filter(d => d.fdpExceeded).length;
+  const flightTimeExceedCount = monthData.filter(d => d.flightTimeExceeded).length;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
