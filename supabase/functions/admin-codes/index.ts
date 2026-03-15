@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
       });
     }
 
-
+    if (action === "credit_response") {
       const { requestId, userId, approvedAmount, status } = body;
 
       // Update the credit request status
