@@ -68,7 +68,7 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
   const today = new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' });
 
   const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title></title>
+<html><head><meta charset="utf-8"><title>Flight Hours Summary — ${pilotName}</title>
 <style>
   @page { size: A4 portrait; margin: 15mm 18mm; }
   html, body { height: 100%; overflow: hidden; }
