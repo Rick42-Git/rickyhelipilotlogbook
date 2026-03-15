@@ -70,8 +70,12 @@ interface DayData {
   duty: DutyOverride;
   actualFDP: number;
   maxFDP: number;
-  exceeded: boolean;
+  fdpExceeded: boolean;
+  flightTimeExceeded: boolean;
+  anyExceeded: boolean;
 }
+
+const MAX_DAILY_FLIGHT_HOURS = 7;
 
 interface Props {
   open: boolean;
@@ -113,9 +117,11 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
 
       const actualFDP = calcActualFDP(duty.reportTime, duty.rotorStop);
       const maxFDP = calculateMaxFDP(duty.reportTime, duty.sectors);
-      const exceeded = actualFDP > maxFDP;
+      const fdpExceeded = actualFDP > maxFDP;
+      const flightTimeExceeded = totalFlightHours > MAX_DAILY_FLIGHT_HOURS;
+      const anyExceeded = fdpExceeded || flightTimeExceeded;
 
-      return { date, flights, totalFlightHours, duty, actualFDP, maxFDP, exceeded };
+      return { date, flights, totalFlightHours, duty, actualFDP, maxFDP, fdpExceeded, flightTimeExceeded, anyExceeded };
     });
   }, [entries, selectedMonth, dutyOverrides]);
 
@@ -133,13 +139,15 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
   const totalFlightHours = monthData.reduce((sum, d) => sum + d.totalFlightHours, 0);
   const totalDutyHours = monthData.reduce((sum, d) => sum + d.actualFDP, 0);
   const totalFlights = monthData.reduce((sum, d) => sum + d.flights.length, 0);
-  const exceedCount = monthData.filter(d => d.exceeded).length;
+  const exceedCount = monthData.filter(d => d.fdpExceeded).length;
+  const flightTimeExceedCount = monthData.filter(d => d.flightTimeExceeded).length;
+  const totalExceedCount = exceedCount + flightTimeExceedCount;
   const flyingDays = monthData.length;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
+        <DialogHeader className="flex-row items-center justify-between gap-4">
           <DialogTitle className="font-mono text-primary tracking-wider">
             ▸ FLIGHT & DUTY CALCULATOR (SACAA)
           </DialogTitle>
@@ -164,7 +172,9 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   sectors: d.duty.sectors,
                   actualFDP: d.actualFDP,
                   maxFDP: d.maxFDP,
-                  exceeded: d.exceeded,
+                  exceeded: d.anyExceeded,
+                  fdpExceeded: d.fdpExceeded,
+                  flightTimeExceeded: d.flightTimeExceeded,
                 })),
               })}
             >
@@ -229,15 +239,16 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
               <div
                 key={d.date}
                 className={`grid grid-cols-[90px_1fr_70px_80px_80px_70px_70px_70px_40px] gap-2 items-center py-1.5 border-b border-border/30 ${
-                  d.exceeded ? 'bg-destructive/10 rounded' : ''
+                  d.anyExceeded ? 'bg-destructive/10 rounded' : ''
                 }`}
               >
                 <span className="font-mono text-xs text-foreground">{d.date}</span>
                 <div className="font-mono text-[10px] text-muted-foreground truncate">
                   {d.flights.map(f => `${f.aircraftType} ${f.aircraftReg}`).join(', ')}
                 </div>
-                <span className="font-mono text-xs font-semibold text-primary">
+                <span className={`font-mono text-xs font-semibold ${d.flightTimeExceeded ? 'text-destructive' : 'text-primary'}`}>
                   {d.totalFlightHours.toFixed(1)} h
+                  {d.flightTimeExceeded && <span className="text-[8px] ml-0.5">▸7h</span>}
                 </span>
                 <Input
                   type="time"
@@ -266,7 +277,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   {d.maxFDP.toFixed(1)} h
                 </span>
                 <span>
-                  {d.exceeded ? (
+                  {d.anyExceeded ? (
                     <AlertTriangle className="h-4 w-4 text-destructive" />
                   ) : (
                     <CheckCircle className="h-4 w-4 text-primary" />
@@ -282,9 +293,13 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
             <span className="text-muted-foreground">
               {flyingDays} DAYS — <span className="text-primary font-bold">{totalFlightHours.toFixed(1)}</span> FLT HRS — <span className="text-foreground font-bold">{totalDutyHours.toFixed(1)}</span> DUTY HRS
             </span>
-            {exceedCount > 0 ? (
+            {totalExceedCount > 0 ? (
               <span className="text-destructive font-bold flex items-center gap-1">
-                <AlertTriangle className="h-3.5 w-3.5" /> {exceedCount} FDP LIMIT(S) EXCEEDED
+                <AlertTriangle className="h-3.5 w-3.5" />
+                {exceedCount > 0 && `${exceedCount} FDP`}
+                {exceedCount > 0 && flightTimeExceedCount > 0 && ' + '}
+                {flightTimeExceedCount > 0 && `${flightTimeExceedCount} FLT TIME`}
+                {' '}LIMIT(S) EXCEEDED
               </span>
             ) : (
               <span className="text-primary font-bold flex items-center gap-1">
