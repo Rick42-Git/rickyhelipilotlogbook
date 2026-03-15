@@ -288,10 +288,35 @@ export default function Admin() {
               </div>
               {codes.map(c => (
                 <div key={c.id} className="grid grid-cols-[1fr_120px_60px_80px_60px_60px] gap-2 items-center py-2 border-b border-border/30">
-                  <div>
-                    <span className="font-mono text-xs text-foreground block truncate">{c.display_name}</span>
-                    {c.email && <span className="font-mono text-[10px] text-muted-foreground block truncate">{c.email}</span>}
-                    {c.is_admin && <span className="font-mono text-[9px] text-primary">ADMIN</span>}
+                  <div className="flex items-center gap-1 min-w-0">
+                    {editingName[c.id] !== undefined ? (
+                      <div className="flex items-center gap-1 flex-1 min-w-0">
+                        <Input
+                          value={editingName[c.id]}
+                          onChange={e => setEditingName(prev => ({ ...prev, [c.id]: e.target.value }))}
+                          onKeyDown={e => e.key === 'Enter' && saveName(c)}
+                          className="font-mono text-xs h-6 flex-1"
+                          autoFocus
+                        />
+                        <Button size="sm" variant="ghost" onClick={() => saveName(c)} className="h-6 w-6 p-0 text-green-400 hover:text-green-300">
+                          <Save className="h-3 w-3" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => setEditingName(prev => { const next = { ...prev }; delete next[c.id]; return next; })} className="h-6 w-6 p-0 text-muted-foreground">
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="min-w-0 flex-1">
+                          <span className="font-mono text-xs text-foreground block truncate">{c.display_name}</span>
+                          {c.email && <span className="font-mono text-[10px] text-muted-foreground block truncate">{c.email}</span>}
+                          {c.is_admin && <span className="font-mono text-[9px] text-primary">ADMIN</span>}
+                        </div>
+                        <Button size="sm" variant="ghost" onClick={() => setEditingName(prev => ({ ...prev, [c.id]: c.display_name }))} className="h-5 w-5 p-0 text-muted-foreground hover:text-primary flex-shrink-0">
+                          <Edit2 className="h-2.5 w-2.5" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                   <span className="font-mono text-xs text-primary tracking-widest">{c.code}</span>
                   <span className="font-mono text-xs text-accent">{c.extraction_limit}</span>
