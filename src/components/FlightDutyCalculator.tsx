@@ -70,8 +70,12 @@ interface DayData {
   duty: DutyOverride;
   actualFDP: number;
   maxFDP: number;
-  exceeded: boolean;
+  fdpExceeded: boolean;
+  flightTimeExceeded: boolean;
+  anyExceeded: boolean;
 }
+
+const MAX_DAILY_FLIGHT_HOURS = 7;
 
 interface Props {
   open: boolean;
