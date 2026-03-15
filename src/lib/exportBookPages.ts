@@ -364,6 +364,11 @@ export function exportBookPagesPDF(
     color: #8a8070;
     border-right: none !important;
   }
+  .cf-val {
+    font-style: italic;
+    color: #8a8070;
+    font-size: 8px;
+  }
 
   /* Totals row */
   .totals-row td {
