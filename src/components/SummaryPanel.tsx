@@ -117,6 +117,20 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
         </div>
       )}
 
+      {/* Quick totals row */}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        {[
+          { label: 'Total Day', value: totalDay },
+          { label: 'Total Night', value: totalNight },
+          { label: 'Total Instruction', value: totalInstruction },
+        ].map(t => (
+          <div key={t.label} className="flex items-center justify-between rounded border border-primary/20 bg-primary/5 px-3 py-2">
+            <p className="font-mono text-[9px] text-primary uppercase tracking-widest">{t.label}</p>
+            <span className="font-mono text-xs font-semibold text-foreground">{t.value.toFixed(1)} <span className="text-muted-foreground font-normal text-[9px]">HRS</span></span>
+          </div>
+        ))}
+      </div>
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {groups.map(g => (
           <div key={g.title} className="space-y-1">
