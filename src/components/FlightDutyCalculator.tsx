@@ -245,8 +245,9 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                 <div className="font-mono text-[10px] text-muted-foreground truncate">
                   {d.flights.map(f => `${f.aircraftType} ${f.aircraftReg}`).join(', ')}
                 </div>
-                <span className="font-mono text-xs font-semibold text-primary">
+                <span className={`font-mono text-xs font-semibold ${d.flightTimeExceeded ? 'text-destructive' : 'text-primary'}`}>
                   {d.totalFlightHours.toFixed(1)} h
+                  {d.flightTimeExceeded && <span className="text-[8px] ml-0.5">▸7h</span>}
                 </span>
                 <Input
                   type="time"
