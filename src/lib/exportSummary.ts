@@ -33,6 +33,17 @@ function getTurbineTotals(entries: LogbookEntry[]) {
   return { hours, flights };
 }
 
+function getGameCaptureTotals(entries: LogbookEntry[]) {
+  let hours = 0, flights = 0;
+  for (const e of entries) {
+    if ((e.flightDetails || '').toLowerCase().includes('game')) {
+      flights += 1;
+      hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
+    }
+  }
+  return { hours, flights };
+}
+
 function fmt(n: number) {
   return n > 0 ? n.toFixed(1) : '—';
 }
