@@ -63,6 +63,7 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
 
   const typeTotals = getTypeTotals(entries);
   const turbine = getTurbineTotals(entries);
+  const gameCapture = getGameCaptureTotals(entries);
 
   const today = new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' });
 
