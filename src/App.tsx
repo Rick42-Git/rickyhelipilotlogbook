@@ -15,6 +15,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 const Admin = lazy(() => import("./pages/Admin"));
 const MassBalance = lazy(() => import("./pages/MassBalance"));
 const FlightPlanning = lazy(() => import("./pages/FlightPlanning"));
+const FrequencyChart = lazy(() => import("./pages/FrequencyChart"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
