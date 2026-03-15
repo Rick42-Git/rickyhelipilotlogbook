@@ -134,7 +134,7 @@ const Index = () => {
                   <DropdownMenuItem onClick={() => exportLast3Pages(entries)}>
                     LAST 3 PAGES (24 entries/page)
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => exportSummaryPDF(entries, user?.email?.split('@')[0]?.toUpperCase() || 'PILOT')}>
+                  <DropdownMenuItem onClick={() => exportSummaryPDF(entries, activatedUser?.displayName?.toUpperCase() || 'PILOT')}>
                     SUMMARY OF TOTALS (PDF)
                   </DropdownMenuItem>
                 </DropdownMenuContent>
