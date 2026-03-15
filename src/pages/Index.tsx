@@ -88,7 +88,7 @@ const Index = () => {
                 </div>
                 <div className="flex items-center gap-3 mt-0.5 md:mt-1">
                   <p className="font-mono text-[10px] md:text-xs text-muted-foreground tracking-widest truncate">
-                    PILOT: {user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
+                    PILOT: {activatedUser?.displayName?.toUpperCase() || user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
                   </p>
                   <span className="font-mono text-[9px] text-accent/60 flex-shrink-0">▸ ACTIVE</span>
                 </div>
