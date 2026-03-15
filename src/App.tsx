@@ -15,6 +15,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 const Admin = lazy(() => import("./pages/Admin"));
 const MassBalance = lazy(() => import("./pages/MassBalance"));
 const FlightPlanning = lazy(() => import("./pages/FlightPlanning"));
+const FrequencyChart = lazy(() => import("./pages/FrequencyChart"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -74,6 +75,11 @@ const App = () => (
             <Route path="/flight-planning" element={
               <ProtectedRoute>
                 <Suspense fallback={<PageLoader />}><FlightPlanning /></Suspense>
+              </ProtectedRoute>
+            } />
+            <Route path="/frequency-chart" element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageLoader />}><FrequencyChart /></Suspense>
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

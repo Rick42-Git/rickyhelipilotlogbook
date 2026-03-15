@@ -10,7 +10,7 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane, List, BookOpen } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane, List, BookOpen, Radio } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -111,6 +111,10 @@ const Index = () => {
                 <Plane className="h-4 w-4" />
                 FLT PLAN
               </Button>
+              <Button variant="outline" onClick={() => navigate('/frequency-chart')} className="font-mono gap-2">
+                <Radio className="h-4 w-4" />
+                FREQ
+              </Button>
               <Button variant="outline" onClick={() => setDutyCalcOpen(true)} className="font-mono gap-2">
                 <Clock className="h-4 w-4" />
                 F&D CALC
@@ -178,6 +182,10 @@ const Index = () => {
             <Button variant="outline" size="sm" onClick={() => navigate('/flight-planning')} className="font-mono text-[10px] gap-1 h-7">
               <Plane className="h-3 w-3" />
               FLT
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/frequency-chart')} className="font-mono text-[10px] gap-1 h-7">
+              <Radio className="h-3 w-3" />
+              FREQ
             </Button>
             <Button variant="outline" size="sm" onClick={() => setDutyCalcOpen(true)} className="font-mono text-[10px] gap-1 h-7">
               <Clock className="h-3 w-3" />
