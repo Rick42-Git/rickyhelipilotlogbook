@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { exportToNumbers, exportLast3Pages } from '@/lib/exportLogbook';
+import { exportSummaryPDF } from '@/lib/exportSummary';
 import { useAuth } from '@/hooks/useAuth';
 import { Last12MonthSummary } from '@/components/Last12MonthSummary';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
@@ -133,6 +134,9 @@ const Index = () => {
                   <DropdownMenuItem onClick={() => exportLast3Pages(entries)}>
                     LAST 3 PAGES (24 entries/page)
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportSummaryPDF(entries, user?.email?.split('@')[0]?.toUpperCase() || 'PILOT')}>
+                    SUMMARY OF TOTALS (PDF)
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               {isAdmin && (
@@ -196,6 +200,9 @@ const Index = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => exportLast3Pages(entries)}>
                   LAST 3 PAGES (24 entries/page)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportSummaryPDF(entries, user?.email?.split('@')[0]?.toUpperCase() || 'PILOT')}>
+                  SUMMARY OF TOTALS (PDF)
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
