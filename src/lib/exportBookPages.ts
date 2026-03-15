@@ -20,12 +20,28 @@ export function exportBookPagesPDF(
 
   let spreadsHtml = '';
 
+  // Compute carried-forward totals from all entries before the first exported spread
+  const preEntries = sorted.slice(0, fromSpread * ROWS_PER_SPREAD);
+  const initTotals = { seDayPilot: 0, seDayDual: 0, seNightDual: 0, seNightPilot: 0, instrumentTime: 0, instructorDay: 0, instructorNight: 0 };
+  let runningTotals = preEntries.reduce((t, e) => ({
+    seDayPilot: t.seDayPilot + e.seDayPilot,
+    seDayDual: t.seDayDual + e.seDayDual,
+    seNightDual: t.seNightDual + e.seNightDual,
+    seNightPilot: t.seNightPilot + e.seNightPilot,
+    instrumentTime: t.instrumentTime + e.instrumentTime,
+    instructorDay: t.instructorDay + e.instructorDay,
+    instructorNight: t.instructorNight + e.instructorNight,
+  }), { ...initTotals });
+
   for (let s = fromSpread; s <= toSpread; s++) {
     const spreadEntries = sorted.slice(s * ROWS_PER_SPREAD, s * ROWS_PER_SPREAD + ROWS_PER_SPREAD);
     const emptyRows = ROWS_PER_SPREAD - spreadEntries.length;
     const year = spreadEntries.length > 0 ? getMonthDay(spreadEntries[0].date).year : '';
 
-    const totals = spreadEntries.reduce((t, e) => ({
+    // Carried forward = running totals before this spread
+    const cf = { ...runningTotals };
+
+    const pageTotals = spreadEntries.reduce((t, e) => ({
       seDayPilot: t.seDayPilot + e.seDayPilot,
       seDayDual: t.seDayDual + e.seDayDual,
       seNightDual: t.seNightDual + e.seNightDual,
@@ -33,7 +49,18 @@ export function exportBookPagesPDF(
       instrumentTime: t.instrumentTime + e.instrumentTime,
       instructorDay: t.instructorDay + e.instructorDay,
       instructorNight: t.instructorNight + e.instructorNight,
-    }), { seDayPilot: 0, seDayDual: 0, seNightDual: 0, seNightPilot: 0, instrumentTime: 0, instructorDay: 0, instructorNight: 0 });
+    }), { ...initTotals });
+
+    // Update running totals (carried forward + this page)
+    runningTotals = {
+      seDayPilot: cf.seDayPilot + pageTotals.seDayPilot,
+      seDayDual: cf.seDayDual + pageTotals.seDayDual,
+      seNightDual: cf.seNightDual + pageTotals.seNightDual,
+      seNightPilot: cf.seNightPilot + pageTotals.seNightPilot,
+      instrumentTime: cf.instrumentTime + pageTotals.instrumentTime,
+      instructorDay: cf.instructorDay + pageTotals.instructorDay,
+      instructorNight: cf.instructorNight + pageTotals.instructorNight,
+    };
 
     // Build left-page rows
     let leftRows = '';
@@ -127,19 +154,19 @@ export function exportBookPagesPDF(
             </thead>
             <tbody>
               <tr class="cf-row">
-                <td class="td-c"></td><td class="td-c"></td><td class="td-c"></td>
-                <td class="td-c"></td><td class="td-c"></td><td class="td-c"></td>
-                <td class="td-c last-col"></td>
+                <td class="td-c cf-val">${fmt(cf.seDayPilot)}</td><td class="td-c cf-val">${fmt(cf.seDayDual)}</td><td class="td-c cf-val">${fmt(cf.seNightDual)}</td>
+                <td class="td-c cf-val">${fmt(cf.seNightPilot)}</td><td class="td-c cf-val">${fmt(cf.instrumentTime)}</td><td class="td-c cf-val">${fmt(cf.instructorDay)}</td>
+                <td class="td-c cf-val last-col">${fmt(cf.instructorNight)}</td>
               </tr>
               ${rightRows}
               <tr class="totals-row">
-                <td class="td-c total-val day-val">${fmt(totals.seDayPilot)}</td>
-                <td class="td-c total-val day-val">${fmt(totals.seDayDual)}</td>
-                <td class="td-c total-val night-val">${fmt(totals.seNightDual)}</td>
-                <td class="td-c total-val night-val">${fmt(totals.seNightPilot)}</td>
-                <td class="td-c total-val">${fmt(totals.instrumentTime)}</td>
-                <td class="td-c total-val inst-val">${fmt(totals.instructorDay)}</td>
-                <td class="td-c total-val inst-val last-col">${fmt(totals.instructorNight)}</td>
+                <td class="td-c total-val day-val">${fmt(runningTotals.seDayPilot)}</td>
+                <td class="td-c total-val day-val">${fmt(runningTotals.seDayDual)}</td>
+                <td class="td-c total-val night-val">${fmt(runningTotals.seNightDual)}</td>
+                <td class="td-c total-val night-val">${fmt(runningTotals.seNightPilot)}</td>
+                <td class="td-c total-val">${fmt(runningTotals.instrumentTime)}</td>
+                <td class="td-c total-val inst-val">${fmt(runningTotals.instructorDay)}</td>
+                <td class="td-c total-val inst-val last-col">${fmt(runningTotals.instructorNight)}</td>
               </tr>
             </tbody>
           </table>
@@ -336,6 +363,11 @@ export function exportBookPagesPDF(
     font-style: italic;
     color: #8a8070;
     border-right: none !important;
+  }
+  .cf-val {
+    font-style: italic;
+    color: #8a8070;
+    font-size: 8px;
   }
 
   /* Totals row */
