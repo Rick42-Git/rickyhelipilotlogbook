@@ -39,7 +39,7 @@ import { ColumnTemplateManager } from '@/components/ColumnTemplateManager';
 import { useColumnTemplates } from '@/hooks/useColumnTemplates';
 
 const Index = () => {
-  const { user, signOut } = useAuth();
+  const { user, activatedUser, signOut } = useAuth();
   const navigate = useNavigate();
   const { isAdmin } = useIsAdmin();
   const { entries, loading, addEntry, updateEntry, deleteEntry, addMultipleEntries, undoLastImport, lastImportIds, clearAllEntries, deleteUnknownEntries, getTotals } = useLogbook();
@@ -88,7 +88,7 @@ const Index = () => {
                 </div>
                 <div className="flex items-center gap-3 mt-0.5 md:mt-1">
                   <p className="font-mono text-[10px] md:text-xs text-muted-foreground tracking-widest truncate">
-                    PILOT: {user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
+                    PILOT: {activatedUser?.displayName?.toUpperCase() || user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
                   </p>
                   <span className="font-mono text-[9px] text-accent/60 flex-shrink-0">▸ ACTIVE</span>
                 </div>
@@ -134,7 +134,7 @@ const Index = () => {
                   <DropdownMenuItem onClick={() => exportLast3Pages(entries)}>
                     LAST 3 PAGES (24 entries/page)
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => exportSummaryPDF(entries, user?.email?.split('@')[0]?.toUpperCase() || 'PILOT')}>
+                  <DropdownMenuItem onClick={() => exportSummaryPDF(entries, activatedUser?.displayName?.toUpperCase() || 'PILOT')}>
                     SUMMARY OF TOTALS (PDF)
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -201,7 +201,7 @@ const Index = () => {
                 <DropdownMenuItem onClick={() => exportLast3Pages(entries)}>
                   LAST 3 PAGES (24 entries/page)
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportSummaryPDF(entries, user?.email?.split('@')[0]?.toUpperCase() || 'PILOT')}>
+                <DropdownMenuItem onClick={() => exportSummaryPDF(entries, activatedUser?.displayName?.toUpperCase() || 'PILOT')}>
                   SUMMARY OF TOTALS (PDF)
                 </DropdownMenuItem>
               </DropdownMenuContent>
