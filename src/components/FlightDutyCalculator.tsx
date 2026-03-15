@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle, CheckCircle, Clock, Plane } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Plane, FileDown } from 'lucide-react';
+import { exportDutyCalcPDF } from '@/lib/exportDutyCalc';
 import { LogbookEntry } from '@/types/logbook';
 
 interface DutyOverride {
