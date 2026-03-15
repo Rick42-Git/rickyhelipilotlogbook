@@ -55,6 +55,9 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
   ], []);
 
   const grandTotal = useMemo(() => (totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot), [totals]);
+  const totalDay = useMemo(() => totals.seDayDual + totals.seDayPilot, [totals]);
+  const totalNight = useMemo(() => totals.seNightDual + totals.seNightPilot, [totals]);
+  const totalInstruction = useMemo(() => totals.instructorDay + totals.instructorNight, [totals]);
   const typeTotals = useMemo(() => getTypeTotals(entries), [entries]);
   const turbineTotals = useMemo(() => getTurbineTotals(entries), [entries]);
   const gameTotals = useMemo(() => getGameTotals(entries), [entries]);
@@ -113,6 +116,20 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
           </div>
         </div>
       )}
+
+      {/* Quick totals row */}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        {[
+          { label: 'Total Day', value: totalDay },
+          { label: 'Total Night', value: totalNight },
+          { label: 'Total Instruction', value: totalInstruction },
+        ].map(t => (
+          <div key={t.label} className="flex items-center justify-between rounded border border-primary/20 bg-primary/5 px-3 py-2">
+            <p className="font-mono text-[9px] text-primary uppercase tracking-widest">{t.label}</p>
+            <span className="font-mono text-xs font-semibold text-foreground">{t.value.toFixed(1)} <span className="text-muted-foreground font-normal text-[9px]">HRS</span></span>
+          </div>
+        ))}
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {groups.map(g => (
