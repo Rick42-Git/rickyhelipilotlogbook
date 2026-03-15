@@ -234,8 +234,8 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
     <div class="date">Generated ${today}</div>
     <div class="sig">
       <div class="sig-line"></div>
-      <div class="sig-label">Pilot Signature</div>
-    </div>
+      <div class="sig-label">${pilotName}</div>
+      <div class="sig-label" style="margin-top:2px">Pilot Signature</div>
   </div>
 
 </body></html>`;
