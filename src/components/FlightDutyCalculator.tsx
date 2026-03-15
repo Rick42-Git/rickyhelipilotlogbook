@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle, CheckCircle, Clock, Plane } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Plane, FileDown } from 'lucide-react';
+import { exportDutyCalcPDF } from '@/lib/exportDutyCalc';
 import { LogbookEntry } from '@/types/logbook';
 
 interface DutyOverride {
@@ -142,6 +143,34 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
           <DialogTitle className="font-mono text-primary tracking-wider">
             ▸ FLIGHT & DUTY CALCULATOR (SACAA)
           </DialogTitle>
+          {monthData.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="font-mono text-xs gap-1.5"
+              onClick={() => exportDutyCalcPDF({
+                month: monthOptions.find(o => o.value === selectedMonth)?.label || selectedMonth,
+                flyingDays,
+                totalFlights,
+                totalFlightHours,
+                totalDutyHours,
+                exceedCount,
+                rows: monthData.map(d => ({
+                  date: d.date,
+                  details: d.flights.map(f => `${f.aircraftType} ${f.aircraftReg}`).join(', '),
+                  flightHours: d.totalFlightHours,
+                  reportTime: d.duty.reportTime,
+                  rotorStop: d.duty.rotorStop,
+                  sectors: d.duty.sectors,
+                  actualFDP: d.actualFDP,
+                  maxFDP: d.maxFDP,
+                  exceeded: d.exceeded,
+                })),
+              })}
+            >
+              <FileDown className="h-3.5 w-3.5" /> Export PDF
+            </Button>
+          )}
         </DialogHeader>
 
         <div className="flex items-center gap-3 mb-4">
