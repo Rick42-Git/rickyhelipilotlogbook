@@ -292,9 +292,13 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
             <span className="text-muted-foreground">
               {flyingDays} DAYS — <span className="text-primary font-bold">{totalFlightHours.toFixed(1)}</span> FLT HRS — <span className="text-foreground font-bold">{totalDutyHours.toFixed(1)}</span> DUTY HRS
             </span>
-            {exceedCount > 0 ? (
+            {totalExceedCount > 0 ? (
               <span className="text-destructive font-bold flex items-center gap-1">
-                <AlertTriangle className="h-3.5 w-3.5" /> {exceedCount} FDP LIMIT(S) EXCEEDED
+                <AlertTriangle className="h-3.5 w-3.5" />
+                {exceedCount > 0 && `${exceedCount} FDP`}
+                {exceedCount > 0 && flightTimeExceedCount > 0 && ' + '}
+                {flightTimeExceedCount > 0 && `${flightTimeExceedCount} FLT TIME`}
+                {' '}LIMIT(S) EXCEEDED
               </span>
             ) : (
               <span className="text-primary font-bold flex items-center gap-1">
