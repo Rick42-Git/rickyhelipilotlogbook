@@ -130,67 +130,66 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
   }
 
   return (
-    <div className="bg-card/80 backdrop-blur-sm border border-border rounded-lg">
-      <div className="flex items-center justify-between gap-2 p-2 border-b border-border/50">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search entries..."
-            className="h-8 pl-8 font-mono text-xs bg-background/50"
-          />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="font-mono text-xs gap-1.5">
-                <SlidersHorizontal className="h-3.5 w-3.5" />
-                COLUMNS
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="p-3 grid grid-cols-2 gap-x-4 gap-y-2 w-[320px]">
-              {columns.map(col => (
-                <label key={col.key} className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={visibleCols.has(col.key)}
-                    onCheckedChange={() => toggleCol(col.key)}
-                  />
-                  <span className="font-mono text-xs">{col.label}</span>
-                </label>
-            ))}
-          </DropdownMenuContent>
-          </DropdownMenu>
-          {onClearAll && entries.length > 0 && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="font-mono text-[10px] gap-1 h-6 px-2 text-destructive hover:bg-destructive/10">
-                  <Trash2 className="h-3 w-3" />
-                  CLEAR
+    <div className="bg-card/80 backdrop-blur-sm border border-border rounded-lg max-h-[70vh] overflow-auto relative">
+      <div className="sticky top-0 z-40 bg-card border-b border-border/50">
+        <div className="flex items-center justify-between gap-2 p-2">
+          <div className="relative flex-1 max-w-xs">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search entries..."
+              className="h-8 pl-8 font-mono text-xs bg-background/50"
+            />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="font-mono text-xs gap-1.5">
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  COLUMNS
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="font-mono">CLEAR ALL ENTRIES?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete all {entries.length} flight entries. This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="font-mono">CANCEL</AlertDialogCancel>
-                  <AlertDialogAction onClick={onClearAll} className="font-mono bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    DELETE ALL
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="p-3 grid grid-cols-2 gap-x-4 gap-y-2 w-[320px]">
+                {columns.map(col => (
+                  <label key={col.key} className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={visibleCols.has(col.key)}
+                      onCheckedChange={() => toggleCol(col.key)}
+                    />
+                    <span className="font-mono text-xs">{col.label}</span>
+                  </label>
+              ))}
+            </DropdownMenuContent>
+            </DropdownMenu>
+            {onClearAll && entries.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="font-mono text-[10px] gap-1 h-6 px-2 text-destructive hover:bg-destructive/10">
+                    <Trash2 className="h-3 w-3" />
+                    CLEAR
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="font-mono">CLEAR ALL ENTRIES?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete all {entries.length} flight entries. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="font-mono">CANCEL</AlertDialogCancel>
+                    <AlertDialogAction onClick={onClearAll} className="font-mono bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      DELETE ALL
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="relative">
-        <img src={helicopterWatermark} alt="" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-auto opacity-[0.04] pointer-events-none select-none" />
-        <table className="w-full text-sm relative z-10">
-          <thead className="sticky z-30 top-[37px]">
+        <table className="w-full text-sm">
+          <thead>
             <tr className="border-b border-border bg-card">
               {activeCols.map(col => (
                 <th key={col.key} className="px-2 py-2 text-left font-mono text-[10px] text-primary uppercase tracking-wider whitespace-nowrap">{col.shortLabel}</th>
@@ -198,6 +197,11 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
               <th className="px-2 py-2" />
             </tr>
           </thead>
+        </table>
+      </div>
+      <div className="relative">
+        <img src={helicopterWatermark} alt="" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-auto opacity-[0.04] pointer-events-none select-none" />
+        <table className="w-full text-sm relative z-10">
           <tbody>
             {filteredEntries
               .sort((a, b) => (a.date > b.date ? -1 : 1))
