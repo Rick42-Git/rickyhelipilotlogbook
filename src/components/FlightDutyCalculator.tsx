@@ -117,9 +117,11 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
 
       const actualFDP = calcActualFDP(duty.reportTime, duty.rotorStop);
       const maxFDP = calculateMaxFDP(duty.reportTime, duty.sectors);
-      const exceeded = actualFDP > maxFDP;
+      const fdpExceeded = actualFDP > maxFDP;
+      const flightTimeExceeded = totalFlightHours > MAX_DAILY_FLIGHT_HOURS;
+      const anyExceeded = fdpExceeded || flightTimeExceeded;
 
-      return { date, flights, totalFlightHours, duty, actualFDP, maxFDP, exceeded };
+      return { date, flights, totalFlightHours, duty, actualFDP, maxFDP, fdpExceeded, flightTimeExceeded, anyExceeded };
     });
   }, [entries, selectedMonth, dutyOverrides]);
 
