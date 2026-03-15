@@ -95,6 +95,33 @@ export type Database = {
         }
         Relationships: []
       }
+      airport_frequencies: {
+        Row: {
+          airport_ident: string
+          airport_ref: number
+          description: string
+          frequency_mhz: number | null
+          id: number
+          type: string
+        }
+        Insert: {
+          airport_ident?: string
+          airport_ref: number
+          description?: string
+          frequency_mhz?: number | null
+          id: number
+          type?: string
+        }
+        Update: {
+          airport_ident?: string
+          airport_ref?: number
+          description?: string
+          frequency_mhz?: number | null
+          id?: number
+          type?: string
+        }
+        Relationships: []
+      }
       column_templates: {
         Row: {
           column_mapping: Json
