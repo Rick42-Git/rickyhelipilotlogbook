@@ -21,13 +21,17 @@ const numericFields: NumericField[] = [
 const FETCH_PAGE_SIZE = 1000;
 
 // Map between camelCase (frontend) and snake_case (DB)
+function normalizePIC(pic: string): string {
+  return pic.trim().toLowerCase() === 's' ? 'Self' : pic;
+}
+
 function toDbEntry(e: Omit<LogbookEntry, 'id'>, userId: string) {
   return {
     user_id: userId,
     date: e.date,
     aircraft_type: e.aircraftType,
     aircraft_reg: e.aircraftReg,
-    pilot_in_command: e.pilotInCommand,
+    pilot_in_command: normalizePIC(e.pilotInCommand),
     flight_details: e.flightDetails,
     se_day_dual: e.seDayDual,
     se_day_pilot: e.seDayPilot,
