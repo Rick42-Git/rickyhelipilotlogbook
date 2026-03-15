@@ -78,7 +78,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (action === "credit_response") {
+    if (action === "update_name") {
+      const { id, display_name } = body;
+      const { error } = await supabase
+        .from("access_codes")
+        .update({ display_name })
+        .eq("id", id);
+
+      if (error) throw error;
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+
       const { requestId, userId, approvedAmount, status } = body;
 
       // Update the credit request status
