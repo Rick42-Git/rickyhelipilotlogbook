@@ -200,17 +200,6 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
     </table>
   </div>
 
-  ${(turbine.flights > 0 || gameCapture.flights > 0) ? `<div class="highlight-bar">
-    ${turbine.flights > 0 ? `<div class="highlight-item highlight-turbine">
-      <div><div class="hi-label">Turbine Hours</div><div class="hi-detail">${turbine.flights} flights</div></div>
-      <div class="hi-value">${turbine.hours.toFixed(1)}h</div>
-    </div>` : ''}
-    ${gameCapture.flights > 0 ? `<div class="highlight-item highlight-game">
-      <div><div class="hi-label">Game Capture</div><div class="hi-detail">${gameCapture.flights} flights</div></div>
-      <div class="hi-value">${gameCapture.hours.toFixed(1)}h</div>
-    </div>` : ''}
-  </div>` : ''}
-
   <div class="breakdown-grid">
     <div class="breakdown-card">
       <div class="card-title">Day / Night Breakdown</div>
@@ -232,11 +221,6 @@ export function exportSummaryPDF(entries: LogbookEntry[], pilotName: string) {
 
   <div class="footer">
     <div class="date">Generated ${today}</div>
-    <div class="sig">
-      <div class="sig-line"></div>
-      <div class="sig-label">${pilotName}</div>
-      <div class="sig-label" style="margin-top:2px">Pilot Signature</div>
-    </div>
   </div>
 
 </body></html>`;
