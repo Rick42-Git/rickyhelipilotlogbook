@@ -171,7 +171,9 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   sectors: d.duty.sectors,
                   actualFDP: d.actualFDP,
                   maxFDP: d.maxFDP,
-                  exceeded: d.exceeded,
+                  exceeded: d.anyExceeded,
+                  fdpExceeded: d.fdpExceeded,
+                  flightTimeExceeded: d.flightTimeExceeded,
                 })),
               })}
             >
