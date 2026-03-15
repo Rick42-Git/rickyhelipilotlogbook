@@ -238,7 +238,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
               <div
                 key={d.date}
                 className={`grid grid-cols-[90px_1fr_70px_80px_80px_70px_70px_70px_40px] gap-2 items-center py-1.5 border-b border-border/30 ${
-                  d.exceeded ? 'bg-destructive/10 rounded' : ''
+                  d.anyExceeded ? 'bg-destructive/10 rounded' : ''
                 }`}
               >
                 <span className="font-mono text-xs text-foreground">{d.date}</span>
