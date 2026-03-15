@@ -276,7 +276,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   {d.maxFDP.toFixed(1)} h
                 </span>
                 <span>
-                  {d.exceeded ? (
+                  {d.anyExceeded ? (
                     <AlertTriangle className="h-4 w-4 text-destructive" />
                   ) : (
                     <CheckCircle className="h-4 w-4 text-primary" />
