@@ -3,10 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { X, ArrowLeft, RefreshCw, Plus, Copy, Check, Edit2 } from 'lucide-react';
+import { X, ArrowLeft, RefreshCw, Plus, Copy, Check, Edit2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import helicopterIcon from '@/assets/helicopter-icon.png';
+import { setActivatedUser, getActivatedUser } from '@/lib/activation';
 
 interface AccessCode {
   id: string;
