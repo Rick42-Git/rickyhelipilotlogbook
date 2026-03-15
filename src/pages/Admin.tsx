@@ -122,6 +122,26 @@ export default function Admin() {
     toast.success('Code copied to clipboard');
   };
 
+  const saveName = async (codeEntry: AccessCode) => {
+    const newDisplayName = editingName[codeEntry.id];
+    if (!newDisplayName?.trim() || !adminId) return;
+    const { error } = await supabase.functions.invoke('admin-codes', {
+      body: { action: 'update_name', adminId, id: codeEntry.id, display_name: newDisplayName.trim() },
+    });
+    if (error) {
+      toast.error('Failed to update name');
+    } else {
+      toast.success('Name updated');
+      // Update localStorage if editing own name
+      const current = getActivatedUser();
+      if (current && current.id === codeEntry.id) {
+        setActivatedUser({ ...current, displayName: newDisplayName.trim() });
+      }
+      setEditingName(prev => { const next = { ...prev }; delete next[codeEntry.id]; return next; });
+      fetchCodes();
+    }
+  };
+
   const handleCreditAction = async (request: CreditRequest, action: 'approve' | 'reject') => {
     if (!adminId) return;
     const approvedAmount = action === 'approve' ? (editingAmount[request.id] ?? request.requested_amount) : 0;
