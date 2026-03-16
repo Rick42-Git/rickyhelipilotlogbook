@@ -146,11 +146,12 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
   };
 
   const totalFlightHours = monthData.reduce((sum, d) => sum + d.totalFlightHours, 0);
+  const totalFatigueUnits = monthData.reduce((sum, d) => sum + d.totalFatigueUnits, 0);
   const totalDutyHours = monthData.reduce((sum, d) => sum + d.actualFDP, 0);
   const totalFlights = monthData.reduce((sum, d) => sum + d.flights.length, 0);
   const exceedCount = monthData.filter(d => d.fdpExceeded).length;
-  const flightTimeExceedCount = monthData.filter(d => d.flightTimeExceeded).length;
-  const totalExceedCount = exceedCount + flightTimeExceedCount;
+  const fatigueExceedCount = monthData.filter(d => d.fatigueExceeded).length;
+  const totalExceedCount = exceedCount + fatigueExceedCount;
   const flyingDays = monthData.length;
 
   return (
