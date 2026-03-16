@@ -333,7 +333,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
         ) : (
           <div className="space-y-0">
             {/* Header */}
-            <div className="grid grid-cols-[90px_1fr_50px_50px_50px_45px_80px_80px_50px_50px_50px_28px] gap-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+            <div className="grid grid-cols-[90px_1fr_50px_50px_50px_45px_90px_90px_50px_50px_50px_28px] gap-1.5 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
               <span>Date</span>
               <span>Details</span>
               <span>Flt Hrs</span>
@@ -351,7 +351,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
             {monthData.map((d, idx) => (
               <div key={d.date}>
                 <div
-                  className={`grid grid-cols-[90px_1fr_50px_50px_50px_45px_80px_80px_50px_50px_50px_28px] gap-1 items-center py-1.5 border-b border-border/30 ${
+                  className={`grid grid-cols-[90px_1fr_50px_50px_50px_45px_90px_90px_50px_50px_50px_28px] gap-1.5 items-center py-1.5 border-b border-border/30 ${
                     d.anyExceeded ? 'bg-destructive/10 rounded' : ''
                   }`}
                 >
