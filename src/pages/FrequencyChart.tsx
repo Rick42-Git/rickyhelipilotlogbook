@@ -139,7 +139,7 @@ const FrequencyChart = () => {
       const [runwayRes, navaidRes] = await Promise.all([
         supabase
           .from('runways')
-          .select('id, airport_ident, length_ft, width_ft, surface, lighted, closed, le_ident, he_ident, le_heading_degT, he_heading_degT')
+          .select('id, airport_ident, length_ft, width_ft, surface, lighted, closed, le_ident, he_ident, le_heading_degt, he_heading_degt')
           .in('airport_ident', identArray)
           .limit(200),
         supabase
