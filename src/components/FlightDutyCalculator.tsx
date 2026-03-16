@@ -312,8 +312,8 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
               <span className="text-destructive font-bold flex items-center gap-1">
                 <AlertTriangle className="h-3.5 w-3.5" />
                 {exceedCount > 0 && `${exceedCount} FDP`}
-                {exceedCount > 0 && flightTimeExceedCount > 0 && ' + '}
-                {flightTimeExceedCount > 0 && `${flightTimeExceedCount} FLT TIME`}
+                {exceedCount > 0 && fatigueExceedCount > 0 && ' + '}
+                {fatigueExceedCount > 0 && `${fatigueExceedCount} FATIGUE`}
                 {' '}LIMIT(S) EXCEEDED
               </span>
             ) : (
