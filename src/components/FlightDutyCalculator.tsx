@@ -435,11 +435,12 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
             {totalExceedCount > 0 ? (
               <span className="text-destructive font-bold flex items-center gap-1">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                {exceedCount > 0 && `${exceedCount} FDP`}
-                {exceedCount > 0 && (fatigueExceedCount > 0 || restViolations > 0) && ' + '}
-                {fatigueExceedCount > 0 && `${fatigueExceedCount} FATIGUE`}
-                {fatigueExceedCount > 0 && restViolations > 0 && ' + '}
-                {restViolations > 0 && `${restViolations} REST`}
+                {[
+                  exceedCount > 0 && `${exceedCount} FDP`,
+                  nightExceedCount > 0 && `${nightExceedCount} NIGHT`,
+                  fatigueExceedCount > 0 && `${fatigueExceedCount} FATIGUE`,
+                  restViolations > 0 && `${restViolations} REST`,
+                ].filter(Boolean).join(' + ')}
                 {' '}LIMIT(S) EXCEEDED
               </span>
             ) : (
