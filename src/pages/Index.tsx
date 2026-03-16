@@ -266,7 +266,7 @@ const Index = () => {
               className="font-mono text-[10px] gap-1.5 h-7 px-2 text-muted-foreground hover:text-foreground"
             >
               {viewMode === 'list' ? <BookOpen className="h-3.5 w-3.5" /> : <List className="h-3.5 w-3.5" />}
-              {viewMode === 'list' ? 'BOOK' : 'LIST'}
+              {viewMode === 'list' ? 'SWITCH TO LOGBOOK VIEW' : 'SWITCH TO LIST VIEW'}
             </Button>
           )}
           <div className="flex-1 alt-line" />
