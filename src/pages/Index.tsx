@@ -51,6 +51,7 @@ const Index = () => {
   const { canInstall, install } = useInstallPrompt();
   const { templates } = useColumnTemplates();
   const [viewMode, setViewMode] = useState<'list' | 'book'>('list');
+  const { theme, toggleTheme } = useTheme();
 
   const handleEdit = (entry: LogbookEntry) => {
     setEditingEntry(entry);
