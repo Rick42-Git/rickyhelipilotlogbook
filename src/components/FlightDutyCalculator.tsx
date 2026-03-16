@@ -237,8 +237,9 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
   const totalFlights = monthData.reduce((sum, d) => sum + d.flights.length, 0);
   const exceedCount = monthData.filter(d => d.fdpExceeded).length;
   const fatigueExceedCount = monthData.filter(d => d.fatigueExceeded).length;
+  const nightExceedCount = monthData.filter(d => d.nightExceeded).length;
   const restViolations = monthData.filter(d => d.restAfter && !d.restAfter.isValid).length;
-  const totalExceedCount = exceedCount + fatigueExceedCount + restViolations;
+  const totalExceedCount = exceedCount + fatigueExceedCount + nightExceedCount + restViolations;
   const flyingDays = monthData.length;
   const maxConsecutive = monthData.reduce((max, d) => Math.max(max, d.consecutiveDays), 0);
 
