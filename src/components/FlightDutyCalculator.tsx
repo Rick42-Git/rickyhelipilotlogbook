@@ -48,6 +48,10 @@ function getFlightHours(entry: LogbookEntry): number {
   );
 }
 
+function getNightHours(entry: LogbookEntry): number {
+  return entry.seNightDual + entry.seNightPilot + entry.instructorNight;
+}
+
 function getFatigueUnits(entry: LogbookEntry): number {
   const commercialHours = entry.seDayDual + entry.seDayPilot +
     entry.seNightDual + entry.seNightPilot;
@@ -132,18 +136,21 @@ interface DayData {
   date: string;
   flights: LogbookEntry[];
   totalFlightHours: number;
+  totalNightHours: number;
   totalFatigueUnits: number;
   duty: DutyOverride;
   actualFDP: number;
   maxFDP: number;
   fdpExceeded: boolean;
   fatigueExceeded: boolean;
+  nightExceeded: boolean;
   anyExceeded: boolean;
-  consecutiveDays: number; // how many days in a row including this one
+  consecutiveDays: number;
   restAfter?: { isValid: boolean; localNights: number; restHours: number; message: string };
 }
 
 const DAILY_FATIGUE_LIMIT = 10;
+const DAILY_NIGHT_LIMIT = 8;
 
 interface Props {
   open: boolean;
@@ -173,6 +180,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
     const days: DayData[] = dates.map((date, idx) => {
       const flights = byDate[date];
       const totalFlightHours = flights.reduce((sum, f) => sum + getFlightHours(f), 0);
+      const totalNightHours = flights.reduce((sum, f) => sum + getNightHours(f), 0);
       const totalFatigueUnits = flights.reduce((sum, f) => sum + getFatigueUnits(f), 0);
       const sectorCount = flights.length;
 
@@ -186,9 +194,9 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
       const maxFDP = calculateMaxFDP(duty.reportTime, duty.sectors);
       const fdpExceeded = actualFDP > maxFDP;
       const fatigueExceeded = totalFatigueUnits > DAILY_FATIGUE_LIMIT;
-      const anyExceeded = fdpExceeded || fatigueExceeded;
+      const nightExceeded = totalNightHours > DAILY_NIGHT_LIMIT;
+      const anyExceeded = fdpExceeded || fatigueExceeded || nightExceeded;
 
-      // Calculate consecutive days
       let consecutiveDays = 1;
       for (let j = idx - 1; j >= 0; j--) {
         if (isConsecutiveDay(dates[j], dates[j + 1])) {
@@ -196,7 +204,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
         } else break;
       }
 
-      return { date, flights, totalFlightHours, totalFatigueUnits, duty, actualFDP, maxFDP, fdpExceeded, fatigueExceeded, anyExceeded, consecutiveDays };
+      return { date, flights, totalFlightHours, totalNightHours, totalFatigueUnits, duty, actualFDP, maxFDP, fdpExceeded, fatigueExceeded, nightExceeded, anyExceeded, consecutiveDays };
     });
 
     // Calculate rest validation between duty blocks
@@ -229,8 +237,9 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
   const totalFlights = monthData.reduce((sum, d) => sum + d.flights.length, 0);
   const exceedCount = monthData.filter(d => d.fdpExceeded).length;
   const fatigueExceedCount = monthData.filter(d => d.fatigueExceeded).length;
+  const nightExceedCount = monthData.filter(d => d.nightExceeded).length;
   const restViolations = monthData.filter(d => d.restAfter && !d.restAfter.isValid).length;
-  const totalExceedCount = exceedCount + fatigueExceedCount + restViolations;
+  const totalExceedCount = exceedCount + fatigueExceedCount + nightExceedCount + restViolations;
   const flyingDays = monthData.length;
   const maxConsecutive = monthData.reduce((max, d) => Math.max(max, d.consecutiveDays), 0);
 
@@ -259,6 +268,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   date: d.date,
                   details: d.flights.map(f => `${f.aircraftType} ${f.aircraftReg}`).join(', '),
                   flightHours: d.totalFlightHours,
+                  nightHours: d.totalNightHours,
                   fatigueUnits: d.totalFatigueUnits,
                   reportTime: d.duty.reportTime,
                   rotorStop: d.duty.rotorStop,
@@ -267,6 +277,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   maxFDP: d.maxFDP,
                   exceeded: d.anyExceeded,
                   fdpExceeded: d.fdpExceeded,
+                  nightExceeded: d.nightExceeded,
                   fatigueExceeded: d.fatigueExceeded,
                   consecutiveDays: d.consecutiveDays,
                   restAfter: d.restAfter,
@@ -322,10 +333,11 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
         ) : (
           <div className="space-y-0">
             {/* Header */}
-            <div className="grid grid-cols-[90px_1fr_55px_55px_45px_80px_80px_55px_55px_55px_30px] gap-1.5 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+            <div className="grid grid-cols-[90px_1fr_50px_50px_50px_45px_80px_80px_50px_50px_50px_28px] gap-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
               <span>Date</span>
               <span>Details</span>
               <span>Flt Hrs</span>
+              <span>Night</span>
               <span>Fatigue</span>
               <span>Days</span>
               <span>Report</span>
@@ -339,7 +351,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
             {monthData.map((d, idx) => (
               <div key={d.date}>
                 <div
-                  className={`grid grid-cols-[90px_1fr_55px_55px_45px_80px_80px_55px_55px_55px_30px] gap-1.5 items-center py-1.5 border-b border-border/30 ${
+                  className={`grid grid-cols-[90px_1fr_50px_50px_50px_45px_80px_80px_50px_50px_50px_28px] gap-1 items-center py-1.5 border-b border-border/30 ${
                     d.anyExceeded ? 'bg-destructive/10 rounded' : ''
                   }`}
                 >
@@ -349,6 +361,10 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   </div>
                   <span className="font-mono text-xs text-primary font-semibold">
                     {d.totalFlightHours.toFixed(1)}
+                  </span>
+                  <span className={`font-mono text-xs font-semibold ${d.nightExceeded ? 'text-destructive' : 'text-foreground'}`}>
+                    {d.totalNightHours.toFixed(1)}
+                    {d.nightExceeded && <span className="text-[8px] ml-0.5">▸8</span>}
                   </span>
                   <span className={`font-mono text-xs font-semibold ${d.fatigueExceeded ? 'text-destructive' : 'text-foreground'}`}>
                     {d.totalFatigueUnits.toFixed(1)}
@@ -421,11 +437,12 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
             {totalExceedCount > 0 ? (
               <span className="text-destructive font-bold flex items-center gap-1">
                 <AlertTriangle className="h-3.5 w-3.5" />
-                {exceedCount > 0 && `${exceedCount} FDP`}
-                {exceedCount > 0 && (fatigueExceedCount > 0 || restViolations > 0) && ' + '}
-                {fatigueExceedCount > 0 && `${fatigueExceedCount} FATIGUE`}
-                {fatigueExceedCount > 0 && restViolations > 0 && ' + '}
-                {restViolations > 0 && `${restViolations} REST`}
+                {[
+                  exceedCount > 0 && `${exceedCount} FDP`,
+                  nightExceedCount > 0 && `${nightExceedCount} NIGHT`,
+                  fatigueExceedCount > 0 && `${fatigueExceedCount} FATIGUE`,
+                  restViolations > 0 && `${restViolations} REST`,
+                ].filter(Boolean).join(' + ')}
                 {' '}LIMIT(S) EXCEEDED
               </span>
             ) : (
