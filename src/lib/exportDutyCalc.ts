@@ -2,6 +2,7 @@ interface DutyRow {
   date: string;
   details: string;
   flightHours: number;
+  nightHours: number;
   fatigueUnits: number;
   reportTime: string;
   rotorStop: string;
@@ -10,6 +11,7 @@ interface DutyRow {
   maxFDP: number;
   exceeded: boolean;
   fdpExceeded: boolean;
+  nightExceeded: boolean;
   fatigueExceeded: boolean;
   consecutiveDays: number;
   restAfter?: { isValid: boolean; localNights: number; restHours: number; message: string };
