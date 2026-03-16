@@ -120,10 +120,11 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
           <div className="book-spread relative overflow-hidden rounded-md" style={{
             background: 'linear-gradient(135deg, hsl(45 30% 92%) 0%, hsl(42 25% 88%) 100%)',
             boxShadow: `
-              0 20px 60px hsl(var(--background) / 0.7),
-              0 8px 24px hsl(var(--background) / 0.5),
-              0 2px 8px hsl(var(--background) / 0.3),
-              0 0 0 1px hsl(30 15% 60% / 0.3),
+              0 30px 80px -10px hsl(30 50% 15% / 0.6),
+              0 15px 35px -5px hsl(30 40% 10% / 0.5),
+              0 5px 15px hsl(0 0% 0% / 0.4),
+              0 0 0 1px hsl(30 20% 50% / 0.25),
+              0 0 80px -20px hsl(38 95% 55% / 0.12),
               inset 0 1px 0 hsl(45 30% 95%)
             `,
             transform: 'translateY(-2px)',
