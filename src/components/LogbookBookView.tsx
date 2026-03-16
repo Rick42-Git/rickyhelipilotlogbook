@@ -119,7 +119,14 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
           {/* Book spread */}
           <div className="book-spread relative overflow-hidden rounded-md" style={{
             background: 'linear-gradient(135deg, hsl(45 30% 92%) 0%, hsl(42 25% 88%) 100%)',
-            boxShadow: '0 8px 40px hsl(var(--background) / 0.6), 0 2px 8px hsl(var(--background) / 0.3), inset 0 1px 0 hsl(45 30% 95%)',
+            boxShadow: `
+              0 20px 60px hsl(var(--background) / 0.7),
+              0 8px 24px hsl(var(--background) / 0.5),
+              0 2px 8px hsl(var(--background) / 0.3),
+              0 0 0 1px hsl(30 15% 60% / 0.3),
+              inset 0 1px 0 hsl(45 30% 95%)
+            `,
+            transform: 'translateY(-2px)',
           }}>
             {/* Spine center shadow */}
             <div className="absolute left-1/2 top-0 bottom-0 w-8 -translate-x-1/2 z-20 pointer-events-none" style={{
