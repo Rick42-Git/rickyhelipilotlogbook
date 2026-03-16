@@ -337,6 +337,9 @@ export default function Admin() {
             </div>
           )}
         </div>
+
+        {/* Data Import Section */}
+        <DataImporter />
       </div>
     </div>
   );
