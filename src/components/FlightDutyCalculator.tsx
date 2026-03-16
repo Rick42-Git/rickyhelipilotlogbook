@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle, CheckCircle, Clock, Plane, FileDown } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Plane, FileDown, Moon } from 'lucide-react';
 import { exportDutyCalcPDF } from '@/lib/exportDutyCalc';
 import { LogbookEntry } from '@/types/logbook';
 
@@ -55,6 +55,64 @@ function getFatigueUnits(entry: LogbookEntry): number {
   return commercialHours + (instructionHours * 1.5);
 }
 
+/** SACAA Two Local Nights rest validation.
+ *  A local night = 21:00–07:00 (10hr window containing 8hr sleep opportunity).
+ *  Rest must span at least 2 full local nights to be valid. */
+function validateRestPeriod(dutyEndDate: string, dutyEndTime: string, nextDutyStartDate: string, nextDutyStartTime: string): {
+  isValid: boolean;
+  localNights: number;
+  restHours: number;
+  message: string;
+} {
+  const [eh, em] = dutyEndTime.split(':').map(Number);
+  const [sh, sm] = nextDutyStartTime.split(':').map(Number);
+
+  const endDt = new Date(dutyEndDate);
+  endDt.setHours(eh, em, 0, 0);
+
+  const startDt = new Date(nextDutyStartDate);
+  startDt.setHours(sh, sm, 0, 0);
+
+  const restMs = startDt.getTime() - endDt.getTime();
+  const restHours = restMs / (1000 * 60 * 60);
+
+  if (restHours < 36) {
+    return { isValid: false, localNights: 0, restHours, message: 'Rest < 36h; cannot contain two local nights' };
+  }
+
+  // Count full 21:00–07:00 windows within the rest period
+  let localNights = 0;
+  const checkDate = new Date(endDt);
+  checkDate.setHours(21, 0, 0, 0);
+
+  // If duty ended after 21:00, first available night starts next day
+  if (endDt.getHours() >= 21) {
+    checkDate.setDate(checkDate.getDate() + 1);
+  }
+
+  while (true) {
+    const nightEnd = new Date(checkDate);
+    nightEnd.setHours(nightEnd.getHours() + 10); // 21:00 + 10h = 07:00 next day
+    if (nightEnd.getTime() > startDt.getTime()) break;
+    localNights++;
+    checkDate.setDate(checkDate.getDate() + 1);
+  }
+
+  if (localNights >= 2) {
+    return { isValid: true, localNights, restHours, message: `Valid rest — ${localNights} local nights` };
+  } else {
+    return { isValid: false, localNights, restHours, message: `Invalid rest — only ${localNights} local night${localNights !== 1 ? 's' : ''}` };
+  }
+}
+
+/** Check if two ISO date strings (YYYY-MM-DD) are consecutive calendar days */
+function isConsecutiveDay(dateA: string, dateB: string): boolean {
+  const a = new Date(dateA);
+  const b = new Date(dateB);
+  const diff = (b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24);
+  return diff === 1;
+}
+
 function getMonthOptions() {
   const options: { value: string; label: string }[] = [];
   const now = new Date();
@@ -81,6 +139,8 @@ interface DayData {
   fdpExceeded: boolean;
   fatigueExceeded: boolean;
   anyExceeded: boolean;
+  consecutiveDays: number; // how many days in a row including this one
+  restAfter?: { isValid: boolean; localNights: number; restHours: number; message: string };
 }
 
 const DAILY_FATIGUE_LIMIT = 10;
@@ -99,11 +159,9 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
   const [dutyOverrides, setDutyOverrides] = useState<Record<string, DutyOverride>>({});
   const monthOptions = useMemo(getMonthOptions, []);
 
-  // Filter logbook entries for the selected month and group by date
   const monthData = useMemo((): DayData[] => {
     const filtered = entries.filter(e => e.date.startsWith(selectedMonth));
 
-    // Group by date
     const byDate: Record<string, LogbookEntry[]> = {};
     for (const e of filtered) {
       if (!byDate[e.date]) byDate[e.date] = [];
@@ -112,7 +170,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
 
     const dates = Object.keys(byDate).sort();
 
-    return dates.map(date => {
+    const days: DayData[] = dates.map((date, idx) => {
       const flights = byDate[date];
       const totalFlightHours = flights.reduce((sum, f) => sum + getFlightHours(f), 0);
       const totalFatigueUnits = flights.reduce((sum, f) => sum + getFatigueUnits(f), 0);
@@ -130,8 +188,29 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
       const fatigueExceeded = totalFatigueUnits > DAILY_FATIGUE_LIMIT;
       const anyExceeded = fdpExceeded || fatigueExceeded;
 
-      return { date, flights, totalFlightHours, totalFatigueUnits, duty, actualFDP, maxFDP, fdpExceeded, fatigueExceeded, anyExceeded };
+      // Calculate consecutive days
+      let consecutiveDays = 1;
+      for (let j = idx - 1; j >= 0; j--) {
+        if (isConsecutiveDay(dates[j], dates[j + 1])) {
+          consecutiveDays++;
+        } else break;
+      }
+
+      return { date, flights, totalFlightHours, totalFatigueUnits, duty, actualFDP, maxFDP, fdpExceeded, fatigueExceeded, anyExceeded, consecutiveDays };
     });
+
+    // Calculate rest validation between duty blocks
+    for (let i = 0; i < days.length - 1; i++) {
+      const isEndOfBlock = !isConsecutiveDay(days[i].date, days[i + 1].date);
+      if (isEndOfBlock) {
+        days[i].restAfter = validateRestPeriod(
+          days[i].date, days[i].duty.rotorStop,
+          days[i + 1].date, days[i + 1].duty.reportTime
+        );
+      }
+    }
+
+    return days;
   }, [entries, selectedMonth, dutyOverrides]);
 
   const updateDuty = (date: string, field: keyof DutyOverride, value: string | number) => {
@@ -146,13 +225,14 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
   };
 
   const totalFlightHours = monthData.reduce((sum, d) => sum + d.totalFlightHours, 0);
-  const totalFatigueUnits = monthData.reduce((sum, d) => sum + d.totalFatigueUnits, 0);
   const totalDutyHours = monthData.reduce((sum, d) => sum + d.actualFDP, 0);
   const totalFlights = monthData.reduce((sum, d) => sum + d.flights.length, 0);
   const exceedCount = monthData.filter(d => d.fdpExceeded).length;
   const fatigueExceedCount = monthData.filter(d => d.fatigueExceeded).length;
-  const totalExceedCount = exceedCount + fatigueExceedCount;
+  const restViolations = monthData.filter(d => d.restAfter && !d.restAfter.isValid).length;
+  const totalExceedCount = exceedCount + fatigueExceedCount + restViolations;
   const flyingDays = monthData.length;
+  const maxConsecutive = monthData.reduce((max, d) => Math.max(max, d.consecutiveDays), 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -173,6 +253,8 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                 totalFlightHours,
                 totalDutyHours,
                 exceedCount,
+                restViolations,
+                maxConsecutive,
                 rows: monthData.map(d => ({
                   date: d.date,
                   details: d.flights.map(f => `${f.aircraftType} ${f.aircraftReg}`).join(', '),
@@ -186,6 +268,8 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   exceeded: d.anyExceeded,
                   fdpExceeded: d.fdpExceeded,
                   fatigueExceeded: d.fatigueExceeded,
+                  consecutiveDays: d.consecutiveDays,
+                  restAfter: d.restAfter,
                 })),
               })}
             >
@@ -208,7 +292,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
         </div>
 
         {/* Monthly summary cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
           <div className="border border-border rounded p-3">
             <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">Flying Days</p>
             <p className="font-mono text-lg font-bold text-foreground">{flyingDays}</p>
@@ -225,6 +309,10 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
             <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3" /> Duty Hours</p>
             <p className="font-mono text-lg font-bold text-foreground">{totalDutyHours.toFixed(1)} h</p>
           </div>
+          <div className="border border-border rounded p-3">
+            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Moon className="h-3 w-3" /> Max Consec Days</p>
+            <p className={`font-mono text-lg font-bold ${maxConsecutive >= 7 ? 'text-destructive' : 'text-foreground'}`}>{maxConsecutive}</p>
+          </div>
         </div>
 
         {monthData.length === 0 ? (
@@ -232,13 +320,14 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
             No flights found for this month.
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-0">
             {/* Header */}
-            <div className="grid grid-cols-[90px_1fr_70px_70px_80px_80px_70px_70px_70px_40px] gap-2 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+            <div className="grid grid-cols-[90px_1fr_55px_55px_45px_80px_80px_55px_55px_55px_30px] gap-1.5 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
               <span>Date</span>
               <span>Details</span>
               <span>Flt Hrs</span>
               <span>Fatigue</span>
+              <span>Days</span>
               <span>Report</span>
               <span>Rotor Stop</span>
               <span>Sectors</span>
@@ -247,64 +336,85 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
               <span />
             </div>
 
-            {monthData.map(d => (
-              <div
-                key={d.date}
-                className={`grid grid-cols-[90px_1fr_70px_70px_80px_80px_70px_70px_70px_40px] gap-2 items-center py-1.5 border-b border-border/30 ${
-                  d.anyExceeded ? 'bg-destructive/10 rounded' : ''
-                }`}
-              >
-                <span className="font-mono text-xs text-foreground">{d.date}</span>
-                <div className="font-mono text-[10px] text-muted-foreground truncate">
-                  {d.flights.map(f => `${f.aircraftType} ${f.aircraftReg}`).join(', ')}
+            {monthData.map((d, idx) => (
+              <div key={d.date}>
+                <div
+                  className={`grid grid-cols-[90px_1fr_55px_55px_45px_80px_80px_55px_55px_55px_30px] gap-1.5 items-center py-1.5 border-b border-border/30 ${
+                    d.anyExceeded ? 'bg-destructive/10 rounded' : ''
+                  }`}
+                >
+                  <span className="font-mono text-xs text-foreground">{d.date}</span>
+                  <div className="font-mono text-[10px] text-muted-foreground truncate">
+                    {d.flights.map(f => `${f.aircraftType} ${f.aircraftReg}`).join(', ')}
+                  </div>
+                  <span className="font-mono text-xs text-primary font-semibold">
+                    {d.totalFlightHours.toFixed(1)}
+                  </span>
+                  <span className={`font-mono text-xs font-semibold ${d.fatigueExceeded ? 'text-destructive' : 'text-foreground'}`}>
+                    {d.totalFatigueUnits.toFixed(1)}
+                    {d.fatigueExceeded && <span className="text-[8px] ml-0.5">▸10</span>}
+                  </span>
+                  <span className={`font-mono text-xs font-semibold ${d.consecutiveDays >= 7 ? 'text-destructive' : d.consecutiveDays >= 5 ? 'text-amber-400' : 'text-muted-foreground'}`}>
+                    {d.consecutiveDays}
+                  </span>
+                  <Input
+                    type="time"
+                    value={d.duty.reportTime}
+                    onChange={(e) => updateDuty(d.date, 'reportTime', e.target.value)}
+                    className="font-mono text-xs h-7"
+                  />
+                  <Input
+                    type="time"
+                    value={d.duty.rotorStop}
+                    onChange={(e) => updateDuty(d.date, 'rotorStop', e.target.value)}
+                    className="font-mono text-xs h-7"
+                  />
+                  <Input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={d.duty.sectors}
+                    onChange={(e) => updateDuty(d.date, 'sectors', parseInt(e.target.value) || 1)}
+                    className="font-mono text-xs h-7"
+                  />
+                  <span className="font-mono text-xs font-semibold text-foreground">
+                    {d.actualFDP.toFixed(1)}
+                  </span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {d.maxFDP.toFixed(1)}
+                  </span>
+                  <span>
+                    {d.anyExceeded ? (
+                      <AlertTriangle className="h-4 w-4 text-destructive" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 text-primary" />
+                    )}
+                  </span>
                 </div>
-                <span className="font-mono text-xs text-primary font-semibold">
-                  {d.totalFlightHours.toFixed(1)} h
-                </span>
-                <span className={`font-mono text-xs font-semibold ${d.fatigueExceeded ? 'text-destructive' : 'text-foreground'}`}>
-                  {d.totalFatigueUnits.toFixed(1)}
-                  {d.fatigueExceeded && <span className="text-[8px] ml-0.5">▸10</span>}
-                </span>
-                <Input
-                  type="time"
-                  value={d.duty.reportTime}
-                  onChange={(e) => updateDuty(d.date, 'reportTime', e.target.value)}
-                  className="font-mono text-xs h-7"
-                />
-                <Input
-                  type="time"
-                  value={d.duty.rotorStop}
-                  onChange={(e) => updateDuty(d.date, 'rotorStop', e.target.value)}
-                  className="font-mono text-xs h-7"
-                />
-                <Input
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={d.duty.sectors}
-                  onChange={(e) => updateDuty(d.date, 'sectors', parseInt(e.target.value) || 1)}
-                  className="font-mono text-xs h-7"
-                />
-                <span className="font-mono text-xs font-semibold text-foreground">
-                  {d.actualFDP.toFixed(1)} h
-                </span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  {d.maxFDP.toFixed(1)} h
-                </span>
-                <span>
-                  {d.anyExceeded ? (
-                    <AlertTriangle className="h-4 w-4 text-destructive" />
-                  ) : (
-                    <CheckCircle className="h-4 w-4 text-primary" />
-                  )}
-                </span>
+
+                {/* Rest period validation between duty blocks */}
+                {d.restAfter && (
+                  <div className={`flex items-center gap-2 py-1.5 px-3 my-1 rounded text-[10px] font-mono ${
+                    d.restAfter.isValid
+                      ? 'bg-primary/5 border border-primary/20 text-primary'
+                      : 'bg-destructive/10 border border-destructive/20 text-destructive'
+                  }`}>
+                    <Moon className="h-3 w-3 flex-shrink-0" />
+                    <span className="font-semibold">REST:</span>
+                    <span>{d.restAfter.restHours.toFixed(1)}h</span>
+                    <span>•</span>
+                    <span>{d.restAfter.localNights} local night{d.restAfter.localNights !== 1 ? 's' : ''} (21:00–07:00)</span>
+                    <span>•</span>
+                    <span className="font-semibold">{d.restAfter.isValid ? '✓ VALID' : '✗ INSUFFICIENT'}</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
 
         {monthData.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between font-mono text-xs">
+          <div className="mt-4 pt-3 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between font-mono text-xs gap-2">
             <span className="text-muted-foreground">
               {flyingDays} DAYS — <span className="text-primary font-bold">{totalFlightHours.toFixed(1)}</span> FLT HRS — <span className="text-foreground font-bold">{totalDutyHours.toFixed(1)}</span> DUTY HRS
             </span>
@@ -312,8 +422,10 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
               <span className="text-destructive font-bold flex items-center gap-1">
                 <AlertTriangle className="h-3.5 w-3.5" />
                 {exceedCount > 0 && `${exceedCount} FDP`}
-                {exceedCount > 0 && fatigueExceedCount > 0 && ' + '}
+                {exceedCount > 0 && (fatigueExceedCount > 0 || restViolations > 0) && ' + '}
                 {fatigueExceedCount > 0 && `${fatigueExceedCount} FATIGUE`}
+                {fatigueExceedCount > 0 && restViolations > 0 && ' + '}
+                {restViolations > 0 && `${restViolations} REST`}
                 {' '}LIMIT(S) EXCEEDED
               </span>
             ) : (
