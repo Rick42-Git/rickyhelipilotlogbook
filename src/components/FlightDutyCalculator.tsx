@@ -136,18 +136,21 @@ interface DayData {
   date: string;
   flights: LogbookEntry[];
   totalFlightHours: number;
+  totalNightHours: number;
   totalFatigueUnits: number;
   duty: DutyOverride;
   actualFDP: number;
   maxFDP: number;
   fdpExceeded: boolean;
   fatigueExceeded: boolean;
+  nightExceeded: boolean;
   anyExceeded: boolean;
-  consecutiveDays: number; // how many days in a row including this one
+  consecutiveDays: number;
   restAfter?: { isValid: boolean; localNights: number; restHours: number; message: string };
 }
 
 const DAILY_FATIGUE_LIMIT = 10;
+const DAILY_NIGHT_LIMIT = 8;
 
 interface Props {
   open: boolean;
