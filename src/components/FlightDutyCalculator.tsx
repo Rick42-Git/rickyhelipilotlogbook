@@ -250,7 +250,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
             {monthData.map(d => (
               <div
                 key={d.date}
-                className={`grid grid-cols-[90px_1fr_70px_80px_80px_70px_70px_70px_40px] gap-2 items-center py-1.5 border-b border-border/30 ${
+                className={`grid grid-cols-[90px_1fr_70px_70px_80px_80px_70px_70px_70px_40px] gap-2 items-center py-1.5 border-b border-border/30 ${
                   d.anyExceeded ? 'bg-destructive/10 rounded' : ''
                 }`}
               >
@@ -258,9 +258,12 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                 <div className="font-mono text-[10px] text-muted-foreground truncate">
                   {d.flights.map(f => `${f.aircraftType} ${f.aircraftReg}`).join(', ')}
                 </div>
-                <span className={`font-mono text-xs font-semibold ${d.flightTimeExceeded ? 'text-destructive' : 'text-primary'}`}>
+                <span className="font-mono text-xs text-primary font-semibold">
                   {d.totalFlightHours.toFixed(1)} h
-                  {d.flightTimeExceeded && <span className="text-[8px] ml-0.5">▸7h</span>}
+                </span>
+                <span className={`font-mono text-xs font-semibold ${d.fatigueExceeded ? 'text-destructive' : 'text-foreground'}`}>
+                  {d.totalFatigueUnits.toFixed(1)}
+                  {d.fatigueExceeded && <span className="text-[8px] ml-0.5">▸10</span>}
                 </span>
                 <Input
                   type="time"
