@@ -38,14 +38,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function AdminRoute() {
+function AdminRoute({ children }: { children?: React.ReactNode }) {
   const { activatedUser, loading } = useAuth();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
 
   if (loading || adminLoading) return <PageLoader />;
   if (!activatedUser) return <Navigate to="/auth" replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
-  return <Suspense fallback={<PageLoader />}><Admin /></Suspense>;
+  return <Suspense fallback={<PageLoader />}>{children ?? <Admin />}</Suspense>;
 }
 
 function AuthRoute() {
@@ -72,11 +72,7 @@ const App = () => (
                 <Suspense fallback={<PageLoader />}><MassBalance /></Suspense>
               </ProtectedRoute>
             } />
-            <Route path="/flight-planning" element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}><FlightPlanning /></Suspense>
-              </ProtectedRoute>
-            } />
+            <Route path="/flight-planning" element={<AdminRoute><FlightPlanning /></AdminRoute>} />
             <Route path="/frequency-chart" element={
               <ProtectedRoute>
                 <Suspense fallback={<PageLoader />}><FrequencyChart /></Suspense>
