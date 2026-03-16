@@ -177,6 +177,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   date: d.date,
                   details: d.flights.map(f => `${f.aircraftType} ${f.aircraftReg}`).join(', '),
                   flightHours: d.totalFlightHours,
+                  fatigueUnits: d.totalFatigueUnits,
                   reportTime: d.duty.reportTime,
                   rotorStop: d.duty.rotorStop,
                   sectors: d.duty.sectors,
@@ -184,7 +185,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   maxFDP: d.maxFDP,
                   exceeded: d.anyExceeded,
                   fdpExceeded: d.fdpExceeded,
-                  flightTimeExceeded: d.flightTimeExceeded,
+                  fatigueExceeded: d.fatigueExceeded,
                 })),
               })}
             >
