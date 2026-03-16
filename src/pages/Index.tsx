@@ -162,6 +162,9 @@ const Index = () => {
             </div>
             {/* Mobile: sign out only */}
             <div className="flex md:hidden gap-1">
+              <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8">
+                {theme === 'dark' ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
+              </Button>
               {isAdmin && (
                 <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="h-8 w-8 text-accent">
                   <Shield className="h-4 w-4" />
