@@ -189,8 +189,7 @@ const FrequencyChart = () => {
         {!loading && !searched && (
           <div className="text-center py-16 font-mono text-xs text-muted-foreground/60 space-y-2">
             <Radio className="h-8 w-8 mx-auto mb-3 opacity-30" />
-            <p>Search by airport ICAO code (e.g. FAOR, FACT)</p>
-            <p>or description (e.g. "Johannesburg", "Tower")</p>
+            <p>Search by ICAO designator (e.g. FAOR, FACT)</p>
           </div>
         )}
 
