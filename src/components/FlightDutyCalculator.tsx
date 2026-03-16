@@ -74,15 +74,16 @@ interface DayData {
   date: string;
   flights: LogbookEntry[];
   totalFlightHours: number;
+  totalFatigueUnits: number;
   duty: DutyOverride;
   actualFDP: number;
   maxFDP: number;
   fdpExceeded: boolean;
-  flightTimeExceeded: boolean;
+  fatigueExceeded: boolean;
   anyExceeded: boolean;
 }
 
-const MAX_DAILY_FLIGHT_HOURS = 7;
+const DAILY_FATIGUE_LIMIT = 10;
 
 interface Props {
   open: boolean;
