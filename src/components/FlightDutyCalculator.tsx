@@ -349,7 +349,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
             {monthData.map((d, idx) => (
               <div key={d.date}>
                 <div
-                  className={`grid grid-cols-[90px_1fr_55px_55px_45px_80px_80px_55px_55px_55px_30px] gap-1.5 items-center py-1.5 border-b border-border/30 ${
+                  className={`grid grid-cols-[90px_1fr_50px_50px_50px_45px_80px_80px_50px_50px_50px_28px] gap-1 items-center py-1.5 border-b border-border/30 ${
                     d.anyExceeded ? 'bg-destructive/10 rounded' : ''
                   }`}
                 >
@@ -359,6 +359,10 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   </div>
                   <span className="font-mono text-xs text-primary font-semibold">
                     {d.totalFlightHours.toFixed(1)}
+                  </span>
+                  <span className={`font-mono text-xs font-semibold ${d.nightExceeded ? 'text-destructive' : 'text-foreground'}`}>
+                    {d.totalNightHours.toFixed(1)}
+                    {d.nightExceeded && <span className="text-[8px] ml-0.5">▸8</span>}
                   </span>
                   <span className={`font-mono text-xs font-semibold ${d.fatigueExceeded ? 'text-destructive' : 'text-foreground'}`}>
                     {d.totalFatigueUnits.toFixed(1)}
