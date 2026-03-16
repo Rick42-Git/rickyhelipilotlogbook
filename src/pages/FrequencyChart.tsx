@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Search, Radio, X, Loader2, MapPin, Plane, Navigation } from 'lucide-react';
+import { ArrowLeft, Search, Radio, X, Loader2, MapPin, Plane, Navigation, Pin, PinOff, Trash2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -12,53 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-interface FrequencyRow {
-  id: number;
-  airport_ident: string;
-  type: string;
-  description: string;
-  frequency_mhz: number;
-}
-
-interface AirportRow {
-  id: number;
-  ident: string;
-  type: string;
-  name: string;
-  latitude_deg: number | null;
-  longitude_deg: number | null;
-  elevation_ft: number | null;
-  municipality: string;
-  iso_country: string;
-  icao_code: string;
-  iata_code: string;
-}
-
-interface RunwayRow {
-  id: number;
-  airport_ident: string;
-  length_ft: number | null;
-  width_ft: number | null;
-  surface: string;
-  lighted: boolean;
-  closed: boolean;
-  le_ident: string;
-  he_ident: string;
-  le_heading_degt: number | null;
-  he_heading_degt: number | null;
-}
-
-interface NavaidRow {
-  id: number;
-  ident: string;
-  name: string;
-  type: string;
-  frequency_khz: number | null;
-  elevation_ft: number | null;
-  associated_airport: string;
-  power: string;
-}
+import AirportCard from '@/components/frequency-chart/AirportCard';
+import type { AirportGroup } from '@/components/frequency-chart/types';
 
 const FREQ_TYPES = [
   { value: 'ALL', label: 'All Types' },
@@ -81,10 +36,8 @@ const FrequencyChart = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
-  const [results, setResults] = useState<FrequencyRow[]>([]);
-  const [airports, setAirports] = useState<AirportRow[]>([]);
-  const [runways, setRunways] = useState<RunwayRow[]>([]);
-  const [navaids, setNavaids] = useState<NavaidRow[]>([]);
+  const [searchResults, setSearchResults] = useState<[string, AirportGroup][]>([]);
+  const [pinnedResults, setPinnedResults] = useState<[string, AirportGroup][]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
@@ -95,7 +48,6 @@ const FrequencyChart = () => {
 
     const term = search.trim().toUpperCase();
 
-    // Run all queries in parallel
     let freqQuery = supabase
       .from('airport_frequencies')
       .select('id, airport_ident, type, description, frequency_mhz')
@@ -109,7 +61,6 @@ const FrequencyChart = () => {
       freqQuery = freqQuery.eq('type', typeFilter);
     }
 
-    // Airport search
     let airportQuery = supabase
       .from('airports')
       .select('id, ident, type, name, latitude_deg, longitude_deg, elevation_ft, municipality, iso_country, icao_code, iata_code')
@@ -119,22 +70,20 @@ const FrequencyChart = () => {
       airportQuery = airportQuery.or(`ident.ilike.%${term}%,icao_code.ilike.%${term}%,iata_code.ilike.%${term}%,name.ilike.%${term}%`);
     }
 
-    const [freqRes, airportRes] = await Promise.all([
-      freqQuery,
-      airportQuery,
-    ]);
+    const [freqRes, airportRes] = await Promise.all([freqQuery, airportQuery]);
 
-    const freqData = freqRes.error ? [] : (freqRes.data as FrequencyRow[]) || [];
-    const airportData = airportRes.error ? [] : (airportRes.data as AirportRow[]) || [];
+    const freqData = freqRes.error ? [] : freqRes.data || [];
+    const airportData = airportRes.error ? [] : airportRes.data || [];
 
-    // Get all unique airport idents from results
     const allIdents = new Set<string>();
     freqData.forEach(f => allIdents.add(f.airport_ident));
     airportData.forEach(a => { allIdents.add(a.ident); if (a.icao_code) allIdents.add(a.icao_code); });
 
     const identArray = Array.from(allIdents);
 
-    // Fetch runways and navaids for matched airports
+    let runwayData: any[] = [];
+    let navaidData: any[] = [];
+
     if (identArray.length > 0) {
       const [runwayRes, navaidRes] = await Promise.all([
         supabase
@@ -148,16 +97,32 @@ const FrequencyChart = () => {
           .in('associated_airport', identArray)
           .limit(200),
       ]);
-
-      setRunways(runwayRes.error ? [] : (runwayRes.data as RunwayRow[]) || []);
-      setNavaids(navaidRes.error ? [] : (navaidRes.data as NavaidRow[]) || []);
-    } else {
-      setRunways([]);
-      setNavaids([]);
+      runwayData = runwayRes.error ? [] : runwayRes.data || [];
+      navaidData = navaidRes.error ? [] : navaidRes.data || [];
     }
 
-    setResults(freqData);
-    setAirports(airportData);
+    // Group into airport entries
+    const map = new Map<string, AirportGroup>();
+
+    freqData.forEach(r => {
+      if (!map.has(r.airport_ident)) map.set(r.airport_ident, { freqs: [], rwys: [], navs: [] });
+      map.get(r.airport_ident)!.freqs.push(r);
+    });
+
+    airportData.forEach(a => {
+      if (!map.has(a.ident)) map.set(a.ident, { freqs: [], rwys: [], navs: [] });
+      map.get(a.ident)!.airport = a;
+    });
+
+    runwayData.forEach(r => {
+      if (map.has(r.airport_ident)) map.get(r.airport_ident)!.rwys.push(r);
+    });
+
+    navaidData.forEach(n => {
+      if (map.has(n.associated_airport)) map.get(n.associated_airport)!.navs.push(n);
+    });
+
+    setSearchResults(Array.from(map.entries()));
     setLoading(false);
   };
 
@@ -168,85 +133,26 @@ const FrequencyChart = () => {
   const clearSearch = () => {
     setSearch('');
     setTypeFilter('ALL');
-    setResults([]);
-    setAirports([]);
-    setRunways([]);
-    setNavaids([]);
+    setSearchResults([]);
     setSearched(false);
   };
 
-  // Group results by airport
-  const grouped = useMemo(() => {
-    const map = new Map<string, {
-      freqs: FrequencyRow[];
-      airport?: AirportRow;
-      rwys: RunwayRow[];
-      navs: NavaidRow[];
-    }>();
-
-    // Add from frequencies
-    results.forEach(r => {
-      if (!map.has(r.airport_ident)) {
-        map.set(r.airport_ident, { freqs: [], rwys: [], navs: [] });
-      }
-      map.get(r.airport_ident)!.freqs.push(r);
+  const pinAirport = useCallback((ident: string, data: AirportGroup) => {
+    setPinnedResults(prev => {
+      if (prev.some(([id]) => id === ident)) return prev;
+      return [...prev, [ident, data]];
     });
+  }, []);
 
-    // Add from airports
-    airports.forEach(a => {
-      const key = a.ident;
-      if (!map.has(key)) {
-        map.set(key, { freqs: [], rwys: [], navs: [] });
-      }
-      map.get(key)!.airport = a;
-    });
+  const unpinAirport = useCallback((ident: string) => {
+    setPinnedResults(prev => prev.filter(([id]) => id !== ident));
+  }, []);
 
-    // Add runways
-    runways.forEach(r => {
-      if (map.has(r.airport_ident)) {
-        map.get(r.airport_ident)!.rwys.push(r);
-      }
-    });
+  const clearAllPinned = useCallback(() => {
+    setPinnedResults([]);
+  }, []);
 
-    // Add navaids
-    navaids.forEach(n => {
-      if (map.has(n.associated_airport)) {
-        map.get(n.associated_airport)!.navs.push(n);
-      }
-    });
-
-    return Array.from(map.entries());
-  }, [results, airports, runways, navaids]);
-
-  const totalResults = results.length + airports.length;
-
-  const getTypeBadgeClass = (type: string) => {
-    switch (type) {
-      case 'TWR': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      case 'GND': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'APP': case 'DEP': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'CTAF': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-      case 'ATIS': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-      case 'CNTR': return 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30';
-      default: return 'bg-muted text-muted-foreground border-border';
-    }
-  };
-
-  const getNavaidBadgeClass = (type: string) => {
-    switch (type) {
-      case 'VOR': case 'VOR-DME': case 'VORTAC': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-      case 'NDB': case 'NDB-DME': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-      case 'DME': return 'bg-sky-500/20 text-sky-400 border-sky-500/30';
-      case 'TACAN': return 'bg-pink-500/20 text-pink-400 border-pink-500/30';
-      default: return 'bg-muted text-muted-foreground border-border';
-    }
-  };
-
-  const formatFreqKhz = (khz: number | null) => {
-    if (!khz) return '—';
-    if (khz >= 100000) return (khz / 1000).toFixed(2);
-    return khz.toString();
-  };
+  const pinnedIdents = useMemo(() => new Set(pinnedResults.map(([id]) => id)), [pinnedResults]);
 
   return (
     <div className="min-h-screen bg-background grid-bg scanline">
@@ -314,7 +220,38 @@ const FrequencyChart = () => {
           </div>
         </div>
 
-        {/* Results */}
+        {/* Pinned Results */}
+        {pinnedResults.length > 0 && (
+          <div className="mb-6 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-[10px] text-primary/70 tracking-widest flex items-center gap-1.5">
+                <Pin className="h-3 w-3" />
+                PINNED — {pinnedResults.length} AIRPORT{pinnedResults.length !== 1 ? 'S' : ''}
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAllPinned}
+                className="font-mono text-[10px] h-6 px-2 text-muted-foreground hover:text-destructive gap-1"
+              >
+                <Trash2 className="h-3 w-3" />
+                CLEAR ALL
+              </Button>
+            </div>
+            {pinnedResults.map(([ident, data]) => (
+              <AirportCard
+                key={`pinned-${ident}`}
+                ident={ident}
+                data={data}
+                isPinned={true}
+                onPin={() => {}}
+                onUnpin={() => unpinAirport(ident)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Search Results */}
         {loading && (
           <div className="flex items-center justify-center py-12 text-muted-foreground font-mono text-sm gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -322,13 +259,13 @@ const FrequencyChart = () => {
           </div>
         )}
 
-        {!loading && searched && grouped.length === 0 && (
+        {!loading && searched && searchResults.length === 0 && (
           <div className="text-center py-12 font-mono text-sm text-muted-foreground">
             No results found. Try a different search term.
           </div>
         )}
 
-        {!loading && !searched && (
+        {!loading && !searched && pinnedResults.length === 0 && (
           <div className="text-center py-16 font-mono text-xs text-muted-foreground/60 space-y-2">
             <Radio className="h-8 w-8 mx-auto mb-3 opacity-30" />
             <p>Search by ICAO designator, IATA code, or airport name</p>
@@ -336,147 +273,20 @@ const FrequencyChart = () => {
           </div>
         )}
 
-        {!loading && grouped.length > 0 && (
+        {!loading && searchResults.length > 0 && (
           <div className="space-y-3">
             <p className="font-mono text-[10px] text-muted-foreground/60 tracking-wider">
-              {grouped.length} AIRPORT{grouped.length !== 1 ? 'S' : ''} FOUND
+              {searchResults.length} RESULT{searchResults.length !== 1 ? 'S' : ''} — CLICK <Pin className="h-2.5 w-2.5 inline" /> TO KEEP
             </p>
-            {grouped.map(([ident, data]) => (
-              <div key={ident} className="glass-panel hud-border p-3 md:p-4 space-y-3">
-                {/* Airport Header */}
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="font-mono text-sm font-bold text-primary tracking-wider flex items-center gap-2">
-                      {ident}
-                      {data.airport?.iata_code && (
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/30">
-                          {data.airport.iata_code}
-                        </Badge>
-                      )}
-                    </div>
-                    {data.airport && (
-                      <div className="font-mono text-xs text-muted-foreground mt-0.5">
-                        {data.airport.name}
-                        {data.airport.municipality && ` • ${data.airport.municipality}`}
-                        {data.airport.iso_country && ` • ${data.airport.iso_country}`}
-                      </div>
-                    )}
-                  </div>
-                  {data.airport?.elevation_ft != null && (
-                    <div className="font-mono text-[10px] text-muted-foreground text-right shrink-0">
-                      <span className="text-foreground">{data.airport.elevation_ft}</span> ft
-                    </div>
-                  )}
-                </div>
-
-                {/* Airport Details */}
-                {data.airport && (data.airport.latitude_deg != null || data.airport.type) && (
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[10px] text-muted-foreground border-t border-border/30 pt-2">
-                    {data.airport.type && (
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {data.airport.type.replace(/_/g, ' ')}
-                      </span>
-                    )}
-                    {data.airport.latitude_deg != null && data.airport.longitude_deg != null && (
-                      <span>
-                        {data.airport.latitude_deg.toFixed(4)}°, {data.airport.longitude_deg.toFixed(4)}°
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* Frequencies */}
-                {data.freqs.length > 0 && (
-                  <div className="border-t border-border/30 pt-2">
-                    <div className="font-mono text-[10px] text-muted-foreground/60 tracking-widest mb-1.5 flex items-center gap-1.5">
-                      <Radio className="h-3 w-3" />
-                      FREQUENCIES
-                    </div>
-                    <div className="space-y-1">
-                      {data.freqs.map(f => (
-                        <div key={f.id} className="flex items-center gap-2 font-mono text-xs">
-                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 min-w-[44px] justify-center ${getTypeBadgeClass(f.type)}`}>
-                            {f.type}
-                          </Badge>
-                          <span className="text-foreground font-semibold tabular-nums min-w-[60px]">
-                            {f.frequency_mhz > 0 ? f.frequency_mhz.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') : '—'}
-                          </span>
-                          <span className="text-muted-foreground truncate">
-                            {f.description || '—'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Runways */}
-                {data.rwys.length > 0 && (
-                  <div className="border-t border-border/30 pt-2">
-                    <div className="font-mono text-[10px] text-muted-foreground/60 tracking-widest mb-1.5 flex items-center gap-1.5">
-                      <Plane className="h-3 w-3" />
-                      RUNWAYS
-                    </div>
-                    <div className="space-y-1">
-                      {data.rwys.map(r => (
-                        <div key={r.id} className="flex items-center gap-2 font-mono text-xs flex-wrap">
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 min-w-[60px] justify-center bg-indigo-500/20 text-indigo-400 border-indigo-500/30">
-                            {r.le_ident}/{r.he_ident}
-                          </Badge>
-                          <span className="text-foreground font-semibold tabular-nums">
-                            {r.length_ft ? `${r.length_ft.toLocaleString()} ft` : '—'}
-                          </span>
-                          <span className="text-muted-foreground">×</span>
-                          <span className="text-foreground tabular-nums">
-                            {r.width_ft ? `${r.width_ft} ft` : '—'}
-                          </span>
-                          <span className="text-muted-foreground">{r.surface || '—'}</span>
-                          {r.lighted && (
-                            <Badge variant="outline" className="text-[9px] px-1 py-0 bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                              LIT
-                            </Badge>
-                          )}
-                          {r.closed && (
-                            <Badge variant="outline" className="text-[9px] px-1 py-0 bg-red-500/20 text-red-400 border-red-500/30">
-                              CLOSED
-                            </Badge>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Navaids */}
-                {data.navs.length > 0 && (
-                  <div className="border-t border-border/30 pt-2">
-                    <div className="font-mono text-[10px] text-muted-foreground/60 tracking-widest mb-1.5 flex items-center gap-1.5">
-                      <Navigation className="h-3 w-3" />
-                      NAVAIDS
-                    </div>
-                    <div className="space-y-1">
-                      {data.navs.map(n => (
-                        <div key={n.id} className="flex items-center gap-2 font-mono text-xs">
-                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 min-w-[60px] justify-center ${getNavaidBadgeClass(n.type)}`}>
-                            {n.type}
-                          </Badge>
-                          <span className="text-foreground font-semibold tabular-nums min-w-[60px]">
-                            {formatFreqKhz(n.frequency_khz)}
-                          </span>
-                          <span className="text-primary font-semibold">{n.ident}</span>
-                          <span className="text-muted-foreground truncate">{n.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Empty state for airport with no data */}
-                {data.freqs.length === 0 && data.rwys.length === 0 && data.navs.length === 0 && !data.airport && (
-                  <div className="font-mono text-[10px] text-muted-foreground/40 italic">No additional data available</div>
-                )}
-              </div>
+            {searchResults.map(([ident, data]) => (
+              <AirportCard
+                key={`result-${ident}`}
+                ident={ident}
+                data={data}
+                isPinned={pinnedIdents.has(ident)}
+                onPin={() => pinAirport(ident, data)}
+                onUnpin={() => unpinAirport(ident)}
+              />
             ))}
           </div>
         )}
