@@ -114,7 +114,7 @@ export function exportDutyCalcPDF(data: DutySummary) {
   <div class="card"><div class="label">Max Consec Days</div><div class="val${data.maxConsecutive >= 7 ? ' danger' : ''}">${data.maxConsecutive}</div></div>
 </div>
 <table>
-  <thead><tr><th>Date</th><th>Details</th><th>Flt Hrs</th><th>Fatigue</th><th>Days</th><th>Report</th><th>Rotor Stop</th><th>Sectors</th><th>Act FDP</th><th>Max FDP</th><th>Status</th></tr></thead>
+  <thead><tr><th>Date</th><th>Details</th><th>Flt Hrs</th><th>Night</th><th>Fatigue</th><th>Days</th><th>Report</th><th>Rotor Stop</th><th>Sectors</th><th>Act FDP</th><th>Max FDP</th><th>Status</th></tr></thead>
   <tbody>${rows}</tbody>
 </table>
 <div class="footer">
