@@ -45,8 +45,8 @@ interface RunwayRow {
   closed: boolean;
   le_ident: string;
   he_ident: string;
-  le_heading_degT: number | null;
-  he_heading_degT: number | null;
+  le_heading_degt: number | null;
+  he_heading_degt: number | null;
 }
 
 interface NavaidRow {
