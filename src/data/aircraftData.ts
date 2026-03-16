@@ -305,8 +305,8 @@ export const aircraftTypes: AircraftType[] = [
     lateralCGLimit: 4.5,
     stations: [
       { label: 'Empty Weight', station: 145, buttline: 0, defaultWeight: 4770, editable: false },
-      { label: 'Pilot', station: 128, buttline: -13.0, defaultWeight: 170, editable: true },
-      { label: 'Co-Pilot', station: 128, buttline: 13.0, defaultWeight: 0, editable: true },
+      { label: 'Pilot', station: 128, buttline: 13.0, defaultWeight: 170, editable: true },
+      { label: 'Co-Pilot', station: 128, buttline: -13.0, defaultWeight: 0, editable: true },
       { label: 'Cabin Row 1', station: 158, buttline: 0, defaultWeight: 0, editable: true },
       { label: 'Cabin Row 2', station: 175, buttline: 0, defaultWeight: 0, editable: true },
       { label: 'Baggage', station: 205, buttline: 0, defaultWeight: 0, editable: true },
