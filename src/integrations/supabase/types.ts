@@ -122,6 +122,63 @@ export type Database = {
         }
         Relationships: []
       }
+      airports: {
+        Row: {
+          continent: string
+          elevation_ft: number | null
+          gps_code: string
+          iata_code: string
+          icao_code: string
+          id: number
+          ident: string
+          iso_country: string
+          iso_region: string
+          latitude_deg: number | null
+          local_code: string
+          longitude_deg: number | null
+          municipality: string
+          name: string
+          scheduled_service: string
+          type: string
+        }
+        Insert: {
+          continent?: string
+          elevation_ft?: number | null
+          gps_code?: string
+          iata_code?: string
+          icao_code?: string
+          id: number
+          ident?: string
+          iso_country?: string
+          iso_region?: string
+          latitude_deg?: number | null
+          local_code?: string
+          longitude_deg?: number | null
+          municipality?: string
+          name?: string
+          scheduled_service?: string
+          type?: string
+        }
+        Update: {
+          continent?: string
+          elevation_ft?: number | null
+          gps_code?: string
+          iata_code?: string
+          icao_code?: string
+          id?: number
+          ident?: string
+          iso_country?: string
+          iso_region?: string
+          latitude_deg?: number | null
+          local_code?: string
+          longitude_deg?: number | null
+          municipality?: string
+          name?: string
+          scheduled_service?: string
+          type?: string
+        }
+        Relationships: []
+      }
       column_templates: {
         Row: {
           column_mapping: Json
@@ -299,6 +356,105 @@ export type Database = {
         }
         Relationships: []
       }
+      navaids: {
+        Row: {
+          associated_airport: string
+          dme_channel: string
+          dme_frequency_khz: number | null
+          elevation_ft: number | null
+          frequency_khz: number | null
+          id: number
+          ident: string
+          iso_country: string
+          latitude_deg: number | null
+          longitude_deg: number | null
+          magnetic_variation_deg: number | null
+          name: string
+          power: string
+          type: string
+          usage_type: string
+        }
+        Insert: {
+          associated_airport?: string
+          dme_channel?: string
+          dme_frequency_khz?: number | null
+          elevation_ft?: number | null
+          frequency_khz?: number | null
+          id: number
+          ident?: string
+          iso_country?: string
+          latitude_deg?: number | null
+          longitude_deg?: number | null
+          magnetic_variation_deg?: number | null
+          name?: string
+          power?: string
+          type?: string
+          usage_type?: string
+        }
+        Update: {
+          associated_airport?: string
+          dme_channel?: string
+          dme_frequency_khz?: number | null
+          elevation_ft?: number | null
+          frequency_khz?: number | null
+          id?: number
+          ident?: string
+          iso_country?: string
+          latitude_deg?: number | null
+          longitude_deg?: number | null
+          magnetic_variation_deg?: number | null
+          name?: string
+          power?: string
+          type?: string
+          usage_type?: string
+        }
+        Relationships: []
+      }
+      runways: {
+        Row: {
+          airport_ident: string
+          airport_ref: number
+          closed: boolean
+          he_heading_degt: number | null
+          he_ident: string
+          id: number
+          le_heading_degt: number | null
+          le_ident: string
+          length_ft: number | null
+          lighted: boolean
+          surface: string
+          width_ft: number | null
+        }
+        Insert: {
+          airport_ident?: string
+          airport_ref: number
+          closed?: boolean
+          he_heading_degt?: number | null
+          he_ident?: string
+          id: number
+          le_heading_degt?: number | null
+          le_ident?: string
+          length_ft?: number | null
+          lighted?: boolean
+          surface?: string
+          width_ft?: number | null
+        }
+        Update: {
+          airport_ident?: string
+          airport_ref?: number
+          closed?: boolean
+          he_heading_degt?: number | null
+          he_ident?: string
+          id?: number
+          le_heading_degt?: number | null
+          le_ident?: string
+          length_ft?: number | null
+          lighted?: boolean
+          surface?: string
+          width_ft?: number | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -323,6 +479,8 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       access_status: "pending" | "approved" | "rejected"
