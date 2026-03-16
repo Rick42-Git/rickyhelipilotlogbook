@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import helicopterIcon from '@/assets/helicopter-icon.png';
 import { setActivatedUser, getActivatedUser } from '@/lib/activation';
+import DataImporter from '@/components/DataImporter';
 
 interface AccessCode {
   id: string;
@@ -336,6 +337,9 @@ export default function Admin() {
             </div>
           )}
         </div>
+
+        {/* Data Import Section */}
+        <DataImporter />
       </div>
     </div>
   );
