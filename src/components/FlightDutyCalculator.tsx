@@ -48,6 +48,10 @@ function getFlightHours(entry: LogbookEntry): number {
   );
 }
 
+function getNightHours(entry: LogbookEntry): number {
+  return entry.seNightDual + entry.seNightPilot + entry.instructorNight;
+}
+
 function getFatigueUnits(entry: LogbookEntry): number {
   const commercialHours = entry.seDayDual + entry.seDayPilot +
     entry.seNightDual + entry.seNightPilot;
