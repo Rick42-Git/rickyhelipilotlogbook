@@ -98,6 +98,9 @@ const Index = () => {
             </div>
             {/* Desktop buttons */}
             <div className="hidden md:flex gap-2">
+              <Button variant="ghost" size="icon" onClick={toggleTheme} className="font-mono" title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+                {theme === 'dark' ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
+              </Button>
               {canInstall && (
                 <Button variant="outline" onClick={install} className="font-mono gap-2 border-primary text-primary">
                   <MonitorSmartphone className="h-4 w-4" />
