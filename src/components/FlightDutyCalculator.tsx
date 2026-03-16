@@ -180,6 +180,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
     const days: DayData[] = dates.map((date, idx) => {
       const flights = byDate[date];
       const totalFlightHours = flights.reduce((sum, f) => sum + getFlightHours(f), 0);
+      const totalNightHours = flights.reduce((sum, f) => sum + getNightHours(f), 0);
       const totalFatigueUnits = flights.reduce((sum, f) => sum + getFatigueUnits(f), 0);
       const sectorCount = flights.length;
 
@@ -193,9 +194,9 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
       const maxFDP = calculateMaxFDP(duty.reportTime, duty.sectors);
       const fdpExceeded = actualFDP > maxFDP;
       const fatigueExceeded = totalFatigueUnits > DAILY_FATIGUE_LIMIT;
-      const anyExceeded = fdpExceeded || fatigueExceeded;
+      const nightExceeded = totalNightHours > DAILY_NIGHT_LIMIT;
+      const anyExceeded = fdpExceeded || fatigueExceeded || nightExceeded;
 
-      // Calculate consecutive days
       let consecutiveDays = 1;
       for (let j = idx - 1; j >= 0; j--) {
         if (isConsecutiveDay(dates[j], dates[j + 1])) {
@@ -203,7 +204,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
         } else break;
       }
 
-      return { date, flights, totalFlightHours, totalFatigueUnits, duty, actualFDP, maxFDP, fdpExceeded, fatigueExceeded, anyExceeded, consecutiveDays };
+      return { date, flights, totalFlightHours, totalNightHours, totalFatigueUnits, duty, actualFDP, maxFDP, fdpExceeded, fatigueExceeded, nightExceeded, anyExceeded, consecutiveDays };
     });
 
     // Calculate rest validation between duty blocks
