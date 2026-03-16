@@ -115,6 +115,7 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
     return dates.map(date => {
       const flights = byDate[date];
       const totalFlightHours = flights.reduce((sum, f) => sum + getFlightHours(f), 0);
+      const totalFatigueUnits = flights.reduce((sum, f) => sum + getFatigueUnits(f), 0);
       const sectorCount = flights.length;
 
       const duty = dutyOverrides[date] || {
@@ -126,10 +127,10 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
       const actualFDP = calcActualFDP(duty.reportTime, duty.rotorStop);
       const maxFDP = calculateMaxFDP(duty.reportTime, duty.sectors);
       const fdpExceeded = actualFDP > maxFDP;
-      const flightTimeExceeded = totalFlightHours > MAX_DAILY_FLIGHT_HOURS;
-      const anyExceeded = fdpExceeded || flightTimeExceeded;
+      const fatigueExceeded = totalFatigueUnits > DAILY_FATIGUE_LIMIT;
+      const anyExceeded = fdpExceeded || fatigueExceeded;
 
-      return { date, flights, totalFlightHours, duty, actualFDP, maxFDP, fdpExceeded, flightTimeExceeded, anyExceeded };
+      return { date, flights, totalFlightHours, totalFatigueUnits, duty, actualFDP, maxFDP, fdpExceeded, fatigueExceeded, anyExceeded };
     });
   }, [entries, selectedMonth, dutyOverrides]);
 
