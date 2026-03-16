@@ -31,19 +31,23 @@ interface DutySummary {
 
 export function exportDutyCalcPDF(data: DutySummary) {
   const fatigueExceedCount = data.rows.filter(r => r.fatigueExceeded).length;
-  const totalExceedCount = data.exceedCount + fatigueExceedCount + data.restViolations;
+  const nightExceedCount = data.rows.filter(r => r.nightExceeded).length;
+  const totalExceedCount = data.exceedCount + fatigueExceedCount + nightExceedCount + data.restViolations;
 
   const rows = data.rows.map((r, idx) => {
+    const nightColor = r.nightExceeded ? 'color:#dc2626;' : '';
+    const nightNote = r.nightExceeded ? ' <span style="font-size:7px">▸8</span>' : '';
     const fatigueColor = r.fatigueExceeded ? 'color:#dc2626;' : '';
     const fatigueNote = r.fatigueExceeded ? ' <span style="font-size:7px">▸10</span>' : '';
     const consecColor = r.consecutiveDays >= 7 ? 'color:#dc2626;font-weight:700;' : r.consecutiveDays >= 5 ? 'color:#f59e0b;' : 'color:#888;';
-    const anyExceeded = r.fdpExceeded || r.fatigueExceeded;
+    const anyExceeded = r.fdpExceeded || r.fatigueExceeded || r.nightExceeded;
 
     let row = `
     <tr style="${anyExceeded ? 'background:#fef2f2;' : ''}">
       <td>${r.date}</td>
       <td style="font-size:9px;color:#666;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.details}</td>
       <td style="font-weight:600;color:#2563eb">${r.flightHours.toFixed(1)}</td>
+      <td style="font-weight:600;${nightColor}">${r.nightHours.toFixed(1)}${nightNote}</td>
       <td style="font-weight:600;${fatigueColor}">${r.fatigueUnits.toFixed(1)}${fatigueNote}</td>
       <td style="${consecColor}">${r.consecutiveDays}</td>
       <td>${r.reportTime}</td>
