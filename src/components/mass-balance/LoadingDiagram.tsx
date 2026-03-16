@@ -34,10 +34,10 @@ export function LoadingDiagram({ stations, weights }: LoadingDiagramProps) {
     }
   });
 
-  // Position map for helicopter diagram
+  // Position map for helicopter diagram (pilot sits RIGHT side)
   const positionMap: Record<string, { x: number; y: number }> = {
-    'pilot': { x: 175, y: 95 },
-    'copilot': { x: 120, y: 95 },
+    'pilot': { x: 190, y: 95 },
+    'copilot': { x: 110, y: 95 },
     'fuel': { x: 150, y: 145 },
     'rear-left': { x: 110, y: 155 },
     'rear-right': { x: 190, y: 155 },
