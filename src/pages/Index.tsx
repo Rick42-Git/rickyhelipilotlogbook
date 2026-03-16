@@ -249,7 +249,7 @@ const Index = () => {
           }} />
         </div>
 
-        <div className="flex items-center gap-3 my-6 sticky top-0 z-30 bg-background py-3 -mx-4 px-4">
+        <div className="flex items-center gap-3 my-6 sticky top-0 z-30 bg-background pt-4 pb-3 -mx-4 px-4">
           {entries.length > 0 && (
             <Button
               variant="ghost"
