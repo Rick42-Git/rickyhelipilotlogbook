@@ -10,7 +10,8 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane, List, BookOpen, Radio } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane, List, BookOpen, Radio, Sun, Moon } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +51,7 @@ const Index = () => {
   const { canInstall, install } = useInstallPrompt();
   const { templates } = useColumnTemplates();
   const [viewMode, setViewMode] = useState<'list' | 'book'>('list');
+  const { theme, toggleTheme } = useTheme();
 
   const handleEdit = (entry: LogbookEntry) => {
     setEditingEntry(entry);
@@ -96,6 +98,9 @@ const Index = () => {
             </div>
             {/* Desktop buttons */}
             <div className="hidden md:flex gap-2">
+              <Button variant="ghost" size="icon" onClick={toggleTheme} className="font-mono" title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+                {theme === 'dark' ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
+              </Button>
               {canInstall && (
                 <Button variant="outline" onClick={install} className="font-mono gap-2 border-primary text-primary">
                   <MonitorSmartphone className="h-4 w-4" />
@@ -157,6 +162,9 @@ const Index = () => {
             </div>
             {/* Mobile: sign out only */}
             <div className="flex md:hidden gap-1">
+              <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8">
+                {theme === 'dark' ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
+              </Button>
               {isAdmin && (
                 <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="h-8 w-8 text-accent">
                   <Shield className="h-4 w-4" />
