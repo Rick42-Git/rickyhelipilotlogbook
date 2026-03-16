@@ -181,10 +181,12 @@ const Index = () => {
               <Scale className="h-3 w-3" />
               M&B
             </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate('/flight-planning')} className="font-mono text-[10px] gap-1 h-7">
-              <Plane className="h-3 w-3" />
-              FLT
-            </Button>
+            {isAdmin && (
+              <Button variant="outline" size="sm" onClick={() => navigate('/flight-planning')} className="font-mono text-[10px] gap-1 h-7">
+                <Plane className="h-3 w-3" />
+                FLT
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={() => navigate('/frequency-chart')} className="font-mono text-[10px] gap-1 h-7">
               <Radio className="h-3 w-3" />
               FREQ

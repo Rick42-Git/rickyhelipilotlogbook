@@ -72,11 +72,7 @@ const App = () => (
                 <Suspense fallback={<PageLoader />}><MassBalance /></Suspense>
               </ProtectedRoute>
             } />
-            <Route path="/flight-planning" element={
-              <ProtectedRoute>
-                <Suspense fallback={<PageLoader />}><FlightPlanning /></Suspense>
-              </ProtectedRoute>
-            } />
+            <Route path="/flight-planning" element={<AdminRoute />} />
             <Route path="/frequency-chart" element={
               <ProtectedRoute>
                 <Suspense fallback={<PageLoader />}><FrequencyChart /></Suspense>
