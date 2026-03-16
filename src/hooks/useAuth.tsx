@@ -28,6 +28,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cached = getActivatedUser();
     setUser(cached);
     setLoading(false);
+
+    // Sync display name from server in case admin updated it
+    if (cached?.id) {
+      supabase
+        .from('access_codes')
+        .select('display_name, is_admin, extraction_limit')
+        .eq('id', cached.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data && data.display_name !== cached.displayName) {
+            const updated = { ...cached, displayName: data.display_name, isAdmin: data.is_admin };
+            setActivatedUser(updated);
+            setUser(updated);
+          }
+        });
+    }
   }, []);
 
   const activate = async (code: string): Promise<{ success: boolean; error?: string }> => {
