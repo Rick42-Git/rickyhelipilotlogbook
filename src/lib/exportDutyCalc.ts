@@ -63,7 +63,7 @@ export function exportDutyCalcPDF(data: DutySummary) {
       const restBg = r.restAfter.isValid ? '#f0fdf4' : '#fef2f2';
       row += `
       <tr style="background:${restBg}">
-        <td colspan="11" style="font-size:9px;color:${restColor};padding:3px 8px;border-bottom:2px solid #ddd">
+        <td colspan="12" style="font-size:9px;color:${restColor};padding:3px 8px;border-bottom:2px solid #ddd">
           🌙 REST: ${r.restAfter.restHours.toFixed(1)}h · ${r.restAfter.localNights} local night${r.restAfter.localNights !== 1 ? 's' : ''} (21:00–07:00) · <b>${r.restAfter.isValid ? '✓ VALID' : '✗ INSUFFICIENT'}</b>
         </td>
       </tr>`;
