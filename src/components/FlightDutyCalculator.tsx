@@ -234,10 +234,11 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
         ) : (
           <div className="space-y-2">
             {/* Header */}
-            <div className="grid grid-cols-[90px_1fr_70px_80px_80px_70px_70px_70px_40px] gap-2 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
+            <div className="grid grid-cols-[90px_1fr_70px_70px_80px_80px_70px_70px_70px_40px] gap-2 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
               <span>Date</span>
               <span>Details</span>
               <span>Flt Hrs</span>
+              <span>Fatigue</span>
               <span>Report</span>
               <span>Rotor Stop</span>
               <span>Sectors</span>
