@@ -76,6 +76,7 @@ export function exportDutyCalcPDF(data: DutySummary) {
   if (totalExceedCount > 0) {
     const parts: string[] = [];
     if (data.exceedCount > 0) parts.push(`${data.exceedCount} FDP`);
+    if (nightExceedCount > 0) parts.push(`${nightExceedCount} NIGHT`);
     if (fatigueExceedCount > 0) parts.push(`${fatigueExceedCount} FATIGUE`);
     if (data.restViolations > 0) parts.push(`${data.restViolations} REST`);
     footerStatus = `<span class="danger" style="font-weight:700">⚠ ${parts.join(' + ')} LIMIT(S) EXCEEDED</span>`;
