@@ -105,7 +105,7 @@ export function exportDutyCalcPDF(data: DutySummary) {
   .note{font-size:8px;color:#888;margin-top:4px}
 </style></head><body>
 <h1>▸ FLIGHT & DUTY REPORT (SACAA)</h1>
-<div class="sub">${data.month} · Fatigue limit: 10.0 units/day (instruction ×1.5) · Rest: 2 local nights required · FDP per SACAA Part 135/127</div>
+<div class="sub">${data.month} · Night limit: 8.0h · Fatigue limit: 10.0 units/day (instruction ×1.5) · Rest: 2 local nights required · FDP per SACAA Part 135/127</div>
 <div class="cards">
   <div class="card"><div class="label">Flying Days</div><div class="val">${data.flyingDays}</div></div>
   <div class="card"><div class="label">Total Flights</div><div class="val">${data.totalFlights}</div></div>
