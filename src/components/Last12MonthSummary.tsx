@@ -112,6 +112,16 @@ export function Last12MonthSummary({ entries, allEntries, open, onOpenChange }: 
     }
   };
 
+  const exportLast3BookPages = () => {
+    const sorted = [...allEntries].sort((a, b) => (a.date > b.date ? 1 : -1));
+    const ROWS_PER_SPREAD = 22;
+    const totalSpreads = Math.ceil(sorted.length / ROWS_PER_SPREAD);
+    if (totalSpreads === 0) return;
+    const fromSpread = Math.max(0, totalSpreads - 3);
+    const toSpread = totalSpreads - 1;
+    exportBookPagesPDF(allEntries, fromSpread, toSpread);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg glass-panel max-h-[85vh] overflow-y-auto">
