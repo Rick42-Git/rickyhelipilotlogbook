@@ -3,15 +3,17 @@ import { LogbookEntry, NumericField } from '@/types/logbook';
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FileDown } from 'lucide-react';
+import { FileDown, BookOpen } from 'lucide-react';
+import { exportBookPagesPDF } from '@/lib/exportBookPages';
 
 interface Last12MonthSummaryProps {
   entries: LogbookEntry[];
+  allEntries: LogbookEntry[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthSummaryProps) {
+export function Last12MonthSummary({ entries, allEntries, open, onOpenChange }: Last12MonthSummaryProps) {
   const now = new Date();
   const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
   const cutoff = twelveMonthsAgo.toISOString().slice(0, 10);
@@ -110,12 +112,25 @@ export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthS
     }
   };
 
+  const exportLast3BookPages = () => {
+    const sorted = [...allEntries].sort((a, b) => (a.date > b.date ? 1 : -1));
+    const ROWS_PER_SPREAD = 22;
+    const totalSpreads = Math.ceil(sorted.length / ROWS_PER_SPREAD);
+    if (totalSpreads === 0) return;
+    const fromSpread = Math.max(0, totalSpreads - 3);
+    const toSpread = totalSpreads - 1;
+    exportBookPagesPDF(allEntries, fromSpread, toSpread);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg glass-panel max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="font-mono text-primary">▸ LAST 12 MONTHS SUMMARY</DialogTitle>
+            <Button variant="ghost" size="sm" className="h-7 px-2 font-mono text-[10px]" onClick={exportLast3BookPages}>
+              <BookOpen className="h-3.5 w-3.5 mr-1" /> Last 3 Pages
+            </Button>
             <Button variant="ghost" size="sm" className="h-7 px-2 font-mono text-[10px]" onClick={exportSummary}>
               <FileDown className="h-3.5 w-3.5 mr-1" /> Export
             </Button>

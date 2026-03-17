@@ -296,7 +296,7 @@ const Index = () => {
           existingEntries={entries}
         />
 
-        <Last12MonthSummary entries={entries} open={summaryOpen} onOpenChange={setSummaryOpen} />
+        <Last12MonthSummary entries={entries} allEntries={entries} open={summaryOpen} onOpenChange={setSummaryOpen} />
         <FlightDutyCalculator open={dutyCalcOpen} onOpenChange={setDutyCalcOpen} entries={entries} />
       </div>
     </div>
