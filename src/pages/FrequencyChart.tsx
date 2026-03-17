@@ -72,8 +72,30 @@ const FrequencyChart = () => {
 
     const [freqRes, airportRes] = await Promise.all([freqQuery, airportQuery]);
 
-    const freqData = freqRes.error ? [] : freqRes.data || [];
+    let freqData = freqRes.error ? [] : freqRes.data || [];
     const airportData = airportRes.error ? [] : airportRes.data || [];
+
+    // Find airport idents that were found by name but not covered by the freq search
+    const freqIdents = new Set(freqData.map(f => f.airport_ident));
+    const missingIdents = airportData
+      .map(a => a.ident)
+      .filter(ident => !freqIdents.has(ident));
+
+    // Fetch frequencies for airports found by name search
+    if (missingIdents.length > 0) {
+      let extraFreqQuery = supabase
+        .from('airport_frequencies')
+        .select('id, airport_ident, type, description, frequency_mhz')
+        .in('airport_ident', missingIdents)
+        .limit(200);
+      if (typeFilter !== 'ALL') {
+        extraFreqQuery = extraFreqQuery.eq('type', typeFilter);
+      }
+      const extraRes = await extraFreqQuery;
+      if (!extraRes.error && extraRes.data) {
+        freqData = [...freqData, ...extraRes.data];
+      }
+    }
 
     const allIdents = new Set<string>();
     freqData.forEach(f => allIdents.add(f.airport_ident));
