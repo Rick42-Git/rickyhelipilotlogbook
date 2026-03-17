@@ -133,7 +133,7 @@ export default function DataImporter() {
         Database Import
       </div>
       <p className="font-mono text-[10px] text-muted-foreground/60">
-        Import airports, runways, and navaids CSV files from OurAirports.
+        Import airports CSV file from OurAirports.
       </p>
       <div className="space-y-3">
         {Object.entries(CSV_CONFIGS).map(([table, config]) => {
