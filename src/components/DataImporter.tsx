@@ -39,51 +39,6 @@ const CSV_CONFIGS: Record<string, { label: string; parser: (row: string[]) => Re
       };
     },
   },
-  runways: {
-    label: 'Runways',
-    parser: (cols) => {
-      const id = parseInt(cols[0]);
-      if (isNaN(id)) return null;
-      return {
-        id,
-        airport_ref: parseInt(cols[1]) || 0,
-        airport_ident: cols[2] || '',
-        length_ft: cols[3] ? parseInt(cols[3]) : null,
-        width_ft: cols[4] ? parseInt(cols[4]) : null,
-        surface: cols[5] || '',
-        lighted: cols[6] === '1',
-        closed: cols[7] === '1',
-        le_ident: cols[8] || '',
-        le_heading_degt: cols[11] ? parseFloat(cols[11]) : null,
-        he_ident: cols[13] || '',
-        he_heading_degt: cols[17] ? parseFloat(cols[17]) : null,
-      };
-    },
-  },
-  navaids: {
-    label: 'Navaids',
-    parser: (cols) => {
-      const id = parseInt(cols[0]);
-      if (isNaN(id)) return null;
-      return {
-        id,
-        ident: cols[2] || '',
-        name: cols[3] || '',
-        type: cols[4] || '',
-        frequency_khz: cols[5] ? parseFloat(cols[5]) : null,
-        latitude_deg: cols[6] ? parseFloat(cols[6]) : null,
-        longitude_deg: cols[7] ? parseFloat(cols[7]) : null,
-        elevation_ft: cols[8] ? parseInt(cols[8]) : null,
-        iso_country: cols[9] || '',
-        dme_frequency_khz: cols[10] ? parseFloat(cols[10]) : null,
-        dme_channel: cols[11] || '',
-        magnetic_variation_deg: cols[15] ? parseFloat(cols[15]) : null,
-        usage_type: cols[16] || '',
-        power: cols[17] || '',
-        associated_airport: cols[18] || '',
-      };
-    },
-  },
 };
 
 function parseCSV(text: string): string[][] {
