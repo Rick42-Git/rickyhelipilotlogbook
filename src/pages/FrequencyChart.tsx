@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
@@ -37,9 +37,19 @@ const FrequencyChart = () => {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [searchResults, setSearchResults] = useState<[string, AirportGroup][]>([]);
-  const [pinnedResults, setPinnedResults] = useState<[string, AirportGroup][]>([]);
+  const [pinnedResults, setPinnedResults] = useState<[string, AirportGroup][]>(() => {
+    try {
+      const saved = localStorage.getItem('freq-chart-pinned');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+
+
+  useEffect(() => {
+    try { localStorage.setItem('freq-chart-pinned', JSON.stringify(pinnedResults)); } catch {}
+  }, [pinnedResults]);
 
   const doSearch = async () => {
     if (!search.trim() && typeFilter === 'ALL') return;
