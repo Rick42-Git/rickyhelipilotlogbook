@@ -37,7 +37,12 @@ const FrequencyChart = () => {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [searchResults, setSearchResults] = useState<[string, AirportGroup][]>([]);
-  const [pinnedResults, setPinnedResults] = useState<[string, AirportGroup][]>([]);
+  const [pinnedResults, setPinnedResults] = useState<[string, AirportGroup][]>(() => {
+    try {
+      const saved = localStorage.getItem('freq-chart-pinned');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
