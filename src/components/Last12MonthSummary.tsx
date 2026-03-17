@@ -3,7 +3,8 @@ import { LogbookEntry, NumericField } from '@/types/logbook';
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FileDown } from 'lucide-react';
+import { FileDown, BookOpen } from 'lucide-react';
+import { exportBookPagesPDF } from '@/lib/exportBookPages';
 
 interface Last12MonthSummaryProps {
   entries: LogbookEntry[];
