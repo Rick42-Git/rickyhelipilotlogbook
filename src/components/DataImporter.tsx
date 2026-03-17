@@ -72,8 +72,6 @@ export default function DataImporter() {
   const [statuses, setStatuses] = useState<Record<string, ImportStatus>>({});
   const fileRefs = {
     airports: useRef<HTMLInputElement>(null),
-    runways: useRef<HTMLInputElement>(null),
-    navaids: useRef<HTMLInputElement>(null),
   };
 
   const handleImport = async (table: string, file: File) => {
