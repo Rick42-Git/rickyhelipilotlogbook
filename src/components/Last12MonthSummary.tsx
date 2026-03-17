@@ -128,6 +128,9 @@ export function Last12MonthSummary({ entries, allEntries, open, onOpenChange }: 
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="font-mono text-primary">▸ LAST 12 MONTHS SUMMARY</DialogTitle>
+            <Button variant="ghost" size="sm" className="h-7 px-2 font-mono text-[10px]" onClick={exportLast3BookPages}>
+              <BookOpen className="h-3.5 w-3.5 mr-1" /> Last 3 Pages
+            </Button>
             <Button variant="ghost" size="sm" className="h-7 px-2 font-mono text-[10px]" onClick={exportSummary}>
               <FileDown className="h-3.5 w-3.5 mr-1" /> Export
             </Button>
