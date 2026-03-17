@@ -54,9 +54,9 @@ const CSV_CONFIGS: Record<string, { label: string; parser: (row: string[]) => Re
         lighted: cols[6] === '1',
         closed: cols[7] === '1',
         le_ident: cols[8] || '',
-        le_heading_degT: cols[11] ? parseFloat(cols[11]) : null,
+        le_heading_degt: cols[11] ? parseFloat(cols[11]) : null,
         he_ident: cols[13] || '',
-        he_heading_degT: cols[17] ? parseFloat(cols[17]) : null,
+        he_heading_degt: cols[17] ? parseFloat(cols[17]) : null,
       };
     },
   },
