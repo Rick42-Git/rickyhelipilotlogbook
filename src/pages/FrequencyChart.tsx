@@ -46,6 +46,11 @@ const FrequencyChart = () => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
+
+  useEffect(() => {
+    try { localStorage.setItem('freq-chart-pinned', JSON.stringify(pinnedResults)); } catch {}
+  }, [pinnedResults]);
+
   const doSearch = async () => {
     if (!search.trim() && typeFilter === 'ALL') return;
     setLoading(true);
