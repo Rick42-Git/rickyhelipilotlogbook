@@ -26,7 +26,7 @@ serve(async (req) => {
       });
     }
 
-    const validTables = ["airports", "runways", "navaids"];
+    const validTables = ["airports"];
     if (!validTables.includes(table)) {
       return new Response(JSON.stringify({ error: "Invalid table" }), {
         status: 400,
