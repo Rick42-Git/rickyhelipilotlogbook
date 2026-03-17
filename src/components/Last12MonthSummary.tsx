@@ -8,11 +8,12 @@ import { exportBookPagesPDF } from '@/lib/exportBookPages';
 
 interface Last12MonthSummaryProps {
   entries: LogbookEntry[];
+  allEntries: LogbookEntry[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function Last12MonthSummary({ entries, open, onOpenChange }: Last12MonthSummaryProps) {
+export function Last12MonthSummary({ entries, allEntries, open, onOpenChange }: Last12MonthSummaryProps) {
   const now = new Date();
   const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
   const cutoff = twelveMonthsAgo.toISOString().slice(0, 10);
