@@ -7,11 +7,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { FileText, Printer, RotateCcw } from 'lucide-react';
 import { Waypoint, calcDistanceNm, formatTime } from '@/types/flightPlan';
 import { toast } from '@/hooks/use-toast';
 
 export interface CA48FormData {
+  // Header
+  priority: string;
+  addressees: string;
+  filing_time: string;
+  originator: string;
   // Item 7
   aircraft_id: string;
   // Item 8
@@ -60,9 +66,15 @@ export interface CA48FormData {
   aircraft_colour: string;
   remarks: string;
   pic: string;
+  // Filed by
+  filed_by: string;
+  filed_by_phone: string;
+  signature_name: string;
+  signature_date: string;
 }
 
 const emptyForm: CA48FormData = {
+  priority: 'FF', addressees: '', filing_time: '', originator: '',
   aircraft_id: '', flight_rules: 'V', type_of_flight: 'G',
   number: '', aircraft_type: '', wake_turb: 'L',
   equipment: 'S/C', departure_aero: '', departure_time: '',
@@ -74,6 +86,7 @@ const emptyForm: CA48FormData = {
   jackets: true, jackets_light: true, jackets_fluores: true, jackets_uhf: false, jackets_vhf: false,
   dinghies_number: '', dinghies_capacity: '', dinghies_cover: false, dinghies_colour: '',
   aircraft_colour: '', remarks: '', pic: '',
+  filed_by: '', filed_by_phone: '', signature_name: '', signature_date: new Date().toISOString().split('T')[0],
 };
 
 interface Props {
@@ -165,6 +178,37 @@ export function CA48FlightPlanDialog({
 
         <ScrollArea className="flex-1 px-6 pb-2">
           <div className="space-y-4 pb-4">
+            {/* Priority / Addressees */}
+            <div className="space-y-2">
+              <h3 className="font-mono text-[10px] text-primary tracking-widest">PRIORITY & ADDRESSEES</h3>
+              <div className="grid grid-cols-4 gap-2">
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">PRIORITY</Label>
+                  <Input value={form.priority} onChange={e => update('priority', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" placeholder="FF" />
+                </div>
+                <div className="col-span-3">
+                  <Label className="font-mono text-[10px] text-muted-foreground">ADDRESSEE(S)</Label>
+                  <Input value={form.addressees} onChange={e => update('addressees', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" placeholder="JNBXTYF" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">FILING TIME</Label>
+                  <Input value={form.filing_time} onChange={e => update('filing_time', e.target.value)}
+                    className="h-8 font-mono text-xs" placeholder="0930" maxLength={4} />
+                </div>
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">ORIGINATOR</Label>
+                  <Input value={form.originator} onChange={e => update('originator', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" />
+                </div>
+              </div>
+            </div>
+
+            <Separator className="bg-muted/30" />
+
             {/* Items 7 & 8 */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 7-8 — AIRCRAFT & FLIGHT RULES</h3>
@@ -323,8 +367,10 @@ export function CA48FlightPlanDialog({
             <Separator className="bg-muted/30" />
 
             {/* Item 19 — Supplementary */}
-            <div className="space-y-2">
-              <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 19 — SUPPLEMENTARY</h3>
+            <div className="space-y-3">
+              <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 19 — SUPPLEMENTARY INFORMATION</h3>
+              <p className="font-mono text-[9px] text-muted-foreground/60">Not transmitted in FPL messages</p>
+              
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">ENDURANCE (HHMM)</Label>
@@ -336,28 +382,146 @@ export function CA48FlightPlanDialog({
                   <Input value={form.pob} onChange={e => update('pob', e.target.value)}
                     className="h-8 font-mono text-xs" placeholder="002" />
                 </div>
-                <div>
-                  <Label className="font-mono text-[10px] text-muted-foreground">AIRCRAFT COLOUR</Label>
-                  <Input value={form.aircraft_colour} onChange={e => update('aircraft_colour', e.target.value.toUpperCase())}
-                    className="h-8 font-mono text-xs uppercase" placeholder="WHITE/BLUE" />
+              </div>
+
+              {/* Emergency Radio */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">EMERGENCY RADIO</Label>
+                <div className="flex gap-4 mt-1">
+                  {(['emergency_radio_uhf', 'UHF'] as const).length && (
+                    <>
+                      <label className="flex items-center gap-1.5 font-mono text-xs">
+                        <Checkbox checked={form.emergency_radio_uhf} onCheckedChange={v => update('emergency_radio_uhf', !!v)} /> UHF
+                      </label>
+                      <label className="flex items-center gap-1.5 font-mono text-xs">
+                        <Checkbox checked={form.emergency_radio_vhf} onCheckedChange={v => update('emergency_radio_vhf', !!v)} /> VHF
+                      </label>
+                      <label className="flex items-center gap-1.5 font-mono text-xs">
+                        <Checkbox checked={form.emergency_radio_elt} onCheckedChange={v => update('emergency_radio_elt', !!v)} /> ELT
+                      </label>
+                    </>
+                  )}
                 </div>
               </div>
-            </div>
 
-            <Separator className="bg-muted/30" />
+              {/* Survival Equipment */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">SURVIVAL EQUIPMENT</Label>
+                <div className="flex gap-4 mt-1">
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.survival_polar} onCheckedChange={v => update('survival_polar', !!v)} /> Polar
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.survival_desert} onCheckedChange={v => update('survival_desert', !!v)} /> Desert
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.survival_maritime} onCheckedChange={v => update('survival_maritime', !!v)} /> Maritime
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.survival_jungle} onCheckedChange={v => update('survival_jungle', !!v)} /> Jungle
+                  </label>
+                </div>
+              </div>
 
-            {/* PIC & Remarks */}
-            <div className="space-y-2">
-              <h3 className="font-mono text-[10px] text-primary tracking-widest">PILOT IN COMMAND & REMARKS</h3>
+              {/* Jackets */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">JACKETS</Label>
+                <div className="flex gap-4 mt-1">
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.jackets} onCheckedChange={v => update('jackets', !!v)} /> Jackets
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.jackets_light} onCheckedChange={v => update('jackets_light', !!v)} /> Light
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.jackets_fluores} onCheckedChange={v => update('jackets_fluores', !!v)} /> Fluores
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.jackets_uhf} onCheckedChange={v => update('jackets_uhf', !!v)} /> UHF
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.jackets_vhf} onCheckedChange={v => update('jackets_vhf', !!v)} /> VHF
+                  </label>
+                </div>
+              </div>
+
+              {/* Dinghies */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">DINGHIES</Label>
+                <div className="grid grid-cols-4 gap-2 mt-1">
+                  <div>
+                    <Label className="font-mono text-[9px] text-muted-foreground/70">NUMBER</Label>
+                    <Input value={form.dinghies_number} onChange={e => update('dinghies_number', e.target.value)}
+                      className="h-7 font-mono text-xs" placeholder="0" />
+                  </div>
+                  <div>
+                    <Label className="font-mono text-[9px] text-muted-foreground/70">CAPACITY</Label>
+                    <Input value={form.dinghies_capacity} onChange={e => update('dinghies_capacity', e.target.value)}
+                      className="h-7 font-mono text-xs" />
+                  </div>
+                  <div className="flex items-end pb-0.5">
+                    <label className="flex items-center gap-1.5 font-mono text-xs">
+                      <Checkbox checked={form.dinghies_cover} onCheckedChange={v => update('dinghies_cover', !!v)} /> Cover
+                    </label>
+                  </div>
+                  <div>
+                    <Label className="font-mono text-[9px] text-muted-foreground/70">COLOUR</Label>
+                    <Input value={form.dinghies_colour} onChange={e => update('dinghies_colour', e.target.value.toUpperCase())}
+                      className="h-7 font-mono text-xs uppercase" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Aircraft Colour */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">AIRCRAFT COLOUR AND MARKINGS</Label>
+                <Input value={form.aircraft_colour} onChange={e => update('aircraft_colour', e.target.value.toUpperCase())}
+                  className="h-8 font-mono text-xs uppercase" placeholder="WHITE/BLUE" />
+              </div>
+
+              {/* Remarks */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">REMARKS</Label>
+                <Textarea value={form.remarks} onChange={e => update('remarks', e.target.value.toUpperCase())}
+                  className="font-mono text-xs uppercase min-h-[40px]" />
+              </div>
+
+              {/* PIC */}
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">PILOT IN COMMAND</Label>
                 <Input value={form.pic} onChange={e => update('pic', e.target.value.toUpperCase())}
                   className="h-8 font-mono text-xs uppercase" />
               </div>
-              <div>
-                <Label className="font-mono text-[10px] text-muted-foreground">REMARKS</Label>
-                <Textarea value={form.remarks} onChange={e => update('remarks', e.target.value.toUpperCase())}
-                  className="font-mono text-xs uppercase min-h-[40px]" />
+            </div>
+
+            <Separator className="bg-muted/30" />
+
+            {/* Filed By / Signature */}
+            <div className="space-y-2">
+              <h3 className="font-mono text-[10px] text-primary tracking-widest">FILED BY</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">FILED BY</Label>
+                  <Input value={form.filed_by} onChange={e => update('filed_by', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" />
+                </div>
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">TELEPHONE</Label>
+                  <Input value={form.filed_by_phone} onChange={e => update('filed_by_phone', e.target.value)}
+                    className="h-8 font-mono text-xs" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">NAME IN BLOCK LETTERS</Label>
+                  <Input value={form.signature_name} onChange={e => update('signature_name', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" />
+                </div>
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">DATE</Label>
+                  <Input value={form.signature_date} onChange={e => update('signature_date', e.target.value)}
+                    className="h-8 font-mono text-xs" placeholder="2026-04-07" />
+                </div>
               </div>
             </div>
           </div>
@@ -405,12 +569,12 @@ function buildCA48HTML(f: CA48FormData): string {
 <table>
   <tr><td colspan="8" class="title">FLIGHT PLAN</td></tr>
   <tr>
-    <td colspan="2" style="border-bottom:none"><span class="section-label">PRIORITY</span><br><span class="arrows">&lt;&lt;≡</span> FF →</td>
-    <td colspan="6"><span class="section-label">ADDRESSEE(S)</span><br><br></td>
+    <td colspan="2" style="border-bottom:none"><span class="section-label">PRIORITY</span><br><span class="arrows">&lt;&lt;≡</span> <span class="field-value-sm">${f.priority}</span> →</td>
+    <td colspan="6"><span class="section-label">ADDRESSEE(S)</span><br><div class="field-value-sm">${f.addressees}</div></td>
   </tr>
   <tr>
-    <td colspan="2"><span class="section-label">FILING TIME</span><br><div class="field-value-sm"></div></td>
-    <td colspan="6"><span class="section-label">ORIGINATOR</span><br><div class="field-value-sm"></div></td>
+    <td colspan="2"><span class="section-label">FILING TIME</span><br><div class="field-value-sm">${f.filing_time}</div></td>
+    <td colspan="6"><span class="section-label">ORIGINATOR</span><br><div class="field-value-sm">${f.originator}</div></td>
   </tr>
   <tr><td colspan="8" style="font-size:7pt;text-align:center;padding:3px">SPECIFIC IDENTIFICATION OF ADDRESSEE(S) AND/OR ORIGINATOR</td></tr>
 
@@ -467,64 +631,92 @@ function buildCA48HTML(f: CA48FormData): string {
 
   <!-- Item 19 -->
   <tr>
-    <td colspan="3"><span class="section-label">19 ENDURANCE HR MIN</span><br>
-      <span class="field-value">-E/ ${f.endurance}</span>
+    <td colspan="2"><span class="section-label">19 ENDURANCE</span><br>
+      <span class="field-value-sm">- E / <span class="field-value">${f.endurance.slice(0,2) || '__'}</span> Hr <span class="field-value">${f.endurance.slice(2,4) || '__'}</span> Min</span>
     </td>
     <td colspan="2"><span class="section-label">PERSONS ON BOARD</span><br>
-      <span class="field-value">→P/ ${f.pob}</span>
+      <span class="field-value">→P / ${f.pob}</span>
     </td>
-    <td colspan="3"><span class="section-label">EMERGENCY RADIO</span><br>
-      <span class="field-value-sm">→R/ ${f.emergency_radio_uhf ? '☑U' : '☐U'} ${f.emergency_radio_vhf ? '☑V' : '☐V'} ${f.emergency_radio_elt ? '☑E' : '☐E'}</span>
+    <td colspan="1" style="text-align:center"><span class="section-label">UHF</span><br>
+      <span class="field-value">${f.emergency_radio_uhf ? '☑' : '☐'} U</span>
+    </td>
+    <td colspan="1" style="text-align:center"><span class="section-label">VHF</span><br>
+      <span class="field-value">${f.emergency_radio_vhf ? '☑' : '☐'} V</span>
+    </td>
+    <td colspan="2" style="text-align:center"><span class="section-label">ELT</span><br>
+      <span class="field-value">${f.emergency_radio_elt ? '☑' : '☐'} E</span>
     </td>
   </tr>
 
   <!-- Survival & Jackets -->
   <tr>
-    <td colspan="4"><span class="section-label">SURVIVAL EQUIPMENT</span><br>
-      <span class="field-value-sm">→S/ ${f.survival_polar ? '☑P' : '☐P'} ${f.survival_desert ? '☑D' : '☐D'} ${f.survival_maritime ? '☑M' : '☐M'} ${f.survival_jungle ? '☑J' : '☐J'}</span>
+    <td colspan="1" style="border-right:none"><span class="section-label">SURVIVAL EQUIPMENT</span><br>
+      <span class="field-value-sm">→S /</span>
     </td>
-    <td colspan="4"><span class="section-label">JACKETS / LIGHT / FLUORES / UHF / VHF</span><br>
-      <span class="field-value-sm">→J/ ${f.jackets ? '☑J' : '☐J'} ${f.jackets_light ? '☑L' : '☐L'} ${f.jackets_fluores ? '☑F' : '☐F'} ${f.jackets_uhf ? '☑U' : '☐U'} ${f.jackets_vhf ? '☑V' : '☐V'}</span>
-    </td>
+    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Polar</span><br><span class="field-value">${f.survival_polar ? '☑' : '☐'} P</span></td>
+    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Desert</span><br><span class="field-value">${f.survival_desert ? '☑' : '☐'} D</span></td>
+    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Maritime</span><br><span class="field-value">${f.survival_maritime ? '☑' : '☐'} M</span></td>
+    <td style="text-align:center;border-left:none"><span class="section-label">Jungle</span><br><span class="field-value">${f.survival_jungle ? '☑' : '☐'} J</span></td>
+    <td colspan="1" style="text-align:center"><span class="section-label">Light</span><br><span class="field-value">${f.jackets_light ? '☑' : '☐'} L</span></td>
+    <td colspan="1" style="text-align:center"><span class="section-label">Fluores</span><br><span class="field-value">${f.jackets_fluores ? '☑' : '☐'} F</span></td>
+    <td colspan="1" style="text-align:center"><span class="section-label">UHF / VHF</span><br><span class="field-value">${f.jackets_uhf ? '☑' : '☐'} U ${f.jackets_vhf ? '☑' : '☐'} V</span></td>
   </tr>
 
   <!-- Dinghies -->
   <tr>
-    <td colspan="8"><span class="section-label">DINGHIES</span><br>
-      <span class="field-value-sm">→D/ ${f.dinghies_number} / CAP: ${f.dinghies_capacity} COVER: ${f.dinghies_cover ? 'C' : ''} COLOUR: ${f.dinghies_colour}</span>
+    <td colspan="1"><span class="section-label">DINGHIES</span><br>
+      <span class="field-value-sm">→D /</span>
     </td>
+    <td colspan="1"><span class="section-label">Number</span><br><span class="field-value">${f.dinghies_number}</span></td>
+    <td colspan="1"><span class="section-label">Capacity</span><br><span class="field-value">${f.dinghies_capacity}</span></td>
+    <td colspan="1"><span class="section-label">Cover</span><br><span class="field-value">→C ${f.dinghies_cover ? '☑' : '☐'}</span></td>
+    <td colspan="4"><span class="section-label">Colour</span><br><span class="field-value">${f.dinghies_colour}</span></td>
   </tr>
 
   <!-- Aircraft colour -->
   <tr>
     <td colspan="8"><span class="section-label">AIRCRAFT COLOUR AND MARKINGS</span><br>
-      <span class="field-value-sm">A/ ${f.aircraft_colour}</span>
+      <span class="field-value-sm">A / ${f.aircraft_colour}</span>
     </td>
   </tr>
 
   <!-- Remarks -->
   <tr>
     <td colspan="8"><span class="section-label">REMARKS</span><br>
-      <span class="field-value-sm">→N/ ${f.remarks}</span> <span class="arrows">&lt;&lt;≡</span>
+      <span class="field-value-sm">→N / ${f.remarks}</span> <span class="arrows">&lt;&lt;≡</span>
     </td>
   </tr>
 
   <!-- PIC -->
   <tr>
     <td colspan="8"><span class="section-label">PILOT IN COMMAND</span><br>
-      <span class="field-value">C/ ${f.pic}</span> <span class="arrows">) &lt;&lt;≡</span>
+      <span class="field-value">C / ${f.pic}</span> <span class="arrows">) &lt;&lt;≡</span>
     </td>
   </tr>
 
-  <!-- Footer -->
+  <!-- Filed By -->
   <tr>
-    <td colspan="3" style="font-size:7pt;text-align:center">FILED BY</td>
-    <td colspan="5" style="font-size:7pt;text-align:center">SPACE RESERVED FOR ADDITIONAL REQUIREMENTS<br><span style="font-size:6pt">Please provide a telephone number so our operators can contact you if needed</span></td>
+    <td colspan="8" style="border-bottom:none"><span class="section-label" style="font-weight:bold;font-size:9pt;text-align:center;display:block">FILED BY:</span></td>
+  </tr>
+  <tr>
+    <td colspan="4"><span class="section-label">FILED BY</span><br><div class="field-value-sm">${f.filed_by}</div>
+      ${f.filed_by_phone ? `<div style="font-size:7pt;color:#555;margin-top:2px">TEL: ${f.filed_by_phone}</div>` : ''}
+    </td>
+    <td colspan="4" style="font-size:7pt;text-align:center;vertical-align:top;padding:6px">
+      SPACE RESERVED FOR ADDITIONAL REQUIREMENTS<br><span style="font-size:6pt">Please provide a telephone number so our operators can contact you if needed</span>
+    </td>
+  </tr>
+
+  <!-- Signature -->
+  <tr>
+    <td colspan="3" style="min-height:40px;padding:8px"><span class="section-label" style="font-weight:bold">SIGNATURE AND CAPACITY</span><br><br><br></td>
+    <td colspan="3"><span class="section-label" style="font-weight:bold">NAME IN BLOCK LETTERS</span><br><div class="field-value" style="padding-top:8px">${f.signature_name}</div></td>
+    <td colspan="2"><span class="section-label" style="font-weight:bold">DATE</span><br><div class="field-value" style="padding-top:8px">${f.signature_date}</div></td>
   </tr>
 
   <tr>
-    <td colspan="4" style="font-size:6pt;border-top:none">CA48/RAF2919</td>
-    <td colspan="4" style="font-size:6pt;text-align:center;border-top:none">VER 1.5.3</td>
+    <td colspan="4" style="font-size:6pt;border-top:none">CA 172-04</td>
+    <td colspan="4" style="font-size:6pt;text-align:right;border-top:none">Page 1 of 1</td>
   </tr>
 </table>
 </body></html>`;
