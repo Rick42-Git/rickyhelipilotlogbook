@@ -211,6 +211,16 @@ const FlightPlanning = () => {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setShowCA48(true)}
+            className="font-mono text-[10px] gap-1 h-7"
+            title="ICAO CA48 Flight Plan Form"
+          >
+            <ClipboardList className="h-3 w-3" />
+            <span className="hidden md:inline">CA48</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setShowFlyover(true)}
             className="font-mono text-[10px] gap-1 h-7"
             disabled={waypoints.length < 2}
