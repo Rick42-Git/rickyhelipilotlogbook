@@ -198,7 +198,21 @@ export function FlightPlanPanel({
               ))}
             </div>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full h-7 font-mono text-[10px] gap-1"
+            onClick={() => setCoordDialogOpen(true)}
+          >
+            <Crosshair className="h-3 w-3" />
+            Enter Coordinates Manually
+          </Button>
           <p className="font-mono text-[9px] text-muted-foreground/60">Or click the map to add a custom waypoint</p>
+          <CoordinateWaypointDialog
+            open={coordDialogOpen}
+            onOpenChange={setCoordDialogOpen}
+            onAdd={addCoordinateWaypoint}
+          />
         </div>
 
         <Separator className="bg-muted/30" />
