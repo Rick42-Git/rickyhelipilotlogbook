@@ -28,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const cached = getActivatedUser();
     setUser(cached);
+    setSupabaseUserId(cached?.id || null);
     setLoading(false);
 
     // Sync display name from server in case admin updated it
