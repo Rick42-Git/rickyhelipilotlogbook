@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, GripVertical, Fuel, ShieldCheck, AlertTriangle, ArrowRight, Pencil, Plus, RotateCcw } from 'lucide-react';
+import { Trash2, GripVertical, Fuel, ShieldCheck, AlertTriangle, ArrowRight, Pencil, Plus, RotateCcw, Crosshair } from 'lucide-react';
+import { CoordinateWaypointDialog } from './CoordinateWaypointDialog';
 import { Waypoint, FlightLeg, calcDistanceNm, calcBearing, formatTime } from '@/types/flightPlan';
 import { searchAirports, Airport } from '@/data/africanAirports';
 import {
