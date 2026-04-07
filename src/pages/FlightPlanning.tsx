@@ -16,6 +16,7 @@ import { useFlightPlans, SavedFlightPlan } from '@/hooks/useFlightPlans';
 import { toast } from '@/hooks/use-toast';
 import { exportFlightPlanPDF } from '@/lib/exportFlightPlan';
 import { FlyoverView } from '@/components/flight-planning/FlyoverView';
+import { CA48FlightPlanDialog } from '@/components/flight-planning/CA48FlightPlanDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
