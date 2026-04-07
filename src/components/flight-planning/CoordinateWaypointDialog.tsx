@@ -39,35 +39,53 @@ function ScrollSelector({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrolling = useRef(false);
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const clamp = (v: number) => Math.max(min, Math.min(max, v));
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (editing) return;
     e.preventDefault();
     e.stopPropagation();
     const dir = e.deltaY > 0 ? -step : step;
     onChange(clamp(+(value + dir).toFixed(decimals)));
-  }, [value, step, min, max, decimals, onChange]);
+  }, [value, step, min, max, decimals, onChange, editing]);
 
-  // Touch scrolling
   const touchStart = useRef(0);
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (editing) return;
     touchStart.current = e.touches[0].clientY;
     isScrolling.current = true;
   };
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isScrolling.current) return;
+    if (!isScrolling.current || editing) return;
     const diff = touchStart.current - e.touches[0].clientY;
     if (Math.abs(diff) > 20) {
       const dir = diff > 0 ? step : -step;
       onChange(clamp(+(value + dir).toFixed(decimals)));
       touchStart.current = e.touches[0].clientY;
     }
-  }, [value, step, min, max, decimals, onChange]);
+  }, [value, step, min, max, decimals, onChange, editing]);
 
   const formatVal = (v: number) => {
     const s = decimals > 0 ? v.toFixed(decimals) : Math.abs(v).toString();
     return padStart > 0 ? s.padStart(padStart, '0') : s;
+  };
+
+  const startEditing = () => {
+    setEditText(formatVal(value));
+    setEditing(true);
+    setTimeout(() => inputRef.current?.select(), 0);
+  };
+
+  const commitEdit = () => {
+    const parsed = parseFloat(editText);
+    if (!isNaN(parsed)) {
+      onChange(clamp(+(parsed).toFixed(decimals)));
+    }
+    setEditing(false);
   };
 
   const prevVal = clamp(+(value - step).toFixed(decimals));
@@ -78,7 +96,7 @@ function ScrollSelector({
       {label && <span className="font-mono text-[8px] text-muted-foreground uppercase tracking-wider">{label}</span>}
       <div
         ref={containerRef}
-        className={cn("flex flex-col items-center select-none cursor-ns-resize", width)}
+        className={cn("flex flex-col items-center select-none", !editing && "cursor-ns-resize", width)}
         onWheel={handleWheel}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -90,9 +108,25 @@ function ScrollSelector({
         >
           {formatVal(nextVal)}
         </button>
-        <div className="font-mono text-sm font-bold text-primary border border-primary/30 rounded px-2 py-0.5 bg-primary/5 min-w-[2.5rem] text-center">
-          {formatVal(value)}
-        </div>
+        {editing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="decimal"
+            value={editText}
+            onChange={e => setEditText(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditing(false); }}
+            className="font-mono text-sm font-bold text-primary border border-primary/30 rounded px-1 py-0.5 bg-primary/5 min-w-[2.5rem] text-center w-full outline-none focus:ring-1 focus:ring-primary"
+          />
+        ) : (
+          <button
+            onClick={startEditing}
+            className="font-mono text-sm font-bold text-primary border border-primary/30 rounded px-2 py-0.5 bg-primary/5 min-w-[2.5rem] text-center hover:bg-primary/10 transition-colors"
+          >
+            {formatVal(value)}
+          </button>
+        )}
         <button
           onClick={() => onChange(clamp(+(value - step).toFixed(decimals)))}
           className="font-mono text-[10px] text-muted-foreground/40 hover:text-muted-foreground transition-colors h-5"
