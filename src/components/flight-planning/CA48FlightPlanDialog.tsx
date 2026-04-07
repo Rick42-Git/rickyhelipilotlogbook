@@ -569,12 +569,12 @@ function buildCA48HTML(f: CA48FormData): string {
 <table>
   <tr><td colspan="8" class="title">FLIGHT PLAN</td></tr>
   <tr>
-    <td colspan="2" style="border-bottom:none"><span class="section-label">PRIORITY</span><br><span class="arrows">&lt;&lt;≡</span> FF →</td>
-    <td colspan="6"><span class="section-label">ADDRESSEE(S)</span><br><br></td>
+    <td colspan="2" style="border-bottom:none"><span class="section-label">PRIORITY</span><br><span class="arrows">&lt;&lt;≡</span> <span class="field-value-sm">${f.priority}</span> →</td>
+    <td colspan="6"><span class="section-label">ADDRESSEE(S)</span><br><div class="field-value-sm">${f.addressees}</div></td>
   </tr>
   <tr>
-    <td colspan="2"><span class="section-label">FILING TIME</span><br><div class="field-value-sm"></div></td>
-    <td colspan="6"><span class="section-label">ORIGINATOR</span><br><div class="field-value-sm"></div></td>
+    <td colspan="2"><span class="section-label">FILING TIME</span><br><div class="field-value-sm">${f.filing_time}</div></td>
+    <td colspan="6"><span class="section-label">ORIGINATOR</span><br><div class="field-value-sm">${f.originator}</div></td>
   </tr>
   <tr><td colspan="8" style="font-size:7pt;text-align:center;padding:3px">SPECIFIC IDENTIFICATION OF ADDRESSEE(S) AND/OR ORIGINATOR</td></tr>
 
@@ -631,64 +631,92 @@ function buildCA48HTML(f: CA48FormData): string {
 
   <!-- Item 19 -->
   <tr>
-    <td colspan="3"><span class="section-label">19 ENDURANCE HR MIN</span><br>
-      <span class="field-value">-E/ ${f.endurance}</span>
+    <td colspan="2"><span class="section-label">19 ENDURANCE</span><br>
+      <span class="field-value-sm">- E / <span class="field-value">${f.endurance.slice(0,2) || '__'}</span> Hr <span class="field-value">${f.endurance.slice(2,4) || '__'}</span> Min</span>
     </td>
     <td colspan="2"><span class="section-label">PERSONS ON BOARD</span><br>
-      <span class="field-value">→P/ ${f.pob}</span>
+      <span class="field-value">→P / ${f.pob}</span>
     </td>
-    <td colspan="3"><span class="section-label">EMERGENCY RADIO</span><br>
-      <span class="field-value-sm">→R/ ${f.emergency_radio_uhf ? '☑U' : '☐U'} ${f.emergency_radio_vhf ? '☑V' : '☐V'} ${f.emergency_radio_elt ? '☑E' : '☐E'}</span>
+    <td colspan="1" style="text-align:center"><span class="section-label">UHF</span><br>
+      <span class="field-value">${f.emergency_radio_uhf ? '☑' : '☐'} U</span>
+    </td>
+    <td colspan="1" style="text-align:center"><span class="section-label">VHF</span><br>
+      <span class="field-value">${f.emergency_radio_vhf ? '☑' : '☐'} V</span>
+    </td>
+    <td colspan="2" style="text-align:center"><span class="section-label">ELT</span><br>
+      <span class="field-value">${f.emergency_radio_elt ? '☑' : '☐'} E</span>
     </td>
   </tr>
 
   <!-- Survival & Jackets -->
   <tr>
-    <td colspan="4"><span class="section-label">SURVIVAL EQUIPMENT</span><br>
-      <span class="field-value-sm">→S/ ${f.survival_polar ? '☑P' : '☐P'} ${f.survival_desert ? '☑D' : '☐D'} ${f.survival_maritime ? '☑M' : '☐M'} ${f.survival_jungle ? '☑J' : '☐J'}</span>
+    <td colspan="1" style="border-right:none"><span class="section-label">SURVIVAL EQUIPMENT</span><br>
+      <span class="field-value-sm">→S /</span>
     </td>
-    <td colspan="4"><span class="section-label">JACKETS / LIGHT / FLUORES / UHF / VHF</span><br>
-      <span class="field-value-sm">→J/ ${f.jackets ? '☑J' : '☐J'} ${f.jackets_light ? '☑L' : '☐L'} ${f.jackets_fluores ? '☑F' : '☐F'} ${f.jackets_uhf ? '☑U' : '☐U'} ${f.jackets_vhf ? '☑V' : '☐V'}</span>
-    </td>
+    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Polar</span><br><span class="field-value">${f.survival_polar ? '☑' : '☐'} P</span></td>
+    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Desert</span><br><span class="field-value">${f.survival_desert ? '☑' : '☐'} D</span></td>
+    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Maritime</span><br><span class="field-value">${f.survival_maritime ? '☑' : '☐'} M</span></td>
+    <td style="text-align:center;border-left:none"><span class="section-label">Jungle</span><br><span class="field-value">${f.survival_jungle ? '☑' : '☐'} J</span></td>
+    <td colspan="1" style="text-align:center"><span class="section-label">Light</span><br><span class="field-value">${f.jackets_light ? '☑' : '☐'} L</span></td>
+    <td colspan="1" style="text-align:center"><span class="section-label">Fluores</span><br><span class="field-value">${f.jackets_fluores ? '☑' : '☐'} F</span></td>
+    <td colspan="1" style="text-align:center"><span class="section-label">UHF / VHF</span><br><span class="field-value">${f.jackets_uhf ? '☑' : '☐'} U ${f.jackets_vhf ? '☑' : '☐'} V</span></td>
   </tr>
 
   <!-- Dinghies -->
   <tr>
-    <td colspan="8"><span class="section-label">DINGHIES</span><br>
-      <span class="field-value-sm">→D/ ${f.dinghies_number} / CAP: ${f.dinghies_capacity} COVER: ${f.dinghies_cover ? 'C' : ''} COLOUR: ${f.dinghies_colour}</span>
+    <td colspan="1"><span class="section-label">DINGHIES</span><br>
+      <span class="field-value-sm">→D /</span>
     </td>
+    <td colspan="1"><span class="section-label">Number</span><br><span class="field-value">${f.dinghies_number}</span></td>
+    <td colspan="1"><span class="section-label">Capacity</span><br><span class="field-value">${f.dinghies_capacity}</span></td>
+    <td colspan="1"><span class="section-label">Cover</span><br><span class="field-value">→C ${f.dinghies_cover ? '☑' : '☐'}</span></td>
+    <td colspan="4"><span class="section-label">Colour</span><br><span class="field-value">${f.dinghies_colour}</span></td>
   </tr>
 
   <!-- Aircraft colour -->
   <tr>
     <td colspan="8"><span class="section-label">AIRCRAFT COLOUR AND MARKINGS</span><br>
-      <span class="field-value-sm">A/ ${f.aircraft_colour}</span>
+      <span class="field-value-sm">A / ${f.aircraft_colour}</span>
     </td>
   </tr>
 
   <!-- Remarks -->
   <tr>
     <td colspan="8"><span class="section-label">REMARKS</span><br>
-      <span class="field-value-sm">→N/ ${f.remarks}</span> <span class="arrows">&lt;&lt;≡</span>
+      <span class="field-value-sm">→N / ${f.remarks}</span> <span class="arrows">&lt;&lt;≡</span>
     </td>
   </tr>
 
   <!-- PIC -->
   <tr>
     <td colspan="8"><span class="section-label">PILOT IN COMMAND</span><br>
-      <span class="field-value">C/ ${f.pic}</span> <span class="arrows">) &lt;&lt;≡</span>
+      <span class="field-value">C / ${f.pic}</span> <span class="arrows">) &lt;&lt;≡</span>
     </td>
   </tr>
 
-  <!-- Footer -->
+  <!-- Filed By -->
   <tr>
-    <td colspan="3" style="font-size:7pt;text-align:center">FILED BY</td>
-    <td colspan="5" style="font-size:7pt;text-align:center">SPACE RESERVED FOR ADDITIONAL REQUIREMENTS<br><span style="font-size:6pt">Please provide a telephone number so our operators can contact you if needed</span></td>
+    <td colspan="8" style="border-bottom:none"><span class="section-label" style="font-weight:bold;font-size:9pt;text-align:center;display:block">FILED BY:</span></td>
+  </tr>
+  <tr>
+    <td colspan="4"><span class="section-label">FILED BY</span><br><div class="field-value-sm">${f.filed_by}</div>
+      ${f.filed_by_phone ? `<div style="font-size:7pt;color:#555;margin-top:2px">TEL: ${f.filed_by_phone}</div>` : ''}
+    </td>
+    <td colspan="4" style="font-size:7pt;text-align:center;vertical-align:top;padding:6px">
+      SPACE RESERVED FOR ADDITIONAL REQUIREMENTS<br><span style="font-size:6pt">Please provide a telephone number so our operators can contact you if needed</span>
+    </td>
+  </tr>
+
+  <!-- Signature -->
+  <tr>
+    <td colspan="3" style="min-height:40px;padding:8px"><span class="section-label" style="font-weight:bold">SIGNATURE AND CAPACITY</span><br><br><br></td>
+    <td colspan="3"><span class="section-label" style="font-weight:bold">NAME IN BLOCK LETTERS</span><br><div class="field-value" style="padding-top:8px">${f.signature_name}</div></td>
+    <td colspan="2"><span class="section-label" style="font-weight:bold">DATE</span><br><div class="field-value" style="padding-top:8px">${f.signature_date}</div></td>
   </tr>
 
   <tr>
-    <td colspan="4" style="font-size:6pt;border-top:none">CA48/RAF2919</td>
-    <td colspan="4" style="font-size:6pt;text-align:center;border-top:none">VER 1.5.3</td>
+    <td colspan="4" style="font-size:6pt;border-top:none">CA 172-04</td>
+    <td colspan="4" style="font-size:6pt;text-align:right;border-top:none">Page 1 of 1</td>
   </tr>
 </table>
 </body></html>`;
