@@ -74,7 +74,7 @@ export interface CA48FormData {
 }
 
 const emptyForm: CA48FormData = {
-  priority: 'FF', addressees: '', filing_time: '', originator: '',
+  priority: '', addressees: '', filing_time: '', originator: '',
   aircraft_id: '', flight_rules: 'V', type_of_flight: 'G',
   number: '', aircraft_type: '', wake_turb: 'L',
   equipment: 'S/C', departure_aero: '', departure_time: '',
