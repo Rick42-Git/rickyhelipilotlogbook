@@ -13,6 +13,11 @@ import { Waypoint, calcDistanceNm, formatTime } from '@/types/flightPlan';
 import { toast } from '@/hooks/use-toast';
 
 export interface CA48FormData {
+  // Header
+  priority: string;
+  addressees: string;
+  filing_time: string;
+  originator: string;
   // Item 7
   aircraft_id: string;
   // Item 8
@@ -61,9 +66,15 @@ export interface CA48FormData {
   aircraft_colour: string;
   remarks: string;
   pic: string;
+  // Filed by
+  filed_by: string;
+  filed_by_phone: string;
+  signature_name: string;
+  signature_date: string;
 }
 
 const emptyForm: CA48FormData = {
+  priority: 'FF', addressees: '', filing_time: '', originator: '',
   aircraft_id: '', flight_rules: 'V', type_of_flight: 'G',
   number: '', aircraft_type: '', wake_turb: 'L',
   equipment: 'S/C', departure_aero: '', departure_time: '',
@@ -75,6 +86,7 @@ const emptyForm: CA48FormData = {
   jackets: true, jackets_light: true, jackets_fluores: true, jackets_uhf: false, jackets_vhf: false,
   dinghies_number: '', dinghies_capacity: '', dinghies_cover: false, dinghies_colour: '',
   aircraft_colour: '', remarks: '', pic: '',
+  filed_by: '', filed_by_phone: '', signature_name: '', signature_date: new Date().toISOString().split('T')[0],
 };
 
 interface Props {
