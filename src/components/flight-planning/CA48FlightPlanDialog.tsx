@@ -178,6 +178,37 @@ export function CA48FlightPlanDialog({
 
         <ScrollArea className="flex-1 px-6 pb-2">
           <div className="space-y-4 pb-4">
+            {/* Priority / Addressees */}
+            <div className="space-y-2">
+              <h3 className="font-mono text-[10px] text-primary tracking-widest">PRIORITY & ADDRESSEES</h3>
+              <div className="grid grid-cols-4 gap-2">
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">PRIORITY</Label>
+                  <Input value={form.priority} onChange={e => update('priority', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" placeholder="FF" />
+                </div>
+                <div className="col-span-3">
+                  <Label className="font-mono text-[10px] text-muted-foreground">ADDRESSEE(S)</Label>
+                  <Input value={form.addressees} onChange={e => update('addressees', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" placeholder="JNBXTYF" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">FILING TIME</Label>
+                  <Input value={form.filing_time} onChange={e => update('filing_time', e.target.value)}
+                    className="h-8 font-mono text-xs" placeholder="0930" maxLength={4} />
+                </div>
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">ORIGINATOR</Label>
+                  <Input value={form.originator} onChange={e => update('originator', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" />
+                </div>
+              </div>
+            </div>
+
+            <Separator className="bg-muted/30" />
+
             {/* Items 7 & 8 */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 7-8 — AIRCRAFT & FLIGHT RULES</h3>
