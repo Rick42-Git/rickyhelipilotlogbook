@@ -367,8 +367,10 @@ export function CA48FlightPlanDialog({
             <Separator className="bg-muted/30" />
 
             {/* Item 19 — Supplementary */}
-            <div className="space-y-2">
-              <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 19 — SUPPLEMENTARY</h3>
+            <div className="space-y-3">
+              <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 19 — SUPPLEMENTARY INFORMATION</h3>
+              <p className="font-mono text-[9px] text-muted-foreground/60">Not transmitted in FPL messages</p>
+              
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">ENDURANCE (HHMM)</Label>
@@ -380,28 +382,146 @@ export function CA48FlightPlanDialog({
                   <Input value={form.pob} onChange={e => update('pob', e.target.value)}
                     className="h-8 font-mono text-xs" placeholder="002" />
                 </div>
-                <div>
-                  <Label className="font-mono text-[10px] text-muted-foreground">AIRCRAFT COLOUR</Label>
-                  <Input value={form.aircraft_colour} onChange={e => update('aircraft_colour', e.target.value.toUpperCase())}
-                    className="h-8 font-mono text-xs uppercase" placeholder="WHITE/BLUE" />
+              </div>
+
+              {/* Emergency Radio */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">EMERGENCY RADIO</Label>
+                <div className="flex gap-4 mt-1">
+                  {(['emergency_radio_uhf', 'UHF'] as const).length && (
+                    <>
+                      <label className="flex items-center gap-1.5 font-mono text-xs">
+                        <Checkbox checked={form.emergency_radio_uhf} onCheckedChange={v => update('emergency_radio_uhf', !!v)} /> UHF
+                      </label>
+                      <label className="flex items-center gap-1.5 font-mono text-xs">
+                        <Checkbox checked={form.emergency_radio_vhf} onCheckedChange={v => update('emergency_radio_vhf', !!v)} /> VHF
+                      </label>
+                      <label className="flex items-center gap-1.5 font-mono text-xs">
+                        <Checkbox checked={form.emergency_radio_elt} onCheckedChange={v => update('emergency_radio_elt', !!v)} /> ELT
+                      </label>
+                    </>
+                  )}
                 </div>
               </div>
-            </div>
 
-            <Separator className="bg-muted/30" />
+              {/* Survival Equipment */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">SURVIVAL EQUIPMENT</Label>
+                <div className="flex gap-4 mt-1">
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.survival_polar} onCheckedChange={v => update('survival_polar', !!v)} /> Polar
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.survival_desert} onCheckedChange={v => update('survival_desert', !!v)} /> Desert
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.survival_maritime} onCheckedChange={v => update('survival_maritime', !!v)} /> Maritime
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.survival_jungle} onCheckedChange={v => update('survival_jungle', !!v)} /> Jungle
+                  </label>
+                </div>
+              </div>
 
-            {/* PIC & Remarks */}
-            <div className="space-y-2">
-              <h3 className="font-mono text-[10px] text-primary tracking-widest">PILOT IN COMMAND & REMARKS</h3>
+              {/* Jackets */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">JACKETS</Label>
+                <div className="flex gap-4 mt-1">
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.jackets} onCheckedChange={v => update('jackets', !!v)} /> Jackets
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.jackets_light} onCheckedChange={v => update('jackets_light', !!v)} /> Light
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.jackets_fluores} onCheckedChange={v => update('jackets_fluores', !!v)} /> Fluores
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.jackets_uhf} onCheckedChange={v => update('jackets_uhf', !!v)} /> UHF
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <Checkbox checked={form.jackets_vhf} onCheckedChange={v => update('jackets_vhf', !!v)} /> VHF
+                  </label>
+                </div>
+              </div>
+
+              {/* Dinghies */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">DINGHIES</Label>
+                <div className="grid grid-cols-4 gap-2 mt-1">
+                  <div>
+                    <Label className="font-mono text-[9px] text-muted-foreground/70">NUMBER</Label>
+                    <Input value={form.dinghies_number} onChange={e => update('dinghies_number', e.target.value)}
+                      className="h-7 font-mono text-xs" placeholder="0" />
+                  </div>
+                  <div>
+                    <Label className="font-mono text-[9px] text-muted-foreground/70">CAPACITY</Label>
+                    <Input value={form.dinghies_capacity} onChange={e => update('dinghies_capacity', e.target.value)}
+                      className="h-7 font-mono text-xs" />
+                  </div>
+                  <div className="flex items-end pb-0.5">
+                    <label className="flex items-center gap-1.5 font-mono text-xs">
+                      <Checkbox checked={form.dinghies_cover} onCheckedChange={v => update('dinghies_cover', !!v)} /> Cover
+                    </label>
+                  </div>
+                  <div>
+                    <Label className="font-mono text-[9px] text-muted-foreground/70">COLOUR</Label>
+                    <Input value={form.dinghies_colour} onChange={e => update('dinghies_colour', e.target.value.toUpperCase())}
+                      className="h-7 font-mono text-xs uppercase" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Aircraft Colour */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">AIRCRAFT COLOUR AND MARKINGS</Label>
+                <Input value={form.aircraft_colour} onChange={e => update('aircraft_colour', e.target.value.toUpperCase())}
+                  className="h-8 font-mono text-xs uppercase" placeholder="WHITE/BLUE" />
+              </div>
+
+              {/* Remarks */}
+              <div>
+                <Label className="font-mono text-[10px] text-muted-foreground">REMARKS</Label>
+                <Textarea value={form.remarks} onChange={e => update('remarks', e.target.value.toUpperCase())}
+                  className="font-mono text-xs uppercase min-h-[40px]" />
+              </div>
+
+              {/* PIC */}
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">PILOT IN COMMAND</Label>
                 <Input value={form.pic} onChange={e => update('pic', e.target.value.toUpperCase())}
                   className="h-8 font-mono text-xs uppercase" />
               </div>
-              <div>
-                <Label className="font-mono text-[10px] text-muted-foreground">REMARKS</Label>
-                <Textarea value={form.remarks} onChange={e => update('remarks', e.target.value.toUpperCase())}
-                  className="font-mono text-xs uppercase min-h-[40px]" />
+            </div>
+
+            <Separator className="bg-muted/30" />
+
+            {/* Filed By / Signature */}
+            <div className="space-y-2">
+              <h3 className="font-mono text-[10px] text-primary tracking-widest">FILED BY</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">FILED BY</Label>
+                  <Input value={form.filed_by} onChange={e => update('filed_by', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" />
+                </div>
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">TELEPHONE</Label>
+                  <Input value={form.filed_by_phone} onChange={e => update('filed_by_phone', e.target.value)}
+                    className="h-8 font-mono text-xs" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">NAME IN BLOCK LETTERS</Label>
+                  <Input value={form.signature_name} onChange={e => update('signature_name', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" />
+                </div>
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">DATE</Label>
+                  <Input value={form.signature_date} onChange={e => update('signature_date', e.target.value)}
+                    className="h-8 font-mono text-xs" placeholder="2026-04-07" />
+                </div>
               </div>
             </div>
           </div>
