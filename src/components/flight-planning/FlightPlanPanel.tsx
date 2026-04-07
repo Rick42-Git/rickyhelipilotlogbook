@@ -86,7 +86,6 @@ export function FlightPlanPanel({
     };
     setWaypoints([...waypoints, wp]);
   };
-  };
 
   // Calculate legs
   const legs: FlightLeg[] = [];
