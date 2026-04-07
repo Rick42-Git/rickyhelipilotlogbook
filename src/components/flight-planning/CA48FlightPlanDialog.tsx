@@ -176,7 +176,7 @@ export function CA48FlightPlanDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6 pb-2">
+        <ScrollArea className="flex-1 overflow-auto px-6 pb-2" style={{ maxHeight: 'calc(90vh - 140px)' }}>
           <div className="space-y-4 pb-4">
             {/* Priority / Addressees */}
             <div className="space-y-2">
@@ -564,8 +564,40 @@ function buildCA48HTML(f: CA48FormData): string {
   .field-value { font-weight: bold; font-size: 11pt; letter-spacing: 1px; min-height: 16px; }
   .field-value-sm { font-weight: bold; font-size: 9pt; letter-spacing: 1px; min-height: 16px; }
   .arrows { font-size: 8pt; color: #888; }
+  .header-bar { display: flex; align-items: center; justify-content: space-between; border: 2px solid #000; padding: 6px 12px; margin-bottom: 0; }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .sacaa-logo { width: 60px; height: 60px; }
+  .header-text { font-size: 8pt; line-height: 1.4; }
+  .header-text strong { font-size: 10pt; display: block; }
+  .header-right { text-align: right; font-size: 7pt; line-height: 1.5; }
   @media print { body { -webkit-print-color-adjust: exact; } }
 </style></head><body>
+
+<!-- SACAA Header -->
+<div class="header-bar">
+  <div class="header-left">
+    <svg class="sacaa-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="48" fill="none" stroke="#003366" stroke-width="3"/>
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#003366" stroke-width="1.5"/>
+      <path d="M50 12 L50 88 M12 50 L88 50" stroke="#003366" stroke-width="1" opacity="0.3"/>
+      <text x="50" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="bold" fill="#003366">SOUTH AFRICAN</text>
+      <text x="50" y="52" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="bold" fill="#003366">CIVIL AVIATION</text>
+      <text x="50" y="62" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="bold" fill="#003366">AUTHORITY</text>
+      <path d="M30 72 Q50 80 70 72" fill="none" stroke="#CC0000" stroke-width="2"/>
+    </svg>
+    <div class="header-text">
+      <strong>SOUTH AFRICAN CIVIL AVIATION AUTHORITY</strong>
+      Flight Plan — ICAO Format<br>
+      <span style="font-size:7pt;color:#555">In accordance with ICAO Annex 2 and CATS</span>
+    </div>
+  </div>
+  <div class="header-right">
+    Form CA 172-04<br>
+    Revision: 01<br>
+    Date: ${f.signature_date || new Date().toISOString().split('T')[0]}
+  </div>
+</div>
+
 <table>
   <tr><td colspan="8" class="title">FLIGHT PLAN</td></tr>
   <tr>
