@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getActivatedUser, setActivatedUser, clearActivatedUser, ActivatedUser } from '@/lib/activation';
 import { supabase } from '@/integrations/supabase/client';
+import { setSupabaseUserId } from '@/lib/supabaseHeaders';
 
 interface AuthContextType {
   user: { id: string; email: string } | null;
@@ -27,22 +28,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const cached = getActivatedUser();
     setUser(cached);
+    setSupabaseUserId(cached?.id || null);
     setLoading(false);
 
     // Sync display name from server in case admin updated it
     if (cached?.id) {
-      supabase
-        .from('access_codes')
-        .select('display_name, is_admin, extraction_limit')
-        .eq('id', cached.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data && data.display_name !== cached.displayName) {
-            const updated = { ...cached, displayName: data.display_name, isAdmin: data.is_admin };
-            setActivatedUser(updated);
-            setUser(updated);
-          }
-        });
+      supabase.functions.invoke('profile-sync', {
+        body: { userId: cached.id },
+      }).then(({ data, error }) => {
+        if (!error && data?.data && data.data.display_name !== cached.displayName) {
+          const updated = { ...cached, displayName: data.data.display_name, isAdmin: data.data.is_admin };
+          setActivatedUser(updated);
+          setUser(updated);
+        }
+      });
     }
   }, []);
 
@@ -77,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const u: ActivatedUser = data.user;
       setActivatedUser(u);
       setUser(u);
+      setSupabaseUserId(u.id);
       return { success: true };
     } catch (e) {
       console.error('[activate] caught error:', e);
@@ -87,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = () => {
     clearActivatedUser();
     setUser(null);
+    setSupabaseUserId(null);
   };
 
   const user = activatedUser ? { id: activatedUser.id, email: activatedUser.email } : null;
