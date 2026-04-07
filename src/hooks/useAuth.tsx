@@ -31,18 +31,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Sync display name from server in case admin updated it
     if (cached?.id) {
-      supabase
-        .from('access_codes')
-        .select('display_name, is_admin, extraction_limit')
-        .eq('id', cached.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data && data.display_name !== cached.displayName) {
-            const updated = { ...cached, displayName: data.display_name, isAdmin: data.is_admin };
-            setActivatedUser(updated);
-            setUser(updated);
-          }
-        });
+      supabase.functions.invoke('profile-sync', {
+        body: { userId: cached.id },
+      }).then(({ data, error }) => {
+        if (!error && data?.data && data.data.display_name !== cached.displayName) {
+          const updated = { ...cached, displayName: data.data.display_name, isAdmin: data.data.is_admin };
+          setActivatedUser(updated);
+          setUser(updated);
+        }
+      });
     }
   }, []);
 
