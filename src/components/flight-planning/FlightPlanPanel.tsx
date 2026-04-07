@@ -77,6 +77,17 @@ export function FlightPlanPanel({
     setWaypoints(waypoints.map(w => w.id === id ? { ...w, notes } : w));
   };
 
+  const addCoordinateWaypoint = (name: string, lat: number, lng: number) => {
+    const wp: Waypoint = {
+      id: crypto.randomUUID(),
+      name,
+      lat,
+      lng,
+    };
+    setWaypoints([...waypoints, wp]);
+  };
+  };
+
   // Calculate legs
   const legs: FlightLeg[] = [];
   for (let i = 1; i < waypoints.length; i++) {
