@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Save, FolderOpen, Printer, Navigation } from 'lucide-react';
+import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Save, FolderOpen, Printer, Navigation, ClipboardList } from 'lucide-react';
 import { FlightMap, MapLayer } from '@/components/flight-planning/FlightMap';
 import { FlightPlanPanel } from '@/components/flight-planning/FlightPlanPanel';
 import { FlightLogTable } from '@/components/flight-planning/FlightLogTable';
@@ -16,6 +16,7 @@ import { useFlightPlans, SavedFlightPlan } from '@/hooks/useFlightPlans';
 import { toast } from '@/hooks/use-toast';
 import { exportFlightPlanPDF } from '@/lib/exportFlightPlan';
 import { FlyoverView } from '@/components/flight-planning/FlyoverView';
+import { CA48FlightPlanDialog } from '@/components/flight-planning/CA48FlightPlanDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,6 +49,7 @@ const FlightPlanning = () => {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [showFlyover, setShowFlyover] = useState(false);
+  const [showCA48, setShowCA48] = useState(false);
   const [saveName, setSaveName] = useState('');
 
   // Map controls
@@ -205,6 +207,16 @@ const FlightPlanning = () => {
           >
             <Printer className="h-3 w-3" />
             <span className="hidden md:inline">PDF</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowCA48(true)}
+            className="font-mono text-[10px] gap-1 h-7"
+            title="ICAO CA48 Flight Plan Form"
+          >
+            <ClipboardList className="h-3 w-3" />
+            <span className="hidden md:inline">CA48</span>
           </Button>
           <Button
             variant="outline"
@@ -407,6 +419,19 @@ const FlightPlanning = () => {
           onClose={() => setShowFlyover(false)}
         />
       )}
+
+      {/* CA48 Flight Plan Form */}
+      <CA48FlightPlanDialog
+        open={showCA48}
+        onOpenChange={setShowCA48}
+        waypoints={waypoints}
+        groundSpeed={groundSpeed}
+        fuelBurnRate={fuelBurnRate}
+        fuelOnBoard={fuelOnBoard}
+        aircraftType={aircraftType}
+        aircraftReg={aircraftReg}
+        pilotInCommand={pilotInCommand}
+      />
     </div>
   );
 };
