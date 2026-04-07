@@ -48,6 +48,7 @@ export function FlightPlanPanel({
   planNotes, setPlanNotes,
 }: FlightPlanPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [coordDialogOpen, setCoordDialogOpen] = useState(false);
 
   const searchResults = searchQuery.length >= 2 ? searchAirports(searchQuery) : [];
 
