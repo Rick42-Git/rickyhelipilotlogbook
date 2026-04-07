@@ -76,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const u: ActivatedUser = data.user;
       setActivatedUser(u);
       setUser(u);
+      setSupabaseUserId(u.id);
       return { success: true };
     } catch (e) {
       console.error('[activate] caught error:', e);
@@ -86,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = () => {
     clearActivatedUser();
     setUser(null);
+    setSupabaseUserId(null);
   };
 
   const user = activatedUser ? { id: activatedUser.id, email: activatedUser.email } : null;
