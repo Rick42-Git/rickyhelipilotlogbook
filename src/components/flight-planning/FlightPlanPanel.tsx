@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, GripVertical, Fuel, ShieldCheck, AlertTriangle, ArrowRight, Pencil, Plus, RotateCcw } from 'lucide-react';
+import { Trash2, GripVertical, Fuel, ShieldCheck, AlertTriangle, ArrowRight, Pencil, Plus, RotateCcw, Crosshair } from 'lucide-react';
+import { CoordinateWaypointDialog } from './CoordinateWaypointDialog';
 import { Waypoint, FlightLeg, calcDistanceNm, calcBearing, formatTime } from '@/types/flightPlan';
 import { searchAirports, Airport } from '@/data/africanAirports';
 import {
@@ -47,6 +48,7 @@ export function FlightPlanPanel({
   planNotes, setPlanNotes,
 }: FlightPlanPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [coordDialogOpen, setCoordDialogOpen] = useState(false);
 
   const searchResults = searchQuery.length >= 2 ? searchAirports(searchQuery) : [];
 
@@ -73,6 +75,17 @@ export function FlightPlanPanel({
 
   const updateWaypointNotes = (id: string, notes: string) => {
     setWaypoints(waypoints.map(w => w.id === id ? { ...w, notes } : w));
+  };
+
+  const addCoordinateWaypoint = (name: string, lat: number, lng: number) => {
+    const wp: Waypoint = {
+      id: crypto.randomUUID(),
+      name,
+      lat,
+      lng,
+    };
+    setWaypoints([...waypoints, wp]);
+  };
   };
 
   // Calculate legs
@@ -185,7 +198,21 @@ export function FlightPlanPanel({
               ))}
             </div>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full h-7 font-mono text-[10px] gap-1"
+            onClick={() => setCoordDialogOpen(true)}
+          >
+            <Crosshair className="h-3 w-3" />
+            Enter Coordinates Manually
+          </Button>
           <p className="font-mono text-[9px] text-muted-foreground/60">Or click the map to add a custom waypoint</p>
+          <CoordinateWaypointDialog
+            open={coordDialogOpen}
+            onOpenChange={setCoordDialogOpen}
+            onAdd={addCoordinateWaypoint}
+          />
         </div>
 
         <Separator className="bg-muted/30" />
