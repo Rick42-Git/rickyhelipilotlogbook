@@ -49,6 +49,7 @@ const FlightPlanning = () => {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [showFlyover, setShowFlyover] = useState(false);
+  const [showCA48, setShowCA48] = useState(false);
   const [saveName, setSaveName] = useState('');
 
   // Map controls
