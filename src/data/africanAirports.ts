@@ -122,6 +122,47 @@ export const africanAirports: Airport[] = [
 
   // SEYCHELLES
   { icao: 'FSIA', iata: 'SEZ', name: 'Seychelles International', city: 'Mahé', country: 'Seychelles', lat: -4.6734, lng: 55.5218, elevation: 10, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // EGYPT
+  { icao: 'HECA', iata: 'CAI', name: 'Cairo International', city: 'Cairo', country: 'Egypt', lat: 30.1219, lng: 31.4056, elevation: 382, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+  { icao: 'HEBA', iata: 'HBE', name: 'Borg El Arab International', city: 'Alexandria', country: 'Egypt', lat: 30.9177, lng: 29.6964, elevation: 177, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+  { icao: 'HEGN', iata: 'HRG', name: 'Hurghada International', city: 'Hurghada', country: 'Egypt', lat: 27.1783, lng: 33.806, elevation: 52, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+  { icao: 'HESH', iata: 'SSH', name: 'Sharm El Sheikh International', city: 'Sharm El Sheikh', country: 'Egypt', lat: 27.9773, lng: 34.395, elevation: 143, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // ALGERIA
+  { icao: 'DAAG', iata: 'ALG', name: 'Houari Boumediene', city: 'Algiers', country: 'Algeria', lat: 36.691, lng: 3.2154, elevation: 82, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+  { icao: 'DAUG', iata: 'GHA', name: 'Noumérat – Moufdi Zakaria', city: 'Ghardaia', country: 'Algeria', lat: 32.3841, lng: 3.8111, elevation: 1512, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // MOROCCO
+  { icao: 'GMMN', iata: 'CMN', name: 'Mohammed V International', city: 'Casablanca', country: 'Morocco', lat: 33.3675, lng: -7.5899, elevation: 656, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+  { icao: 'GMMX', iata: 'RAK', name: 'Marrakesh Menara', city: 'Marrakesh', country: 'Morocco', lat: 31.6069, lng: -8.0363, elevation: 1545, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // TUNISIA
+  { icao: 'DTTA', iata: 'TUN', name: 'Tunis–Carthage International', city: 'Tunis', country: 'Tunisia', lat: 36.851, lng: 10.2272, elevation: 22, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // CÔTE D'IVOIRE
+  { icao: 'DIAP', iata: 'ABJ', name: 'Félix-Houphouët-Boigny International', city: 'Abidjan', country: "Côte d'Ivoire", lat: 5.2613, lng: -3.9262, elevation: 21, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // MALI
+  { icao: 'GABS', iata: 'BKO', name: 'Modibo Keita International', city: 'Bamako', country: 'Mali', lat: 12.5358, lng: -7.95, elevation: 1247, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // TOGO
+  { icao: 'DXXX', iata: 'LFW', name: 'Gnassingbé Eyadéma International', city: 'Lomé', country: 'Togo', lat: 6.1656, lng: 1.2545, elevation: 72, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // SIERRA LEONE
+  { icao: 'GFLL', iata: 'FNA', name: 'Lungi International', city: 'Freetown', country: 'Sierra Leone', lat: 8.6164, lng: -13.1955, elevation: 84, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // LIBERIA
+  { icao: 'GLRB', iata: 'ROB', name: 'Roberts International', city: 'Monrovia', country: 'Liberia', lat: 6.2337, lng: -10.3622, elevation: 31, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // CAMEROON (additional)
+  { icao: 'FKYS', iata: 'NSI', name: 'Yaoundé Nsimalen International', city: 'Yaoundé', country: 'Cameroon', lat: 3.7225, lng: 11.5533, elevation: 2375, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // CENTRAL AFRICAN REPUBLIC
+  { icao: 'FEFF', iata: 'BGF', name: "Bangui M'Poko International", city: 'Bangui', country: 'Central African Republic', lat: 4.3985, lng: 18.5188, elevation: 1208, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
+
+  // NIGERIA (additional)
+  { icao: 'DNKN', iata: 'KAN', name: 'Mallam Aminu Kano International', city: 'Kano', country: 'Nigeria', lat: 12.0476, lng: 8.5246, elevation: 1562, hasCustoms: true, hasFuel: true, fuelTypes: ['Jet A-1'], runwaySurface: 'paved' },
 ];
 
 export const getAirportsByCountry = (country: string) => 
