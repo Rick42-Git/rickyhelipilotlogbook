@@ -419,6 +419,19 @@ const FlightPlanning = () => {
           onClose={() => setShowFlyover(false)}
         />
       )}
+
+      {/* CA48 Flight Plan Form */}
+      <CA48FlightPlanDialog
+        open={showCA48}
+        onOpenChange={setShowCA48}
+        waypoints={waypoints}
+        groundSpeed={groundSpeed}
+        fuelBurnRate={fuelBurnRate}
+        fuelOnBoard={fuelOnBoard}
+        aircraftType={aircraftType}
+        aircraftReg={aircraftReg}
+        pilotInCommand={pilotInCommand}
+      />
     </div>
   );
 };
