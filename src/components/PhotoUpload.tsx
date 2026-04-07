@@ -32,12 +32,12 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
   const fetchRemaining = useCallback(async () => {
     if (!activatedUser?.id) return;
     try {
-      // Get limit from access_codes
-      const { data: codeData } = await supabase
-        .from('access_codes')
-        .select('extraction_limit, is_admin')
-        .eq('id', activatedUser.id)
-        .maybeSingle();
+      // Get limit from profile-sync edge function
+      const { data: syncResult, error: syncError } = await supabase.functions.invoke('profile-sync', {
+        body: { userId: activatedUser.id, action: 'get_limits' },
+      });
+
+      const codeData = !syncError ? syncResult?.data : null;
 
       if (codeData?.is_admin) {
         setRemaining(null); // unlimited for admins
