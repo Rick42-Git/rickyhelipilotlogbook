@@ -38,7 +38,8 @@ function getGameTotals(entries: LogbookEntry[]) {
   let hours = 0;
   let flights = 0;
   for (const e of entries) {
-    if ((e.flightDetails || '').toLowerCase().includes('game')) {
+    const details = (e.flightDetails || '').toLowerCase();
+    if (details.includes('game') || details.includes('sgp')) {
       flights += 1;
       hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
     }
