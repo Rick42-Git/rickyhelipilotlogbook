@@ -33,11 +33,13 @@ function getTurbineTotals(entries: LogbookEntry[]) {
   return { hours, flights };
 }
 
+const GAME_PATTERNS = ['game', 'sgp', 'capture', 'darting', 'zebra', 'eland', 'buffalo', 'rhino', 'elephant', 'giraffe', 'hippo', 'lion', 'leopard', 'cheetah', 'wildebeest', 'kudu', 'impala', 'nyala', 'sable', 'roan', 'waterbuck', 'warthog', 'crocodile', 'wild dog', 'hyena', 'springbok', 'gemsbok', 'oryx', 'tsessebe', 'blesbok', 'bontebok', 'bushbuck', 'duiker', 'steenbok', 'klipspringer', 'hartebeest'];
+
 function getGameTotals(entries: LogbookEntry[]) {
   let hours = 0, flights = 0;
   for (const e of entries) {
     const details = (e.flightDetails || '').toLowerCase();
-    if (details.includes('game') || details.includes('sgp')) {
+    if (GAME_PATTERNS.some(p => details.includes(p))) {
       flights += 1;
       hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
     }
