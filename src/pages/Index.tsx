@@ -10,24 +10,14 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane, List, BookOpen, Radio, Sun, Moon } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane, List, BookOpen, Radio, Sun, Moon, Search } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { exportToNumbers, exportLast3Pages } from '@/lib/exportLogbook';
 import { exportSummaryPDF } from '@/lib/exportSummary';
@@ -38,6 +28,15 @@ import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { FlightDutyCalculator } from '@/components/FlightDutyCalculator';
 import { ColumnTemplateManager } from '@/components/ColumnTemplateManager';
 import { useColumnTemplates } from '@/hooks/useColumnTemplates';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Input } from '@/components/ui/input';
+
+// Mobile components
+import { MobileBottomNav, MobileTab } from '@/components/mobile/MobileBottomNav';
+import { MobileEntryCard } from '@/components/mobile/MobileEntryCard';
+import { MobileSummaryPanel } from '@/components/mobile/MobileSummaryPanel';
+import { MobileToolsPanel } from '@/components/mobile/MobileToolsPanel';
+import { MobileMorePanel } from '@/components/mobile/MobileMorePanel';
 
 const Index = () => {
   const { user, activatedUser, signOut } = useAuth();
@@ -52,6 +51,9 @@ const Index = () => {
   const { templates } = useColumnTemplates();
   const [viewMode, setViewMode] = useState<'list' | 'book'>('list');
   const { theme, toggleTheme } = useTheme();
+  const isMobile = useIsMobile();
+  const [mobileTab, setMobileTab] = useState<MobileTab>('logbook');
+  const [mobileSearch, setMobileSearch] = useState('');
 
   const handleEdit = (entry: LogbookEntry) => {
     setEditingEntry(entry);
@@ -73,6 +75,141 @@ const Index = () => {
 
   const totals = useMemo(() => getTotals(), [getTotals]);
 
+  const pilotName = activatedUser?.displayName?.toUpperCase() || user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN';
+
+  const filteredMobileEntries = useMemo(() => {
+    if (!mobileSearch.trim()) return entries;
+    const q = mobileSearch.toLowerCase();
+    return entries.filter(e =>
+      e.date.toLowerCase().includes(q) ||
+      e.aircraftType.toLowerCase().includes(q) ||
+      e.aircraftReg.toLowerCase().includes(q) ||
+      e.pilotInCommand.toLowerCase().includes(q) ||
+      e.flightDetails.toLowerCase().includes(q)
+    );
+  }, [entries, mobileSearch]);
+
+  const sortedMobileEntries = useMemo(() =>
+    [...filteredMobileEntries].sort((a, b) => (a.date > b.date ? -1 : 1)),
+    [filteredMobileEntries]
+  );
+
+  // ─── MOBILE LAYOUT ───
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        {/* Mobile header */}
+        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3">
+          <div className="flex items-center gap-3">
+            <img src={helicopterIcon} alt="Helicopter" className="h-7 w-auto opacity-80" />
+            <div className="flex-1 min-w-0">
+              <h1 className="font-mono text-sm font-bold text-primary tracking-wider">HELI PILOT</h1>
+              <p className="font-mono text-[9px] text-muted-foreground tracking-widest truncate">{pilotName}</p>
+            </div>
+            <div className="status-dot" />
+          </div>
+        </div>
+
+        {/* Tab content */}
+        <div className="px-4 pt-4">
+          {mobileTab === 'logbook' && (
+            <div className="space-y-3">
+              {/* Search + New */}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={mobileSearch}
+                    onChange={e => setMobileSearch(e.target.value)}
+                    placeholder="Search flights..."
+                    className="h-10 pl-10 font-mono text-xs bg-card border-border rounded-lg"
+                  />
+                </div>
+                <Button onClick={handleNew} className="h-10 px-4 font-mono text-xs gap-1.5 shrink-0">
+                  <Plus className="h-4 w-4" />
+                  NEW
+                </Button>
+              </div>
+
+              {/* Entry count */}
+              <p className="font-mono text-[10px] text-muted-foreground tracking-wider">
+                {filteredMobileEntries.length} {filteredMobileEntries.length === 1 ? 'FLIGHT' : 'FLIGHTS'}
+                {mobileSearch && ` matching "${mobileSearch}"`}
+              </p>
+
+              {/* Cards */}
+              {sortedMobileEntries.length === 0 ? (
+                <div className="bg-card border border-border rounded-lg p-8 text-center">
+                  <p className="font-mono text-sm text-muted-foreground">
+                    {entries.length === 0 ? 'No flights logged yet' : 'No results'}
+                  </p>
+                  <p className="font-mono text-[10px] text-muted-foreground mt-1">
+                    {entries.length === 0 ? 'Tap NEW or go to Upload' : 'Try a different search'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2 pb-4">
+                  {sortedMobileEntries.map(entry => (
+                    <MobileEntryCard
+                      key={entry.id}
+                      entry={entry}
+                      onEdit={handleEdit}
+                      onDelete={deleteEntry}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {mobileTab === 'summary' && (
+            <MobileSummaryPanel totals={totals} entryCount={entries.length} entries={entries} />
+          )}
+
+          {mobileTab === 'upload' && (
+            <div className="pb-20">
+              <PhotoUpload onEntriesExtracted={(extracted) => addMultipleEntries(extracted)} />
+            </div>
+          )}
+
+          {mobileTab === 'tools' && (
+            <MobileToolsPanel
+              isAdmin={isAdmin}
+              entries={entries}
+              pilotName={pilotName}
+              onOpenDutyCalc={() => setDutyCalcOpen(true)}
+              onOpenSummary={() => setSummaryOpen(true)}
+            />
+          )}
+
+          {mobileTab === 'more' && (
+            <MobileMorePanel
+              isAdmin={isAdmin}
+              theme={theme}
+              toggleTheme={toggleTheme}
+              canInstall={canInstall}
+              install={install}
+              signOut={signOut}
+              onImport={addMultipleEntries}
+              templates={templates}
+              pilotName={pilotName}
+              pilotEmail={user?.email || ''}
+            />
+          )}
+        </div>
+
+        {/* Bottom nav */}
+        <MobileBottomNav activeTab={mobileTab} onTabChange={setMobileTab} entryCount={entries.length} />
+
+        {/* Dialogs (shared) */}
+        <EntryFormDialog open={dialogOpen} onOpenChange={setDialogOpen} entry={editingEntry} onSave={handleSave} existingEntries={entries} />
+        <Last12MonthSummary entries={entries} allEntries={entries} open={summaryOpen} onOpenChange={setSummaryOpen} />
+        <FlightDutyCalculator open={dutyCalcOpen} onOpenChange={setDutyCalcOpen} entries={entries} />
+      </div>
+    );
+  }
+
+  // ─── DESKTOP LAYOUT (unchanged) ───
   return (
     <div className="min-h-screen bg-background grid-bg scanline">
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
@@ -90,14 +227,14 @@ const Index = () => {
                 </div>
                 <div className="flex items-center gap-3 mt-0.5 md:mt-1">
                   <p className="font-mono text-[10px] md:text-xs text-muted-foreground tracking-widest truncate">
-                    PILOT: {activatedUser?.displayName?.toUpperCase() || user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN'}
+                    PILOT: {pilotName}
                   </p>
                   <span className="font-mono text-[9px] text-accent/60 flex-shrink-0">▸ ACTIVE</span>
                 </div>
               </div>
             </div>
             {/* Desktop buttons */}
-            <div className="hidden md:flex gap-2">
+            <div className="flex gap-2">
               <Button variant="ghost" size="icon" onClick={toggleTheme} className="font-mono" title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
                 {theme === 'dark' ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
               </Button>
@@ -145,7 +282,7 @@ const Index = () => {
                   <DropdownMenuItem onClick={() => exportLast3Pages(entries)}>
                     LAST 3 PAGES (24 entries/page)
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => exportSummaryPDF(entries, activatedUser?.displayName?.toUpperCase() || 'PILOT')}>
+                  <DropdownMenuItem onClick={() => exportSummaryPDF(entries, pilotName)}>
                     SUMMARY OF TOTALS (PDF)
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -160,108 +297,33 @@ const Index = () => {
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
-            {/* Mobile: sign out only */}
-            <div className="flex md:hidden gap-1">
-              <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8">
-                {theme === 'dark' ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
-              </Button>
-              {isAdmin && (
-                <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="h-8 w-8 text-accent">
-                  <Shield className="h-4 w-4" />
-                </Button>
-              )}
-              <Button variant="ghost" size="icon" onClick={signOut} className="h-8 w-8 text-muted-foreground">
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          {/* Mobile action bar */}
-          <div className="flex md:hidden gap-1.5 mt-3 flex-wrap">
-            {canInstall && (
-              <Button variant="outline" size="sm" onClick={install} className="font-mono text-[10px] gap-1 h-7 border-primary text-primary">
-                <MonitorSmartphone className="h-3 w-3" />
-                INSTALL
-              </Button>
-            )}
-            <SpreadsheetImport onEntriesImported={addMultipleEntries} templates={templates} />
-            
-            <Button variant="outline" size="sm" onClick={() => navigate('/mass-balance')} className="font-mono text-[10px] gap-1 h-7">
-              <Scale className="h-3 w-3" />
-              M&B
-            </Button>
-            {isAdmin && (
-              <Button variant="outline" size="sm" onClick={() => navigate('/flight-planning')} className="font-mono text-[10px] gap-1 h-7">
-                <Plane className="h-3 w-3" />
-                FLT
-              </Button>
-            )}
-            <Button variant="outline" size="sm" onClick={() => navigate('/frequency-chart')} className="font-mono text-[10px] gap-1 h-7">
-              <Radio className="h-3 w-3" />
-              FREQ
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setDutyCalcOpen(true)} className="font-mono text-[10px] gap-1 h-7">
-              <Clock className="h-3 w-3" />
-              F&D
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setSummaryOpen(true)} disabled={entries.length === 0} className="font-mono text-[10px] gap-1 h-7">
-              <BarChart3 className="h-3 w-3" />
-              12M
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={entries.length === 0} className="font-mono text-[10px] gap-1 h-7">
-                  <Download className="h-3 w-3" />
-                  EXPORT
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="font-mono">
-                <DropdownMenuItem onClick={() => exportToNumbers(entries)}>
-                  EXPORT ALL ({entries.length} entries)
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportLast3Pages(entries)}>
-                  LAST 3 PAGES (24 entries/page)
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => exportSummaryPDF(entries, activatedUser?.displayName?.toUpperCase() || 'PILOT')}>
-                  SUMMARY OF TOTALS (PDF)
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
 
         <div className="flex items-center gap-3 my-6">
           <div className="flex-1 alt-line" />
-          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2">
-            <span>totals</span>
-          </span>
+          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2"><span>totals</span></span>
           <div className="flex-1 alt-line" />
         </div>
 
-        {/* Summary */}
         <div className="mb-6">
           <SummaryPanel totals={totals} entryCount={entries.length} entries={entries} />
         </div>
 
         <div className="flex items-center gap-3 my-6">
           <div className="flex-1 alt-line" />
-          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2">
-            <span>upload</span>
-          </span>
+          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2"><span>upload</span></span>
           <div className="flex-1 alt-line" />
         </div>
 
-        {/* Photo Upload */}
         <div className="mb-6">
-          <PhotoUpload onEntriesExtracted={(extracted) => {
-            addMultipleEntries(extracted);
-          }} />
+          <PhotoUpload onEntriesExtracted={(extracted) => addMultipleEntries(extracted)} />
         </div>
 
         <div className="flex items-center gap-3 my-6 sticky top-0 z-30 bg-background pt-4 pb-3 -mx-4 px-4">
           {entries.length > 0 && (
             <Button
-              variant="ghost"
-              size="sm"
+              variant="ghost" size="sm"
               onClick={() => setViewMode(v => v === 'list' ? 'book' : 'list')}
               className="font-mono text-[10px] gap-1.5 h-7 px-2 text-muted-foreground hover:text-foreground"
             >
@@ -270,9 +332,7 @@ const Index = () => {
             </Button>
           )}
           <div className="flex-1 alt-line" />
-          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2">
-            <span>entries</span>
-          </span>
+          <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.3em] compass-divider flex items-center gap-2"><span>entries</span></span>
           <div className="flex-1 alt-line" />
           <Button size="sm" onClick={handleNew} className="font-mono text-[10px] gap-1.5 h-7 px-2">
             <Plus className="h-3.5 w-3.5" />
@@ -280,22 +340,13 @@ const Index = () => {
           </Button>
         </div>
 
-        {/* Entries view */}
         {viewMode === 'list' ? (
           <LogbookTable entries={entries} onEdit={handleEdit} onDelete={deleteEntry} onClearAll={clearAllEntries} />
         ) : (
           <LogbookBookView entries={entries} onEdit={handleEdit} onDelete={deleteEntry} />
         )}
 
-        {/* Entry Dialog */}
-        <EntryFormDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          entry={editingEntry}
-          onSave={handleSave}
-          existingEntries={entries}
-        />
-
+        <EntryFormDialog open={dialogOpen} onOpenChange={setDialogOpen} entry={editingEntry} onSave={handleSave} existingEntries={entries} />
         <Last12MonthSummary entries={entries} allEntries={entries} open={summaryOpen} onOpenChange={setSummaryOpen} />
         <FlightDutyCalculator open={dutyCalcOpen} onOpenChange={setDutyCalcOpen} entries={entries} />
       </div>
