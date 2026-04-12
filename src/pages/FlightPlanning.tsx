@@ -157,82 +157,59 @@ const FlightPlanning = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="h-[100dvh] flex flex-col bg-background">
       {/* Top bar */}
-      <div className="glass-panel hud-border px-3 py-2 flex items-center justify-between gap-2 z-20 flex-shrink-0 relative">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="h-8 w-8">
+      <div className="glass-panel hud-border px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-between gap-1 sm:gap-2 z-20 flex-shrink-0 relative">
+        <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="h-7 w-7 sm:h-8 sm:w-8 shrink-0">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className="flex items-center gap-2">
-            <Plane className="h-4 w-4 text-primary" />
-            <h1 className="font-mono text-sm md:text-base font-bold text-primary tracking-wider">
-              {planName ? planName.toUpperCase() : 'FLIGHT PLANNING'}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Plane className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" />
+            <h1 className="font-mono text-[10px] sm:text-sm font-bold text-primary tracking-wider truncate">
+              {planName ? planName.toUpperCase() : 'FLT PLAN'}
             </h1>
-            <div className="status-dot" />
+            <div className="status-dot shrink-0" />
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto scrollbar-hide">
           {/* Save / Load */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleQuickSave}
-            className="font-mono text-[10px] gap-1 h-7"
-            title={currentPlanId ? 'Quick save' : 'Save as...'}
-          >
+          <Button variant="outline" size="sm" onClick={handleQuickSave}
+            className="font-mono text-[10px] gap-1 h-6 sm:h-7 px-1.5 sm:px-2 shrink-0"
+            title={currentPlanId ? 'Quick save' : 'Save as...'}>
             <Save className="h-3 w-3" />
-            <span className="hidden md:inline">{currentPlanId ? 'SAVE' : 'SAVE AS'}</span>
+            <span className="hidden sm:inline">{currentPlanId ? 'SAVE' : 'SAVE AS'}</span>
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowLoadDialog(true)}
-            className="font-mono text-[10px] gap-1 h-7"
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowLoadDialog(true)}
+            className="font-mono text-[10px] gap-1 h-6 sm:h-7 px-1.5 sm:px-2 shrink-0">
             <FolderOpen className="h-3 w-3" />
-            <span className="hidden md:inline">LOAD</span>
+            <span className="hidden sm:inline">LOAD</span>
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowSignature(true)}
-            className="font-mono text-[10px] gap-1 h-7"
-            disabled={waypoints.length === 0}
-            title="Export as PDF"
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowSignature(true)}
+            className="font-mono text-[10px] gap-1 h-6 sm:h-7 px-1.5 sm:px-2 shrink-0"
+            disabled={waypoints.length === 0} title="Export as PDF">
             <Printer className="h-3 w-3" />
-            <span className="hidden md:inline">PDF</span>
+            <span className="hidden sm:inline">PDF</span>
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowCA48(true)}
-            className="font-mono text-[10px] gap-1 h-7"
-            title="ICAO Flight Plan Form"
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowCA48(true)}
+            className="font-mono text-[10px] gap-1 h-6 sm:h-7 px-1.5 sm:px-2 shrink-0"
+            title="ICAO Flight Plan Form">
             <ClipboardList className="h-3 w-3" />
-            <span className="hidden md:inline">File2Fly</span>
+            <span className="hidden sm:inline">File2Fly</span>
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFlyover(true)}
-            className="font-mono text-[10px] gap-1 h-7"
-            disabled={waypoints.length < 2}
-            title="Animated flyover"
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowFlyover(true)}
+            className="font-mono text-[10px] gap-1 h-6 sm:h-7 px-1.5 sm:px-2 shrink-0"
+            disabled={waypoints.length < 2} title="Animated flyover">
             <Navigation className="h-3 w-3" />
-            <span className="hidden md:inline">FLYOVER</span>
+            <span className="hidden sm:inline">FLYOVER</span>
           </Button>
           {/* Map Layer Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="font-mono text-[10px] gap-1 h-7">
+              <Button variant="outline" size="sm" className="font-mono text-[10px] gap-1 h-6 sm:h-7 px-1.5 sm:px-2 shrink-0">
                 <Layers className="h-3 w-3" />
                 <span className="hidden md:inline">{layerLabels[activeLayer]}</span>
-                <span className="md:hidden">MAP</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="font-mono text-xs">
@@ -281,10 +258,10 @@ const FlightPlanning = () => {
             variant={measure.active ? 'default' : 'outline'}
             size="sm"
             onClick={toggleMeasure}
-            className="font-mono text-[10px] gap-1 h-7"
+            className="font-mono text-[10px] gap-1 h-6 sm:h-7 px-1.5 sm:px-2 shrink-0"
           >
             <Ruler className="h-3 w-3" />
-            {measure.active ? 'MEASURING' : 'MEASURE'}
+            <span className="hidden sm:inline">{measure.active ? 'MEASURING' : 'MEASURE'}</span>
           </Button>
         </div>
       </div>
@@ -307,7 +284,7 @@ const FlightPlanning = () => {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative z-0">
-        <div className="flex-1 min-h-[300px] md:min-h-0 relative" style={{ zIndex: 0 }}>
+        <div className="h-[40vh] md:h-auto md:flex-1 min-h-0 relative shrink-0" style={{ zIndex: 0 }}>
           <FlightMap
             waypoints={waypoints}
             onMapClick={handleMapClick}
@@ -360,7 +337,7 @@ const FlightPlanning = () => {
       </div>
 
       {/* Map legend */}
-      <div className="glass-panel px-3 py-1.5 flex items-center justify-center gap-4 text-[9px] font-mono text-muted-foreground flex-shrink-0 border-t border-muted/30 relative z-20">
+      <div className="hidden sm:flex glass-panel px-3 py-1.5 items-center justify-center gap-4 text-[9px] font-mono text-muted-foreground flex-shrink-0 border-t border-muted/30 relative z-20">
         <span className="flex items-center gap-1">
           <span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" /> Customs
         </span>
