@@ -78,6 +78,19 @@ const Index = () => {
   const pilotName = activatedUser?.displayName?.toUpperCase() || user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN';
   const grandTotal = useMemo(() => totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot, [totals]);
 
+  const aviatorTime = useMemo(() => {
+    if (entries.length === 0) return null;
+    const dates = entries.map(e => e.date).filter(Boolean).sort();
+    if (dates.length === 0) return null;
+    const first = new Date(dates[0]);
+    const now = new Date();
+    const diffMs = now.getTime() - first.getTime();
+    const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const years = Math.floor(totalDays / 365.25);
+    const remainingDays = Math.floor(totalDays - years * 365.25);
+    return { years, days: remainingDays };
+  }, [entries]);
+
   const filteredMobileEntries = useMemo(() => {
     if (!mobileSearch.trim()) return entries;
     const q = mobileSearch.toLowerCase();
