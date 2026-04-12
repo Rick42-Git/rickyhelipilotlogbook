@@ -54,6 +54,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const [mobileTab, setMobileTab] = useState<MobileTab>('logbook');
   const [mobileSearch, setMobileSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const handleEdit = (entry: LogbookEntry) => {
     setEditingEntry(entry);
@@ -74,8 +75,8 @@ const Index = () => {
   };
 
   const totals = useMemo(() => getTotals(), [getTotals]);
-
   const pilotName = activatedUser?.displayName?.toUpperCase() || user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN';
+  const grandTotal = useMemo(() => totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot, [totals]);
 
   const filteredMobileEntries = useMemo(() => {
     if (!mobileSearch.trim()) return entries;
@@ -97,111 +98,123 @@ const Index = () => {
   // ─── MOBILE LAYOUT ───
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background pb-20">
-        {/* Mobile header */}
-        <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3">
-          <div className="flex items-center gap-3">
-            <img src={helicopterIcon} alt="Helicopter" className="h-7 w-auto opacity-80" />
-            <div className="flex-1 min-w-0">
-              <h1 className="font-mono text-sm font-bold text-primary tracking-wider">HELI PILOT</h1>
-              <p className="font-mono text-[9px] text-muted-foreground tracking-widest truncate">{pilotName}</p>
-            </div>
-            <div className="status-dot" />
+      <div className="h-[100dvh] flex flex-col bg-background overflow-hidden">
+        {/* Ultra-compact header — 40px */}
+        <div className="shrink-0 bg-card/95 backdrop-blur-md border-b border-border px-3 py-1.5 flex items-center gap-2 z-40">
+          <img src={helicopterIcon} alt="" className="h-5 w-auto opacity-80" />
+          <div className="flex-1 min-w-0">
+            <span className="font-mono text-[10px] font-bold text-primary tracking-wider">{pilotName}</span>
           </div>
+          {/* Inline total hours badge */}
+          <div className="flex items-center gap-1 bg-success/10 border border-success/20 rounded px-1.5 py-0.5">
+            <span className="font-mono text-xs font-bold text-success leading-none">{grandTotal.toFixed(1)}</span>
+            <span className="font-mono text-[7px] text-success/70">HRS</span>
+          </div>
+          {mobileTab === 'logbook' && (
+            <button onClick={() => setSearchOpen(!searchOpen)} className="p-1 text-muted-foreground">
+              <Search className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
-        {/* Tab content */}
-        <div className="px-4 pt-4">
+        {/* Search bar — collapsible, only on logbook tab */}
+        {mobileTab === 'logbook' && searchOpen && (
+          <div className="shrink-0 px-3 py-1.5 bg-card border-b border-border/50">
+            <Input
+              value={mobileSearch}
+              onChange={e => setMobileSearch(e.target.value)}
+              placeholder="Search..."
+              className="h-7 font-mono text-xs bg-background/50 border-border"
+              autoFocus
+            />
+          </div>
+        )}
+
+        {/* Content area — fills remaining space */}
+        <div className="flex-1 overflow-y-auto min-h-0">
           {mobileTab === 'logbook' && (
-            <div className="space-y-3">
-              {/* Search + New */}
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    value={mobileSearch}
-                    onChange={e => setMobileSearch(e.target.value)}
-                    placeholder="Search flights..."
-                    className="h-10 pl-10 font-mono text-xs bg-card border-border rounded-lg"
-                  />
-                </div>
-                <Button onClick={handleNew} className="h-10 px-4 font-mono text-xs gap-1.5 shrink-0">
-                  <Plus className="h-4 w-4" />
-                  NEW
+            <>
+              {/* Compact action bar */}
+              <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm px-3 py-1 flex items-center justify-between border-b border-border/30">
+                <span className="font-mono text-[9px] text-muted-foreground">
+                  {filteredMobileEntries.length} flights
+                </span>
+                <Button onClick={handleNew} size="sm" className="h-6 px-2 font-mono text-[9px] gap-1">
+                  <Plus className="h-3 w-3" /> NEW
                 </Button>
               </div>
 
-              {/* Entry count */}
-              <p className="font-mono text-[10px] text-muted-foreground tracking-wider">
-                {filteredMobileEntries.length} {filteredMobileEntries.length === 1 ? 'FLIGHT' : 'FLIGHTS'}
-                {mobileSearch && ` matching "${mobileSearch}"`}
-              </p>
-
-              {/* Cards */}
+              {/* Dense entry list */}
               {sortedMobileEntries.length === 0 ? (
-                <div className="bg-card border border-border rounded-lg p-8 text-center">
-                  <p className="font-mono text-sm text-muted-foreground">
-                    {entries.length === 0 ? 'No flights logged yet' : 'No results'}
-                  </p>
-                  <p className="font-mono text-[10px] text-muted-foreground mt-1">
-                    {entries.length === 0 ? 'Tap NEW or go to Upload' : 'Try a different search'}
-                  </p>
+                <div className="flex items-center justify-center h-40">
+                  <div className="text-center">
+                    <p className="font-mono text-xs text-muted-foreground">
+                      {entries.length === 0 ? 'No flights yet' : 'No results'}
+                    </p>
+                    <p className="font-mono text-[9px] text-muted-foreground/60 mt-0.5">
+                      {entries.length === 0 ? 'Tap NEW or go to Scan' : 'Try different search'}
+                    </p>
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-2 pb-4">
-                  {sortedMobileEntries.map(entry => (
-                    <MobileEntryCard
-                      key={entry.id}
-                      entry={entry}
-                      onEdit={handleEdit}
-                      onDelete={deleteEntry}
-                    />
-                  ))}
-                </div>
+                sortedMobileEntries.map(entry => (
+                  <MobileEntryCard
+                    key={entry.id}
+                    entry={entry}
+                    onEdit={handleEdit}
+                    onDelete={deleteEntry}
+                  />
+                ))
               )}
-            </div>
+            </>
           )}
 
           {mobileTab === 'summary' && (
-            <MobileSummaryPanel totals={totals} entryCount={entries.length} entries={entries} />
+            <div className="px-3 pt-2">
+              <MobileSummaryPanel totals={totals} entryCount={entries.length} entries={entries} />
+            </div>
           )}
 
           {mobileTab === 'upload' && (
-            <div className="pb-20">
+            <div className="px-3 pt-2 pb-14">
               <PhotoUpload onEntriesExtracted={(extracted) => addMultipleEntries(extracted)} />
             </div>
           )}
 
           {mobileTab === 'tools' && (
-            <MobileToolsPanel
-              isAdmin={isAdmin}
-              entries={entries}
-              pilotName={pilotName}
-              onOpenDutyCalc={() => setDutyCalcOpen(true)}
-              onOpenSummary={() => setSummaryOpen(true)}
-            />
+            <div className="px-3 pt-2">
+              <MobileToolsPanel
+                isAdmin={isAdmin}
+                entries={entries}
+                pilotName={pilotName}
+                onOpenDutyCalc={() => setDutyCalcOpen(true)}
+                onOpenSummary={() => setSummaryOpen(true)}
+              />
+            </div>
           )}
 
           {mobileTab === 'more' && (
-            <MobileMorePanel
-              isAdmin={isAdmin}
-              theme={theme}
-              toggleTheme={toggleTheme}
-              canInstall={canInstall}
-              install={install}
-              signOut={signOut}
-              onImport={addMultipleEntries}
-              templates={templates}
-              pilotName={pilotName}
-              pilotEmail={user?.email || ''}
-            />
+            <div className="px-3 pt-2">
+              <MobileMorePanel
+                isAdmin={isAdmin}
+                theme={theme}
+                toggleTheme={toggleTheme}
+                canInstall={canInstall}
+                install={install}
+                signOut={signOut}
+                onImport={addMultipleEntries}
+                templates={templates}
+                pilotName={pilotName}
+                pilotEmail={user?.email || ''}
+              />
+            </div>
           )}
         </div>
 
-        {/* Bottom nav */}
-        <MobileBottomNav activeTab={mobileTab} onTabChange={setMobileTab} entryCount={entries.length} />
+        {/* Bottom nav — 48px */}
+        <MobileBottomNav activeTab={mobileTab} onTabChange={setMobileTab} />
 
-        {/* Dialogs (shared) */}
+        {/* Shared dialogs */}
         <EntryFormDialog open={dialogOpen} onOpenChange={setDialogOpen} entry={editingEntry} onSave={handleSave} existingEntries={entries} />
         <Last12MonthSummary entries={entries} allEntries={entries} open={summaryOpen} onOpenChange={setSummaryOpen} />
         <FlightDutyCalculator open={dutyCalcOpen} onOpenChange={setDutyCalcOpen} entries={entries} />
@@ -233,7 +246,6 @@ const Index = () => {
                 </div>
               </div>
             </div>
-            {/* Desktop buttons */}
             <div className="flex gap-2">
               <Button variant="ghost" size="icon" onClick={toggleTheme} className="font-mono" title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
                 {theme === 'dark' ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
