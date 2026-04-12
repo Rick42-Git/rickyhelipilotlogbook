@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { FileText, Printer, RotateCcw } from 'lucide-react';
+import { Printer, RotateCcw } from 'lucide-react';
 import { Waypoint, calcDistanceNm, formatTime } from '@/types/flightPlan';
 import { toast } from '@/hooks/use-toast';
 
