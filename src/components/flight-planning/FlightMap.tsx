@@ -26,6 +26,7 @@ interface FlightMapProps {
   showAirspaces: boolean;
   showBoundaries: boolean;
   showTerminator: boolean;
+  showGps?: boolean;
 }
 
 export function FlightMap({
