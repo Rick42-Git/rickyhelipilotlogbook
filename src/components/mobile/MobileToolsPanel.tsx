@@ -19,7 +19,7 @@ export function MobileToolsPanel({ isAdmin, entries, pilotName, onOpenDutyCalc, 
     { label: 'F&D Calculator', icon: Clock, onClick: onOpenDutyCalc },
     { label: '12M Summary', icon: Clock, onClick: onOpenSummary, disabled: entries.length === 0 },
     { label: 'Mass & Balance', icon: Scale, onClick: () => navigate('/mass-balance') },
-    ...(isAdmin ? [{ label: 'Flight Planning', icon: Plane, onClick: () => navigate('/flight-planning') }] : []),
+    { label: 'Flight Planning', icon: Plane, onClick: () => navigate('/flight-planning') },
     { label: 'Frequencies', icon: Radio, onClick: () => navigate('/frequency-chart') },
   ];
 
