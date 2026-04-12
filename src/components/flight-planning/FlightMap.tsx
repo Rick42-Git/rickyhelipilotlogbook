@@ -433,7 +433,7 @@ export function FlightMap({
   }, []);
 
   // GPS location tracking
-  const gpsMarkerRef = useRef<L.CircleMarker | null>(null);
+  const gpsMarkerRef = useRef<L.Marker | null>(null);
   const gpsAccuracyRef = useRef<L.Circle | null>(null);
 
   useEffect(() => {
@@ -456,13 +456,25 @@ export function FlightMap({
         if (gpsMarkerRef.current) {
           gpsMarkerRef.current.setLatLng(latlng);
         } else {
-          gpsMarkerRef.current = L.circleMarker(latlng, {
-            radius: 7,
-            fillColor: '#4285F4',
-            fillOpacity: 1,
-            color: '#ffffff',
-            weight: 2,
-          }).addTo(map);
+          const heliIcon = L.divIcon({
+            className: 'gps-heli-icon',
+            html: `<div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 4px rgba(66,133,244,0.7));">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4285F4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3.3 11h2.4a.6.6 0 0 1 .6.6v3.8a.6.6 0 0 1-.6.6H3.3"/>
+                <path d="M18.3 11h2.4a.6.6 0 0 1 .6.6v3.8a.6.6 0 0 1-.6.6h-2.4"/>
+                <path d="M12 3v4"/>
+                <path d="M7 7h10"/>
+                <path d="M8 7v4h8V7"/>
+                <path d="M8 11v5a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-5"/>
+                <path d="M10 18v2"/>
+                <path d="M14 18v2"/>
+                <path d="M8 20h8"/>
+              </svg>
+            </div>`,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+          });
+          gpsMarkerRef.current = L.marker(latlng, { icon: heliIcon, interactive: false, zIndexOffset: 1000 }).addTo(map);
         }
 
         if (gpsAccuracyRef.current) {
