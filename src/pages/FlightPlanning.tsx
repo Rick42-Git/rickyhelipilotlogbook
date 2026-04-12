@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Save, FolderOpen, Printer, Navigation, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Ruler, Map, Plane, FileText, Layers, Save, FolderOpen, Printer, Navigation, ClipboardList, LocateFixed } from 'lucide-react';
 import { FlightMap, MapLayer } from '@/components/flight-planning/FlightMap';
 import { FlightPlanPanel } from '@/components/flight-planning/FlightPlanPanel';
 import { FlightLogTable } from '@/components/flight-planning/FlightLogTable';
@@ -63,6 +63,7 @@ const FlightPlanning = () => {
   const [showAirspaces, setShowAirspaces] = useState(false);
   const [showBoundaries, setShowBoundaries] = useState(true);
   const [showTerminator, setShowTerminator] = useState(false);
+  const [showGps, setShowGps] = useState(false);
 
   const handleMapClick = useCallback((lat: number, lng: number) => {
     setWaypoints(prev => [...prev, {
@@ -235,6 +236,10 @@ const FlightPlanning = () => {
                 <span className="text-[10px] text-muted-foreground">DAY/NIGHT</span>
                 <Switch checked={showTerminator} onCheckedChange={setShowTerminator} className="scale-[0.6]" />
               </div>
+              <div className="px-2 py-1.5 flex items-center justify-between gap-3">
+                <span className="text-[10px] text-muted-foreground">GPS POS</span>
+                <Switch checked={showGps} onCheckedChange={setShowGps} className="scale-[0.6]" />
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -298,6 +303,7 @@ const FlightPlanning = () => {
             showAirspaces={showAirspaces}
             showBoundaries={showBoundaries}
             showTerminator={showTerminator}
+            showGps={showGps}
           />
         </div>
 
