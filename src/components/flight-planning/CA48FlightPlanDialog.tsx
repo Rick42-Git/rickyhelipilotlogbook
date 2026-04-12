@@ -168,16 +168,16 @@ export function CA48FlightPlanDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-2">
-          <DialogTitle className="font-mono text-primary tracking-wider flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+      <DialogContent className="max-w-2xl max-w-[95vw] sm:max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        <DialogHeader className="px-3 sm:px-6 pt-4 sm:pt-6 pb-2">
+          <DialogTitle className="font-mono text-primary tracking-wider flex items-center gap-2 text-xs sm:text-sm">
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
             ICAO FLIGHT PLAN (File2Fly)
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-auto px-6 pb-2" style={{ maxHeight: 'calc(90vh - 140px)' }}>
-          <div className="space-y-4 pb-4">
+        <ScrollArea className="flex-1 overflow-auto px-3 sm:px-6 pb-2" style={{ maxHeight: 'calc(90vh - 140px)' }}>
+          <div className="space-y-3 sm:space-y-4 pb-4">
             {/* Priority / Addressees */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">PRIORITY & ADDRESSEES</h3>
