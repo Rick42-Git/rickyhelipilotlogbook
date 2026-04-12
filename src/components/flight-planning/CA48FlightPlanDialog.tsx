@@ -387,7 +387,7 @@ export function CA48FlightPlanDialog({
               {/* Emergency Radio */}
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">EMERGENCY RADIO</Label>
-                <div className="flex gap-4 mt-1">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                   {(['emergency_radio_uhf', 'UHF'] as const).length && (
                     <>
                       <label className="flex items-center gap-1.5 font-mono text-xs">
@@ -407,7 +407,7 @@ export function CA48FlightPlanDialog({
               {/* Survival Equipment */}
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">SURVIVAL EQUIPMENT</Label>
-                <div className="flex gap-4 mt-1">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                   <label className="flex items-center gap-1.5 font-mono text-xs">
                     <Checkbox checked={form.survival_polar} onCheckedChange={v => update('survival_polar', !!v)} /> Polar
                   </label>
@@ -426,7 +426,7 @@ export function CA48FlightPlanDialog({
               {/* Jackets */}
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">JACKETS</Label>
-                <div className="flex gap-4 mt-1">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                   <label className="flex items-center gap-1.5 font-mono text-xs">
                     <Checkbox checked={form.jackets} onCheckedChange={v => update('jackets', !!v)} /> Jackets
                   </label>
