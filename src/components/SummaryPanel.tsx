@@ -19,7 +19,7 @@ function getTypeTotals(entries: LogbookEntry[]) {
   return Object.entries(map).sort((a, b) => b[1].hours - a[1].hours);
 }
 
-const PISTON_TYPES = new Set(['RH-22', 'RH-44', 'H269', 'FNTP II', 'FSTD I', 'FSTD II']);
+const PISTON_TYPES = new Set(['RH-22', 'RH-44', 'H269', 'C172', 'TC06', 'FNTP II', 'FSTD I', 'FSTD II']);
 
 function getTurbineTotals(entries: LogbookEntry[]) {
   let hours = 0;
