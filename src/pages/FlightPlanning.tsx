@@ -63,6 +63,7 @@ const FlightPlanning = () => {
   const [showAirspaces, setShowAirspaces] = useState(false);
   const [showBoundaries, setShowBoundaries] = useState(true);
   const [showTerminator, setShowTerminator] = useState(false);
+  const [showGps, setShowGps] = useState(false);
 
   const handleMapClick = useCallback((lat: number, lng: number) => {
     setWaypoints(prev => [...prev, {
