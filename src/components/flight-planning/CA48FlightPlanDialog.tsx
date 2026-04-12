@@ -181,7 +181,7 @@ export function CA48FlightPlanDialog({
             {/* Priority / Addressees */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">PRIORITY & ADDRESSEES</h3>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">PRIORITY</Label>
                   <Input value={form.priority} onChange={e => update('priority', e.target.value.toUpperCase())}
@@ -212,7 +212,7 @@ export function CA48FlightPlanDialog({
             {/* Items 7 & 8 */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 7-8 — AIRCRAFT & FLIGHT RULES</h3>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">7 — AIRCRAFT ID</Label>
                   <Input value={form.aircraft_id} onChange={e => update('aircraft_id', e.target.value.toUpperCase())}
@@ -251,7 +251,7 @@ export function CA48FlightPlanDialog({
             {/* Item 9 & 10 */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 9-10 — AIRCRAFT TYPE & EQUIPMENT</h3>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">NUMBER</Label>
                   <Input value={form.number} onChange={e => update('number', e.target.value)}
@@ -306,7 +306,7 @@ export function CA48FlightPlanDialog({
             {/* Item 15 */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 15 — CRUISING SPEED, LEVEL & ROUTE</h3>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">CRUISING SPEED</Label>
                   <Input value={form.speed} onChange={e => update('speed', e.target.value.toUpperCase())}
@@ -331,7 +331,7 @@ export function CA48FlightPlanDialog({
             {/* Item 16 */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 16 — DESTINATION & ALTERNATES</h3>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">DESTINATION</Label>
                   <Input value={form.dest_aero} onChange={e => update('dest_aero', e.target.value.toUpperCase())}
@@ -371,7 +371,7 @@ export function CA48FlightPlanDialog({
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 19 — SUPPLEMENTARY INFORMATION</h3>
               <p className="font-mono text-[9px] text-muted-foreground/60">Not transmitted in FPL messages</p>
               
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">ENDURANCE (HHMM)</Label>
                   <Input value={form.endurance} onChange={e => update('endurance', e.target.value)}
@@ -448,7 +448,7 @@ export function CA48FlightPlanDialog({
               {/* Dinghies */}
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">DINGHIES</Label>
-                <div className="grid grid-cols-4 gap-2 mt-1">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
                   <div>
                     <Label className="font-mono text-[9px] text-muted-foreground/70">NUMBER</Label>
                     <Input value={form.dinghies_number} onChange={e => update('dinghies_number', e.target.value)}
