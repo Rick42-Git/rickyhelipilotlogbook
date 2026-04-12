@@ -78,6 +78,19 @@ const Index = () => {
   const pilotName = activatedUser?.displayName?.toUpperCase() || user?.email?.split('@')[0]?.toUpperCase() || 'UNKNOWN';
   const grandTotal = useMemo(() => totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot, [totals]);
 
+  const aviatorTime = useMemo(() => {
+    if (entries.length === 0) return null;
+    const dates = entries.map(e => e.date).filter(Boolean).sort();
+    if (dates.length === 0) return null;
+    const first = new Date(dates[0]);
+    const now = new Date();
+    const diffMs = now.getTime() - first.getTime();
+    const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const years = Math.floor(totalDays / 365.25);
+    const remainingDays = Math.floor(totalDays - years * 365.25);
+    return { years, days: remainingDays };
+  }, [entries]);
+
   const filteredMobileEntries = useMemo(() => {
     if (!mobileSearch.trim()) return entries;
     const q = mobileSearch.toLowerCase();
@@ -150,7 +163,13 @@ const Index = () => {
                   <span className="font-mono text-[10px] font-bold text-primary tracking-wide">{pilotName}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {aviatorTime && (
+                  <div className="flex items-center gap-1 bg-primary/5 border border-primary/20 rounded px-2 py-0.5">
+                    <span className="font-mono text-[8px] text-primary/60">AVT</span>
+                    <span className="font-mono text-[10px] font-bold text-primary leading-none">{aviatorTime.years}y {aviatorTime.days}d</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1 bg-success/5 border border-success/20 rounded px-2 py-0.5">
                   <span className="font-mono text-[8px] text-success/60">TTL</span>
                   <span className="font-mono text-sm font-bold text-success leading-none">{grandTotal.toFixed(1)}</span>
