@@ -159,7 +159,7 @@ export function CA48FlightPlanDialog({
       win.document.close();
       setTimeout(() => win.print(), 500);
     }
-    toast({ title: 'CA48 Flight Plan', description: 'Print dialog opened. Save as PDF or print.' });
+    toast({ title: 'File2Fly Flight Plan', description: 'Print dialog opened. Save as PDF or print.' });
   };
 
   const handleReset = () => {
@@ -172,7 +172,7 @@ export function CA48FlightPlanDialog({
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle className="font-mono text-primary tracking-wider flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            ICAO FLIGHT PLAN (CA48)
+            ICAO FLIGHT PLAN (File2Fly)
           </DialogTitle>
         </DialogHeader>
 
