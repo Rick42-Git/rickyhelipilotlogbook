@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { LogbookEntry, numericFieldLabels, NumericField } from '@/types/logbook';
+import { LogbookEntry, NumericField } from '@/types/logbook';
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 
 interface MobileSummaryPanelProps {
@@ -54,80 +54,79 @@ export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummar
   const gameTotals = useMemo(() => getGameTotals(entries), [entries]);
 
   return (
-    <div className="space-y-3 pb-20">
-      {/* Hero total */}
-      <div className="bg-card border border-success/20 rounded-xl p-5 text-center">
-        <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.3em] mb-2">Total Flight Hours</p>
-        <span className="font-mono text-5xl font-bold text-success tracking-wider drop-shadow-[0_0_15px_hsl(142_70%_45%/0.4)]" style={{ fontVariantNumeric: 'tabular-nums' }}>
-          {grandTotal.toFixed(1)}
-        </span>
-        <p className="font-mono text-xs text-muted-foreground mt-2">{entryCount} flights logged</p>
+    <div className="flex flex-col gap-2 overflow-y-auto pb-14">
+      {/* Hero total — compact */}
+      <div className="bg-card border border-success/20 rounded-lg px-3 py-2 flex items-center justify-between">
+        <div>
+          <p className="font-mono text-[8px] text-muted-foreground uppercase tracking-widest">Total Hours</p>
+          <span className="font-mono text-2xl font-bold text-success leading-none">{grandTotal.toFixed(1)}</span>
+        </div>
+        <span className="font-mono text-[10px] text-muted-foreground">{entryCount} flights</span>
       </div>
 
-      {/* Quick stats */}
-      <div className="grid grid-cols-3 gap-2">
+      {/* Quick stats row */}
+      <div className="grid grid-cols-3 gap-1.5">
         {[
           { label: 'Day', value: totalDay, color: 'text-primary' },
           { label: 'Night', value: totalNight, color: 'text-destructive' },
-          { label: 'Instruction', value: totalInstruction, color: 'text-accent' },
+          { label: 'Instr', value: totalInstruction, color: 'text-accent' },
         ].map(s => (
-          <div key={s.label} className="bg-card border border-border rounded-lg p-3 text-center">
-            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider mb-1">{s.label}</p>
-            <span className={`font-mono text-lg font-bold ${s.color}`}>{s.value.toFixed(1)}</span>
+          <div key={s.label} className="bg-card border border-border rounded px-2 py-1.5 text-center">
+            <p className="font-mono text-[7px] text-muted-foreground uppercase tracking-wider">{s.label}</p>
+            <span className={`font-mono text-sm font-bold ${s.color} leading-none`}>{s.value.toFixed(1)}</span>
           </div>
         ))}
       </div>
 
-      {/* Category breakdown */}
-      <div className="bg-card border border-border rounded-lg p-4 space-y-3">
-        <h3 className="font-mono text-[10px] text-primary uppercase tracking-widest">Hour Breakdown</h3>
-        {[
-          { label: 'SE Day Dual', value: totals.seDayDual },
-          { label: 'SE Day PIC', value: totals.seDayPilot },
-          { label: 'SE Night Dual', value: totals.seNightDual },
-          { label: 'SE Night PIC', value: totals.seNightPilot },
-          { label: 'Instrument', value: totals.instrumentTime },
-          { label: 'Instructor Day', value: totals.instructorDay },
-          { label: 'Instructor Night', value: totals.instructorNight },
-        ].map(row => (
-          <div key={row.label} className="flex items-center justify-between">
-            <span className="font-mono text-xs text-muted-foreground">{row.label}</span>
-            <span className="font-mono text-sm font-semibold text-foreground">{row.value.toFixed(1)}</span>
-          </div>
-        ))}
+      {/* Breakdown */}
+      <div className="bg-card border border-border rounded-lg px-3 py-2">
+        <h3 className="font-mono text-[8px] text-primary uppercase tracking-widest mb-1.5">Breakdown</h3>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+          {[
+            { label: 'SE Day Dual', value: totals.seDayDual },
+            { label: 'SE Day PIC', value: totals.seDayPilot },
+            { label: 'SE Night Dual', value: totals.seNightDual },
+            { label: 'SE Night PIC', value: totals.seNightPilot },
+            { label: 'Instrument', value: totals.instrumentTime },
+            { label: 'Inst Day', value: totals.instructorDay },
+            { label: 'Inst Night', value: totals.instructorNight },
+          ].map(row => (
+            <div key={row.label} className="flex items-center justify-between">
+              <span className="font-mono text-[9px] text-muted-foreground">{row.label}</span>
+              <span className="font-mono text-[10px] font-semibold text-foreground">{row.value.toFixed(1)}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Aircraft types */}
       {typeTotals.length > 0 && (
-        <div className="bg-card border border-border rounded-lg p-4 space-y-2">
-          <h3 className="font-mono text-[10px] text-accent uppercase tracking-widest">By Aircraft Type</h3>
-          {typeTotals.map(([type, data]) => (
-            <div key={type} className="flex items-center justify-between">
-              <span className="font-mono text-xs text-muted-foreground">{type}</span>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-semibold text-foreground">{data.hours.toFixed(1)}</span>
-                <span className="font-mono text-[9px] text-muted-foreground">({data.flights})</span>
+        <div className="bg-card border border-border rounded-lg px-3 py-2">
+          <h3 className="font-mono text-[8px] text-accent uppercase tracking-widest mb-1.5">By Type</h3>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+            {typeTotals.map(([type, data]) => (
+              <div key={type} className="flex items-center justify-between">
+                <span className="font-mono text-[9px] text-muted-foreground truncate mr-1">{type}</span>
+                <span className="font-mono text-[10px] font-semibold text-foreground shrink-0">{data.hours.toFixed(1)}</span>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Turbine & Game */}
+      {/* Turbine & Game in one row */}
       {(turbineTotals.flights > 0 || gameTotals.flights > 0) && (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-1.5">
           {turbineTotals.flights > 0 && (
-            <div className="bg-card border border-accent/20 rounded-lg p-3 text-center">
-              <p className="font-mono text-[9px] text-accent uppercase tracking-wider mb-1">Turbine</p>
-              <span className="font-mono text-lg font-bold text-foreground">{turbineTotals.hours.toFixed(1)}</span>
-              <p className="font-mono text-[9px] text-muted-foreground">{turbineTotals.flights} flights</p>
+            <div className="bg-card border border-accent/20 rounded px-2 py-1.5 flex items-center justify-between">
+              <span className="font-mono text-[8px] text-accent uppercase">Turbine</span>
+              <span className="font-mono text-xs font-bold text-foreground">{turbineTotals.hours.toFixed(1)}</span>
             </div>
           )}
           {gameTotals.flights > 0 && (
-            <div className="bg-card border border-accent/20 rounded-lg p-3 text-center">
-              <p className="font-mono text-[9px] text-accent uppercase tracking-wider mb-1">Game</p>
-              <span className="font-mono text-lg font-bold text-foreground">{gameTotals.hours.toFixed(1)}</span>
-              <p className="font-mono text-[9px] text-muted-foreground">{gameTotals.flights} flights</p>
+            <div className="bg-card border border-accent/20 rounded px-2 py-1.5 flex items-center justify-between">
+              <span className="font-mono text-[8px] text-accent uppercase">Game</span>
+              <span className="font-mono text-xs font-bold text-foreground">{gameTotals.hours.toFixed(1)}</span>
             </div>
           )}
         </div>

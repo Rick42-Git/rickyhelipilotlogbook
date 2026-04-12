@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Shield, MonitorSmartphone, Sun, Moon, Upload, ChevronRight } from 'lucide-react';
+import { LogOut, Shield, MonitorSmartphone, Sun, Moon } from 'lucide-react';
 import { SpreadsheetImport } from '@/components/SpreadsheetImport';
 import { LogbookEntry } from '@/types/logbook';
 
@@ -22,67 +22,57 @@ export function MobileMorePanel({
   const navigate = useNavigate();
 
   return (
-    <div className="space-y-4 pb-20">
-      {/* Profile */}
-      <div className="bg-card border border-border rounded-lg p-4">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-            <span className="font-mono text-lg font-bold text-primary">{pilotName.charAt(0)}</span>
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="font-mono text-sm font-bold text-foreground truncate">{pilotName}</p>
-            <p className="font-mono text-[10px] text-muted-foreground truncate">{pilotEmail}</p>
-          </div>
+    <div className="flex flex-col gap-1.5 overflow-y-auto pb-14">
+      {/* Profile row */}
+      <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+        <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+          <span className="font-mono text-sm font-bold text-primary">{pilotName.charAt(0)}</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-mono text-xs font-bold text-foreground truncate">{pilotName}</p>
+          <p className="font-mono text-[9px] text-muted-foreground truncate">{pilotEmail}</p>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="space-y-1">
+      {/* Action rows */}
+      <button
+        onClick={toggleTheme}
+        className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2.5 active:scale-[0.98] transition-transform"
+      >
+        {theme === 'dark' ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
+        <span className="font-mono text-xs text-foreground">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+      </button>
+
+      {canInstall && (
         <button
-          onClick={toggleTheme}
-          className="w-full flex items-center gap-3 bg-card border border-border rounded-lg p-4 active:scale-[0.98] transition-transform"
+          onClick={install}
+          className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2.5 active:scale-[0.98] transition-transform"
         >
-          {theme === 'dark' ? <Sun className="h-5 w-5 text-primary" /> : <Moon className="h-5 w-5 text-primary" />}
-          <span className="font-mono text-sm text-foreground flex-1 text-left">
-            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-          </span>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          <MonitorSmartphone className="h-4 w-4 text-primary" />
+          <span className="font-mono text-xs text-foreground">Install App</span>
         </button>
+      )}
 
-        {canInstall && (
-          <button
-            onClick={install}
-            className="w-full flex items-center gap-3 bg-card border border-border rounded-lg p-4 active:scale-[0.98] transition-transform"
-          >
-            <MonitorSmartphone className="h-5 w-5 text-primary" />
-            <span className="font-mono text-sm text-foreground flex-1 text-left">Install App</span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
-        )}
-
-        <div className="bg-card border border-border rounded-lg overflow-hidden">
-          <SpreadsheetImport onEntriesImported={onImport} templates={templates} />
-        </div>
-
-        {isAdmin && (
-          <button
-            onClick={() => navigate('/admin')}
-            className="w-full flex items-center gap-3 bg-card border border-border rounded-lg p-4 active:scale-[0.98] transition-transform"
-          >
-            <Shield className="h-5 w-5 text-accent" />
-            <span className="font-mono text-sm text-accent flex-1 text-left">Admin Panel</span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
-        )}
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <SpreadsheetImport onEntriesImported={onImport} templates={templates} />
       </div>
 
-      {/* Sign out */}
+      {isAdmin && (
+        <button
+          onClick={() => navigate('/admin')}
+          className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2.5 active:scale-[0.98] transition-transform"
+        >
+          <Shield className="h-4 w-4 text-accent" />
+          <span className="font-mono text-xs text-accent">Admin Panel</span>
+        </button>
+      )}
+
       <button
         onClick={signOut}
-        className="w-full flex items-center gap-3 bg-destructive/10 border border-destructive/20 rounded-lg p-4 active:scale-[0.98] transition-transform"
+        className="flex items-center gap-2 bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2.5 active:scale-[0.98] transition-transform mt-1"
       >
-        <LogOut className="h-5 w-5 text-destructive" />
-        <span className="font-mono text-sm text-destructive flex-1 text-left">Sign Out</span>
+        <LogOut className="h-4 w-4 text-destructive" />
+        <span className="font-mono text-xs text-destructive">Sign Out</span>
       </button>
     </div>
   );
