@@ -527,7 +527,7 @@ export function CA48FlightPlanDialog({
           </div>
         </ScrollArea>
 
-        <div className="flex items-center justify-between px-6 py-4 border-t border-muted/30">
+        <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-t border-muted/30">
           <Button variant="ghost" size="sm" onClick={handleReset} className="font-mono text-xs gap-1">
             <RotateCcw className="h-3 w-3" />RESET
           </Button>
