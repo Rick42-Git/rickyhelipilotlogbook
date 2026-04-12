@@ -163,7 +163,13 @@ const Index = () => {
                   <span className="font-mono text-[10px] font-bold text-primary tracking-wide">{pilotName}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {aviatorTime && (
+                  <div className="flex items-center gap-1 bg-primary/5 border border-primary/20 rounded px-2 py-0.5">
+                    <span className="font-mono text-[8px] text-primary/60">AVT</span>
+                    <span className="font-mono text-[10px] font-bold text-primary leading-none">{aviatorTime.years}y {aviatorTime.days}d</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1 bg-success/5 border border-success/20 rounded px-2 py-0.5">
                   <span className="font-mono text-[8px] text-success/60">TTL</span>
                   <span className="font-mono text-sm font-bold text-success leading-none">{grandTotal.toFixed(1)}</span>
