@@ -46,7 +46,7 @@ function getGameTotals(entries: LogbookEntry[]) {
   return { hours, flights };
 }
 
-const CROSS_COUNTRY_PATTERNS = [' to ', '->', 'nav', 'transnet', 'pipeline'];
+const CROSS_COUNTRY_PATTERNS = [' to ', '->', '→', '-', 'nav', 'transnet', 'pipeline'];
 
 function getCrossCountryTotals(entries: LogbookEntry[]) {
   let hours = 0;
