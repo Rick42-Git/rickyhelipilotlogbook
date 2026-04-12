@@ -168,20 +168,20 @@ export function CA48FlightPlanDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-2">
-          <DialogTitle className="font-mono text-primary tracking-wider flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+      <DialogContent className="max-w-2xl max-w-[95vw] sm:max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        <DialogHeader className="px-3 sm:px-6 pt-4 sm:pt-6 pb-2">
+          <DialogTitle className="font-mono text-primary tracking-wider flex items-center gap-2 text-xs sm:text-sm">
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
             ICAO FLIGHT PLAN (File2Fly)
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-auto px-6 pb-2" style={{ maxHeight: 'calc(90vh - 140px)' }}>
-          <div className="space-y-4 pb-4">
+        <ScrollArea className="flex-1 overflow-auto px-3 sm:px-6 pb-2" style={{ maxHeight: 'calc(90vh - 140px)' }}>
+          <div className="space-y-3 sm:space-y-4 pb-4">
             {/* Priority / Addressees */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">PRIORITY & ADDRESSEES</h3>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">PRIORITY</Label>
                   <Input value={form.priority} onChange={e => update('priority', e.target.value.toUpperCase())}
@@ -212,7 +212,7 @@ export function CA48FlightPlanDialog({
             {/* Items 7 & 8 */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 7-8 — AIRCRAFT & FLIGHT RULES</h3>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">7 — AIRCRAFT ID</Label>
                   <Input value={form.aircraft_id} onChange={e => update('aircraft_id', e.target.value.toUpperCase())}
@@ -251,7 +251,7 @@ export function CA48FlightPlanDialog({
             {/* Item 9 & 10 */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 9-10 — AIRCRAFT TYPE & EQUIPMENT</h3>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">NUMBER</Label>
                   <Input value={form.number} onChange={e => update('number', e.target.value)}
@@ -306,7 +306,7 @@ export function CA48FlightPlanDialog({
             {/* Item 15 */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 15 — CRUISING SPEED, LEVEL & ROUTE</h3>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">CRUISING SPEED</Label>
                   <Input value={form.speed} onChange={e => update('speed', e.target.value.toUpperCase())}
@@ -331,7 +331,7 @@ export function CA48FlightPlanDialog({
             {/* Item 16 */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 16 — DESTINATION & ALTERNATES</h3>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">DESTINATION</Label>
                   <Input value={form.dest_aero} onChange={e => update('dest_aero', e.target.value.toUpperCase())}
@@ -371,7 +371,7 @@ export function CA48FlightPlanDialog({
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 19 — SUPPLEMENTARY INFORMATION</h3>
               <p className="font-mono text-[9px] text-muted-foreground/60">Not transmitted in FPL messages</p>
               
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">ENDURANCE (HHMM)</Label>
                   <Input value={form.endurance} onChange={e => update('endurance', e.target.value)}
@@ -387,7 +387,7 @@ export function CA48FlightPlanDialog({
               {/* Emergency Radio */}
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">EMERGENCY RADIO</Label>
-                <div className="flex gap-4 mt-1">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                   {(['emergency_radio_uhf', 'UHF'] as const).length && (
                     <>
                       <label className="flex items-center gap-1.5 font-mono text-xs">
@@ -407,7 +407,7 @@ export function CA48FlightPlanDialog({
               {/* Survival Equipment */}
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">SURVIVAL EQUIPMENT</Label>
-                <div className="flex gap-4 mt-1">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                   <label className="flex items-center gap-1.5 font-mono text-xs">
                     <Checkbox checked={form.survival_polar} onCheckedChange={v => update('survival_polar', !!v)} /> Polar
                   </label>
@@ -426,7 +426,7 @@ export function CA48FlightPlanDialog({
               {/* Jackets */}
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">JACKETS</Label>
-                <div className="flex gap-4 mt-1">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                   <label className="flex items-center gap-1.5 font-mono text-xs">
                     <Checkbox checked={form.jackets} onCheckedChange={v => update('jackets', !!v)} /> Jackets
                   </label>
@@ -448,7 +448,7 @@ export function CA48FlightPlanDialog({
               {/* Dinghies */}
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">DINGHIES</Label>
-                <div className="grid grid-cols-4 gap-2 mt-1">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
                   <div>
                     <Label className="font-mono text-[9px] text-muted-foreground/70">NUMBER</Label>
                     <Input value={form.dinghies_number} onChange={e => update('dinghies_number', e.target.value)}
@@ -527,7 +527,7 @@ export function CA48FlightPlanDialog({
           </div>
         </ScrollArea>
 
-        <div className="flex items-center justify-between px-6 py-4 border-t border-muted/30">
+        <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-t border-muted/30">
           <Button variant="ghost" size="sm" onClick={handleReset} className="font-mono text-xs gap-1">
             <RotateCcw className="h-3 w-3" />RESET
           </Button>
