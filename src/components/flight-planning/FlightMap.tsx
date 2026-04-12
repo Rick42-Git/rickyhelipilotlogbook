@@ -432,7 +432,65 @@ export function FlightMap({
     return () => clearTimeout(timer);
   }, []);
 
-  return (
+  // GPS location tracking
+  const gpsMarkerRef = useRef<L.CircleMarker | null>(null);
+  const gpsAccuracyRef = useRef<L.Circle | null>(null);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (!showGps) {
+      if (gpsMarkerRef.current) { map.removeLayer(gpsMarkerRef.current); gpsMarkerRef.current = null; }
+      if (gpsAccuracyRef.current) { map.removeLayer(gpsAccuracyRef.current); gpsAccuracyRef.current = null; }
+      return;
+    }
+
+    if (!navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        const latlng = L.latLng(latitude, longitude);
+
+        if (gpsMarkerRef.current) {
+          gpsMarkerRef.current.setLatLng(latlng);
+        } else {
+          gpsMarkerRef.current = L.circleMarker(latlng, {
+            radius: 7,
+            fillColor: '#4285F4',
+            fillOpacity: 1,
+            color: '#ffffff',
+            weight: 2,
+          }).addTo(map);
+        }
+
+        if (gpsAccuracyRef.current) {
+          gpsAccuracyRef.current.setLatLng(latlng);
+          gpsAccuracyRef.current.setRadius(accuracy);
+        } else {
+          gpsAccuracyRef.current = L.circle(latlng, {
+            radius: accuracy,
+            fillColor: '#4285F4',
+            fillOpacity: 0.1,
+            color: '#4285F4',
+            weight: 1,
+            opacity: 0.3,
+          }).addTo(map);
+        }
+      },
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 5000 }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+      if (gpsMarkerRef.current) { map.removeLayer(gpsMarkerRef.current); gpsMarkerRef.current = null; }
+      if (gpsAccuracyRef.current) { map.removeLayer(gpsAccuracyRef.current); gpsAccuracyRef.current = null; }
+    };
+  }, [showGps]);
+
+
     <div className="w-full h-full rounded-md overflow-hidden border border-muted relative" style={{ zIndex: 0 }}>
       <div ref={containerRef} style={{ width: '100%', height: '100%', background: 'hsl(220, 20%, 10%)' }} />
     </div>
