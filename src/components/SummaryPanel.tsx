@@ -46,6 +46,21 @@ function getGameTotals(entries: LogbookEntry[]) {
   return { hours, flights };
 }
 
+const CROSS_COUNTRY_PATTERNS = [' to ', '->', 'nav', 'transnet', 'pipeline'];
+
+function getCrossCountryTotals(entries: LogbookEntry[]) {
+  let hours = 0;
+  let flights = 0;
+  for (const e of entries) {
+    const details = (e.flightDetails || '').toLowerCase();
+    if (CROSS_COUNTRY_PATTERNS.some(p => details.includes(p))) {
+      flights += 1;
+      hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
+    }
+  }
+  return { hours, flights };
+}
+
 export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps) {
   const groups = useMemo(() => [
     { title: 'Single Engine — Day', fields: ['seDayDual', 'seDayPilot'] as NumericField[] },
@@ -61,6 +76,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
   const typeTotals = useMemo(() => getTypeTotals(entries), [entries]);
   const turbineTotals = useMemo(() => getTurbineTotals(entries), [entries]);
   const gameTotals = useMemo(() => getGameTotals(entries), [entries]);
+  const crossCountryTotals = useMemo(() => getCrossCountryTotals(entries), [entries]);
 
   return (
     <div className="glass-panel p-5 glow-amber">
@@ -113,6 +129,16 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
           <div className="flex items-center gap-3">
             <span className="font-mono text-xs font-semibold text-foreground">{gameTotals.hours.toFixed(1)} <span className="text-muted-foreground font-normal text-[9px]">HRS</span></span>
             <span className="font-mono text-[10px] text-muted-foreground">({gameTotals.flights} flights)</span>
+          </div>
+        </div>
+      )}
+
+      {crossCountryTotals.flights > 0 && (
+        <div className="mb-4 flex items-center justify-between rounded border border-primary/20 bg-primary/5 px-4 py-2">
+          <p className="font-mono text-[9px] text-primary uppercase tracking-widest">Cross Country</p>
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-xs font-semibold text-foreground">{crossCountryTotals.hours.toFixed(1)} <span className="text-muted-foreground font-normal text-[9px]">HRS</span></span>
+            <span className="font-mono text-[10px] text-muted-foreground">({crossCountryTotals.flights} flights)</span>
           </div>
         </div>
       )}

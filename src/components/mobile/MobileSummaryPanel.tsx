@@ -44,6 +44,20 @@ function getGameTotals(entries: LogbookEntry[]) {
   return { hours, flights };
 }
 
+const CROSS_COUNTRY_PATTERNS = [' to ', '->', 'nav', 'transnet', 'pipeline'];
+
+function getCrossCountryTotals(entries: LogbookEntry[]) {
+  let hours = 0, flights = 0;
+  for (const e of entries) {
+    const details = (e.flightDetails || '').toLowerCase();
+    if (CROSS_COUNTRY_PATTERNS.some(p => details.includes(p))) {
+      flights += 1;
+      hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
+    }
+  }
+  return { hours, flights };
+}
+
 export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummaryPanelProps) {
   const grandTotal = totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot;
   const totalDay = totals.seDayDual + totals.seDayPilot;
@@ -52,6 +66,7 @@ export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummar
   const typeTotals = useMemo(() => getTypeTotals(entries), [entries]);
   const turbineTotals = useMemo(() => getTurbineTotals(entries), [entries]);
   const gameTotals = useMemo(() => getGameTotals(entries), [entries]);
+  const crossCountryTotals = useMemo(() => getCrossCountryTotals(entries), [entries]);
 
   return (
     <div className="flex flex-col gap-2 overflow-y-auto pb-14">
@@ -115,8 +130,8 @@ export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummar
       )}
 
       {/* Turbine & Game in one row */}
-      {(turbineTotals.flights > 0 || gameTotals.flights > 0) && (
-        <div className="grid grid-cols-2 gap-1.5">
+      {(turbineTotals.flights > 0 || gameTotals.flights > 0 || crossCountryTotals.flights > 0) && (
+        <div className="grid grid-cols-3 gap-1.5">
           {turbineTotals.flights > 0 && (
             <div className="bg-card border border-accent/20 rounded px-2 py-1.5 flex items-center justify-between">
               <span className="font-mono text-[8px] text-accent uppercase">Turbine</span>
@@ -127,6 +142,12 @@ export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummar
             <div className="bg-card border border-accent/20 rounded px-2 py-1.5 flex items-center justify-between">
               <span className="font-mono text-[8px] text-accent uppercase">Game</span>
               <span className="font-mono text-xs font-bold text-foreground">{gameTotals.hours.toFixed(1)}</span>
+            </div>
+          )}
+          {crossCountryTotals.flights > 0 && (
+            <div className="bg-card border border-primary/20 rounded px-2 py-1.5 flex items-center justify-between">
+              <span className="font-mono text-[8px] text-primary uppercase">X-Country</span>
+              <span className="font-mono text-xs font-bold text-foreground">{crossCountryTotals.hours.toFixed(1)}</span>
             </div>
           )}
         </div>
