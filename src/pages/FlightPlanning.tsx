@@ -236,6 +236,10 @@ const FlightPlanning = () => {
                 <span className="text-[10px] text-muted-foreground">DAY/NIGHT</span>
                 <Switch checked={showTerminator} onCheckedChange={setShowTerminator} className="scale-[0.6]" />
               </div>
+              <div className="px-2 py-1.5 flex items-center justify-between gap-3">
+                <span className="text-[10px] text-muted-foreground">GPS POS</span>
+                <Switch checked={showGps} onCheckedChange={setShowGps} className="scale-[0.6]" />
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
 
