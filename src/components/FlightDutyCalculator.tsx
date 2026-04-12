@@ -247,16 +247,16 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader className="flex-row items-center justify-between gap-4">
-          <DialogTitle className="font-mono text-primary tracking-wider">
-            ▸ FLIGHT & DUTY CALCULATOR (SACAA)
+      <DialogContent className={`max-h-[90vh] overflow-y-auto ${isMobile ? 'max-w-[95vw] p-3' : 'max-w-5xl'}`}>
+        <DialogHeader className="flex-row items-center justify-between gap-2">
+          <DialogTitle className={`font-mono text-primary tracking-wider ${isMobile ? 'text-xs' : ''}`}>
+            ▸ F&D CALCULATOR{!isMobile && ' (SACAA)'}
           </DialogTitle>
           {monthData.length > 0 && (
             <Button
               variant="outline"
               size="sm"
-              className="font-mono text-xs gap-1.5"
+              className="font-mono text-xs gap-1.5 shrink-0"
               onClick={() => exportDutyCalcPDF({
                 month: monthOptions.find(o => o.value === selectedMonth)?.label || selectedMonth,
                 flyingDays,
@@ -286,17 +286,17 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                 })),
               })}
             >
-              <FileDown className="h-3.5 w-3.5" /> Export PDF
+              <FileDown className="h-3.5 w-3.5" />{!isMobile && ' Export'} PDF
             </Button>
           )}
         </DialogHeader>
 
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-3">
           <label className="font-mono text-xs text-muted-foreground">MONTH:</label>
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="font-mono text-xs bg-background border border-input rounded px-2 py-1.5 text-foreground"
+            className="font-mono text-xs bg-background border border-input rounded px-2 py-1.5 text-foreground flex-1"
           >
             {monthOptions.map(o => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -305,26 +305,26 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
         </div>
 
         {/* Monthly summary cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-          <div className="border border-border rounded p-3">
-            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">Flying Days</p>
-            <p className="font-mono text-lg font-bold text-foreground">{flyingDays}</p>
+        <div className={`grid gap-2 mb-3 ${isMobile ? 'grid-cols-3' : 'grid-cols-5 gap-3 mb-4'}`}>
+          <div className="border border-border rounded p-2">
+            <p className="font-mono text-[8px] text-muted-foreground uppercase tracking-wider">Days</p>
+            <p className="font-mono text-sm font-bold text-foreground">{flyingDays}</p>
           </div>
-          <div className="border border-border rounded p-3">
-            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">Total Flights</p>
-            <p className="font-mono text-lg font-bold text-foreground">{totalFlights}</p>
+          <div className="border border-border rounded p-2">
+            <p className="font-mono text-[8px] text-muted-foreground uppercase tracking-wider">Flights</p>
+            <p className="font-mono text-sm font-bold text-foreground">{totalFlights}</p>
           </div>
-          <div className="border border-border rounded p-3">
-            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Plane className="h-3 w-3" /> Flight Hours</p>
-            <p className="font-mono text-lg font-bold text-primary">{totalFlightHours.toFixed(1)} h</p>
+          <div className="border border-border rounded p-2">
+            <p className="font-mono text-[8px] text-muted-foreground uppercase tracking-wider flex items-center gap-0.5"><Plane className="h-2.5 w-2.5" /> Flt Hrs</p>
+            <p className="font-mono text-sm font-bold text-primary">{totalFlightHours.toFixed(1)}</p>
           </div>
-          <div className="border border-border rounded p-3">
-            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3" /> Duty Hours</p>
-            <p className="font-mono text-lg font-bold text-foreground">{totalDutyHours.toFixed(1)} h</p>
+          <div className="border border-border rounded p-2">
+            <p className="font-mono text-[8px] text-muted-foreground uppercase tracking-wider flex items-center gap-0.5"><Clock className="h-2.5 w-2.5" /> Duty</p>
+            <p className="font-mono text-sm font-bold text-foreground">{totalDutyHours.toFixed(1)}</p>
           </div>
-          <div className="border border-border rounded p-3">
-            <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Moon className="h-3 w-3" /> Max Consec Days</p>
-            <p className={`font-mono text-lg font-bold ${maxConsecutive >= 7 ? 'text-destructive' : 'text-foreground'}`}>{maxConsecutive}</p>
+          <div className="border border-border rounded p-2">
+            <p className="font-mono text-[8px] text-muted-foreground uppercase tracking-wider flex items-center gap-0.5"><Moon className="h-2.5 w-2.5" /> Consec</p>
+            <p className={`font-mono text-sm font-bold ${maxConsecutive >= 7 ? 'text-destructive' : 'text-foreground'}`}>{maxConsecutive}</p>
           </div>
         </div>
 
@@ -332,7 +332,116 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
           <div className="text-center py-12 text-muted-foreground font-mono text-xs">
             No flights found for this month.
           </div>
+        ) : isMobile ? (
+          /* ── MOBILE CARD LAYOUT ── */
+          <div className="space-y-2">
+            {monthData.map((d) => (
+              <div key={d.date}>
+                <div className={`border rounded-lg p-2.5 space-y-2 ${
+                  d.anyExceeded ? 'border-destructive/40 bg-destructive/5' : 'border-border'
+                }`}>
+                  {/* Row 1: Date + status + details */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-mono text-[11px] font-bold text-foreground shrink-0">{d.date}</span>
+                      <span className="font-mono text-[9px] text-muted-foreground truncate">
+                        {d.flights.map(f => `${f.aircraftType} ${f.aircraftReg}`).join(', ')}
+                      </span>
+                    </div>
+                    {d.anyExceeded ? (
+                      <AlertTriangle className="h-3.5 w-3.5 text-destructive shrink-0" />
+                    ) : (
+                      <CheckCircle className="h-3.5 w-3.5 text-primary shrink-0" />
+                    )}
+                  </div>
+
+                  {/* Row 2: Key metrics */}
+                  <div className="grid grid-cols-5 gap-1">
+                    <div>
+                      <p className="font-mono text-[7px] text-muted-foreground uppercase">Flt</p>
+                      <p className="font-mono text-[11px] font-bold text-primary">{d.totalFlightHours.toFixed(1)}</p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[7px] text-muted-foreground uppercase">Night</p>
+                      <p className={`font-mono text-[11px] font-bold ${d.nightExceeded ? 'text-destructive' : 'text-foreground'}`}>
+                        {d.totalNightHours.toFixed(1)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[7px] text-muted-foreground uppercase">Fatigue</p>
+                      <p className={`font-mono text-[11px] font-bold ${d.fatigueExceeded ? 'text-destructive' : 'text-foreground'}`}>
+                        {d.totalFatigueUnits.toFixed(1)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[7px] text-muted-foreground uppercase">FDP</p>
+                      <p className={`font-mono text-[11px] font-bold ${d.fdpExceeded ? 'text-destructive' : 'text-foreground'}`}>
+                        {d.actualFDP.toFixed(1)}<span className="text-[8px] text-muted-foreground">/{d.maxFDP.toFixed(1)}</span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[7px] text-muted-foreground uppercase">Days</p>
+                      <p className={`font-mono text-[11px] font-bold ${d.consecutiveDays >= 7 ? 'text-destructive' : d.consecutiveDays >= 5 ? 'text-amber-400' : 'text-muted-foreground'}`}>
+                        {d.consecutiveDays}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Row 3: Editable duty times */}
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <div>
+                      <p className="font-mono text-[7px] text-muted-foreground uppercase mb-0.5">Report</p>
+                      <Input
+                        type="time"
+                        value={d.duty.reportTime}
+                        onChange={(e) => updateDuty(d.date, 'reportTime', e.target.value)}
+                        className="font-mono text-[10px] h-7"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-mono text-[7px] text-muted-foreground uppercase mb-0.5">Rotor Stop</p>
+                      <Input
+                        type="time"
+                        value={d.duty.rotorStop}
+                        onChange={(e) => updateDuty(d.date, 'rotorStop', e.target.value)}
+                        className="font-mono text-[10px] h-7"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-mono text-[7px] text-muted-foreground uppercase mb-0.5">Sectors</p>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={10}
+                        value={d.duty.sectors}
+                        onChange={(e) => updateDuty(d.date, 'sectors', parseInt(e.target.value) || 1)}
+                        className="font-mono text-[10px] h-7"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Rest period validation */}
+                {d.restAfter && (
+                  <div className={`flex items-center gap-1.5 py-1.5 px-2 my-1 rounded text-[9px] font-mono flex-wrap ${
+                    d.restAfter.isValid
+                      ? 'bg-primary/5 border border-primary/20 text-primary'
+                      : 'bg-destructive/10 border border-destructive/20 text-destructive'
+                  }`}>
+                    <Moon className="h-2.5 w-2.5 shrink-0" />
+                    <span className="font-semibold">REST:</span>
+                    <span>{d.restAfter.restHours.toFixed(1)}h</span>
+                    <span>•</span>
+                    <span>{d.restAfter.localNights} night{d.restAfter.localNights !== 1 ? 's' : ''}</span>
+                    <span>•</span>
+                    <span className="font-semibold">{d.restAfter.isValid ? '✓ OK' : '✗ INSUFFICIENT'}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         ) : (
+          /* ── DESKTOP TABLE LAYOUT ── */
           <div className="space-y-0">
             {/* Header */}
             <div className="grid grid-cols-[90px_1fr_50px_50px_50px_45px_90px_90px_50px_50px_50px_28px] gap-1.5 font-mono text-[9px] text-muted-foreground uppercase tracking-wider border-b border-border pb-1">
@@ -432,12 +541,12 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
         )}
 
         {monthData.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between font-mono text-xs gap-2">
+          <div className={`mt-3 pt-2 border-t border-border flex flex-col items-start font-mono text-xs gap-1.5 ${!isMobile ? 'sm:flex-row sm:items-center sm:justify-between'  : ''}`}>
             <span className="text-muted-foreground">
-              {flyingDays} DAYS — <span className="text-primary font-bold">{totalFlightHours.toFixed(1)}</span> FLT HRS — <span className="text-foreground font-bold">{totalDutyHours.toFixed(1)}</span> DUTY HRS
+              {flyingDays} DAYS — <span className="text-primary font-bold">{totalFlightHours.toFixed(1)}</span> FLT — <span className="text-foreground font-bold">{totalDutyHours.toFixed(1)}</span> DUTY
             </span>
             {totalExceedCount > 0 ? (
-              <span className="text-destructive font-bold flex items-center gap-1">
+              <span className="text-destructive font-bold flex items-center gap-1 flex-wrap">
                 <AlertTriangle className="h-3.5 w-3.5" />
                 {[
                   exceedCount > 0 && `${exceedCount} FDP`,
@@ -445,11 +554,11 @@ export function FlightDutyCalculator({ open, onOpenChange, entries }: Props) {
                   fatigueExceedCount > 0 && `${fatigueExceedCount} FATIGUE`,
                   restViolations > 0 && `${restViolations} REST`,
                 ].filter(Boolean).join(' + ')}
-                {' '}LIMIT(S) EXCEEDED
+                {' '}EXCEEDED
               </span>
             ) : (
               <span className="text-primary font-bold flex items-center gap-1">
-                <CheckCircle className="h-3.5 w-3.5" /> ALL WITHIN LEGAL LIMITS
+                <CheckCircle className="h-3.5 w-3.5" /> ALL WITHIN LIMITS
               </span>
             )}
           </div>
