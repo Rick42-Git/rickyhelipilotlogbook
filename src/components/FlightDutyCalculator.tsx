@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { AlertTriangle, CheckCircle, Clock, Plane, FileDown, Moon } from 'lucide-react';
 import { exportDutyCalcPDF } from '@/lib/exportDutyCalc';
 import { LogbookEntry } from '@/types/logbook';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DutyOverride {
   reportTime: string;
