@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Plane, Printer, RotateCcw } from 'lucide-react';
+import { FileText, Printer, RotateCcw } from 'lucide-react';
 import { Waypoint, calcDistanceNm, formatTime } from '@/types/flightPlan';
 import { toast } from '@/hooks/use-toast';
 
@@ -171,7 +171,7 @@ export function CA48FlightPlanDialog({
       <DialogContent className="max-w-2xl max-w-[95vw] sm:max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader className="px-3 sm:px-6 pt-4 sm:pt-6 pb-2">
           <DialogTitle className="font-mono text-primary tracking-wider flex items-center gap-2 text-xs sm:text-sm">
-            <Plane className="h-4 w-4 sm:h-5 sm:w-5" />
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
             ICAO FLIGHT PLAN (File2Fly)
           </DialogTitle>
         </DialogHeader>
