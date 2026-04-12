@@ -99,22 +99,73 @@ const Index = () => {
   if (isMobile) {
     return (
       <div className="h-[100dvh] flex flex-col bg-background overflow-hidden">
-        {/* Ultra-compact header — 40px */}
-        <div className="shrink-0 bg-card/95 backdrop-blur-md border-b border-border px-3 py-1.5 flex items-center gap-2 z-40">
-          <img src={helicopterIcon} alt="" className="h-5 w-auto opacity-80" />
-          <div className="flex-1 min-w-0">
-            <span className="font-mono text-[10px] font-bold text-primary tracking-wider">{pilotName}</span>
+        {/* Cockpit-style header */}
+        <div className="shrink-0 z-40 relative overflow-hidden">
+          {/* Background with gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-card via-card/95 to-background/80" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.08),transparent_70%)]" />
+          {/* Scan line effect */}
+          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px)' }} />
+          
+          <div className="relative px-3 pt-3 pb-2">
+            {/* Top row: HUD data readouts */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                <span className="font-mono text-[8px] text-success/70 tracking-widest">ONLINE</span>
+              </div>
+              <span className="font-mono text-[8px] text-muted-foreground/50 tracking-wider">
+                {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}
+              </span>
+              <div className="flex items-center gap-2">
+                {mobileTab === 'logbook' && (
+                  <button onClick={() => setSearchOpen(!searchOpen)} className="p-1 text-muted-foreground hover:text-primary transition-colors">
+                    <Search className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Main header: Logo + Title */}
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="absolute -inset-1 bg-primary/20 rounded-full blur-md" />
+                <img src={helicopterIcon} alt="" className="relative h-9 w-auto drop-shadow-[0_0_12px_hsl(38_95%_55%/0.4)]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h1 className="font-mono text-sm font-bold text-primary tracking-wider leading-none">
+                  ROTORLOG
+                </h1>
+                <p className="font-mono text-[8px] text-muted-foreground/60 tracking-[0.2em] mt-0.5">
+                  DIGITAL PILOT LOGBOOK
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom row: Pilot info + stats */}
+            <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-border/30">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 bg-primary/5 border border-primary/20 rounded px-2 py-0.5">
+                  <span className="font-mono text-[8px] text-primary/60">PIC</span>
+                  <span className="font-mono text-[10px] font-bold text-primary tracking-wide">{pilotName}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1 bg-success/5 border border-success/20 rounded px-2 py-0.5">
+                  <span className="font-mono text-[8px] text-success/60">TTL</span>
+                  <span className="font-mono text-sm font-bold text-success leading-none">{grandTotal.toFixed(1)}</span>
+                  <span className="font-mono text-[7px] text-success/50">HRS</span>
+                </div>
+                <div className="flex items-center gap-1 bg-accent/5 border border-accent/20 rounded px-2 py-0.5">
+                  <span className="font-mono text-[8px] text-accent/60">FLT</span>
+                  <span className="font-mono text-[10px] font-bold text-accent leading-none">{entries.length}</span>
+                </div>
+              </div>
+            </div>
           </div>
-          {/* Inline total hours badge */}
-          <div className="flex items-center gap-1 bg-success/10 border border-success/20 rounded px-1.5 py-0.5">
-            <span className="font-mono text-xs font-bold text-success leading-none">{grandTotal.toFixed(1)}</span>
-            <span className="font-mono text-[7px] text-success/70">HRS</span>
-          </div>
-          {mobileTab === 'logbook' && (
-            <button onClick={() => setSearchOpen(!searchOpen)} className="p-1 text-muted-foreground">
-              <Search className="h-4 w-4" />
-            </button>
-          )}
+          
+          {/* Bottom edge glow */}
+          <div className="h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
         </div>
 
         {/* Search bar — collapsible, only on logbook tab */}
