@@ -433,7 +433,7 @@ export function FlightMap({
   }, []);
 
   // GPS location tracking
-  const gpsMarkerRef = useRef<L.CircleMarker | null>(null);
+  const gpsMarkerRef = useRef<L.Marker | null>(null);
   const gpsAccuracyRef = useRef<L.Circle | null>(null);
 
   useEffect(() => {
