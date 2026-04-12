@@ -490,7 +490,7 @@ export function FlightMap({
     };
   }, [showGps]);
 
-
+  return (
     <div className="w-full h-full rounded-md overflow-hidden border border-muted relative" style={{ zIndex: 0 }}>
       <div ref={containerRef} style={{ width: '100%', height: '100%', background: 'hsl(220, 20%, 10%)' }} />
     </div>
