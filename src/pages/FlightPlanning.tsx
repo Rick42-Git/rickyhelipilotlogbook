@@ -303,6 +303,7 @@ const FlightPlanning = () => {
             showAirspaces={showAirspaces}
             showBoundaries={showBoundaries}
             showTerminator={showTerminator}
+            showGps={showGps}
           />
         </div>
 
