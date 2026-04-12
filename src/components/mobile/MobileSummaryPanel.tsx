@@ -8,7 +8,7 @@ interface MobileSummaryPanelProps {
   entries: LogbookEntry[];
 }
 
-const PISTON_TYPES = new Set(['RH-22', 'RH-44', 'FNTP II', 'FSTD I', 'FSTD II']);
+const PISTON_TYPES = new Set(['RH-22', 'RH-44', 'H269', 'FNTP II', 'FSTD I', 'FSTD II']);
 
 function getTypeTotals(entries: LogbookEntry[]) {
   const map: Record<string, { hours: number; flights: number }> = {};
