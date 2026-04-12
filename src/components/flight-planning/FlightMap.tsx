@@ -32,7 +32,7 @@ interface FlightMapProps {
 export function FlightMap({
   waypoints, onMapClick, measure, setMeasure, onAirportClick,
   showAirports, filterCustoms, filterFuel,
-  activeLayer, showAirspaces, showBoundaries, showTerminator,
+  activeLayer, showAirspaces, showBoundaries, showTerminator, showGps,
 }: FlightMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
