@@ -141,7 +141,14 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
             <div key={f.key} className={f.half ? 'col-span-1' : 'col-span-2'}>
               {f.section && (
                 <div className="col-span-2 mt-3 mb-1">
-                  <p className="font-mono text-[10px] text-accent uppercase tracking-widest border-b border-border pb-1">{f.section}</p>
+                  <div className="flex items-center justify-between border-b border-border pb-1">
+                    <p className="font-mono text-[10px] text-accent uppercase tracking-widest">{f.section}</p>
+                    {f.section.includes('Landing Zone') && (
+                      <Button type="button" variant="ghost" size="sm" className="h-5 px-2 text-[9px] font-mono gap-1" onClick={captureGPS}>
+                        <MapPin className="h-3 w-3" /> USE GPS
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
               <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{f.label}</Label>
