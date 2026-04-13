@@ -107,9 +107,9 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
         </div>
       </div>
 
-      {/* Helicopter vs Fixed-Wing — clean two-column layout */}
+      {/* Helicopter vs Fixed-Wing — adapts to single column when only one category exists */}
       {(heliFlights > 0 || fwFlights > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+        <div className={`grid gap-3 mb-4 ${heliFlights > 0 && fwFlights > 0 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
           {/* Helicopter column */}
           {heliFlights > 0 && (
             <div className="rounded-lg border border-primary/20 bg-primary/5 overflow-hidden">
