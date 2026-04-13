@@ -28,6 +28,7 @@ const SIMULATOR_CODES = new Set([
   'FNTP II', 'FSTD I', 'FSTD II', 'FNTPII', 'FSTDI', 'FSTDII',
   'FNTP-II', 'FSTD-I', 'FSTD-II', 'FNTP 2', 'FSTD 1', 'FSTD 2',
   'FNTP2', 'FSTD1', 'FSTD2', 'SIM', 'FTD', 'SIMULATOR',
+  'FNPT II', 'FNPT-II', 'FNPT2', 'FNPTII', 'FNPT 2',
 ]);
 
 // Helicopter — Piston
@@ -53,22 +54,23 @@ const HELI_PISTON_CODES = new Set([
 // Helicopter — Turbine
 const HELI_TURBINE_CODES = new Set([
   'GAZL', 'GAZ', 'GAZELLE', 'SA341', 'SA342', 'SA 341', 'SA 342', 'SA-341', 'SA-342',
-  'UH1', 'UH-1', 'UH1H', 'UH-1H', 'HUEY',
-  'R66',
-  'B06', 'B206', 'BA206', 'BH206', 'BH-206', 'B-206', 'BA-206', 'BH 206', 'B 206',
-  'B206L', 'BH206L', 'BH-206L', 'B-206L', 'LONGRANGER', 'LONG RANGER',
+  'UH1', 'UH-1', 'UH1H', 'UH-1H', 'HUEY', 'HUEY UH-1',
+  'R66', 'R-66', 'R 66', 'RH66', 'RH-66', '66',
+  'B06', 'B206', 'BA206', 'BH206', 'BH-206', 'B-206', 'BA-206', 'BH 206', 'B 206', 'BA 206',
+  'B206L', 'BH206L', 'BH-206L', 'B-206L', 'B206 L', 'LONGRANGER', 'LONG RANGER', 'BH206L LONGRANGER',
   'B407',
   'B412',
   'B429',
   'B505',
-  'AS50', 'AS350', 'A350', 'EC50', 'H125', 'AS-350',
+  'AS50', 'AS350', 'A350', 'EC50', 'H125', 'AS-350', 'AS350B2', 'AS350B3', 'S350B2', 'S350B3', 'H125B3', 'H125B3+', 'H125B2', 'A-STAR', 'AS 350',
   'AS55', 'AS355', 'EC55',
   'EC30', 'EC130', 'H130',
   'EC35', 'EC135', 'H135',
   'EC45', 'EC145', 'H145',
   'AW39', 'AW139', 'A139',
-  'A109', 'AW109',
+  'A109', 'AW109', 'A109S', 'A109E', 'A109K', 'AW109S', 'AW109E', 'AW109K',
   'A119', 'AW119',
+  'K209', 'K-209',
   'S76', 'S-76',
   'S92', 'S-92',
   'H60', 'UH60', 'UH-60', 'S70', 'S-70',
