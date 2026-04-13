@@ -158,10 +158,10 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
               <div className="relative">
                 <Input
                   ref={el => { inputRefs.current[f.key] = el; }}
-                  type={f.type}
-                  step={f.type === 'number' ? '0.1' : undefined}
-                  placeholder={numericKeys.includes(f.key) ? '0' : ''}
-                  value={displayValue(f.key, form[f.key] as string | number)}
+                  type={f.type === 'coord' ? 'number' : f.type}
+                  step={f.type === 'number' ? '0.1' : f.type === 'coord' ? '0.0001' : undefined}
+                  placeholder={f.type === 'coord' ? 'e.g. -25.7461' : numericKeys.includes(f.key) ? '0' : ''}
+                  value={displayValue(f.key, form[f.key] as string | number | null)}
                   onChange={e => handleChange(f.key, e.target.value)}
                   onFocus={e => {
                     if (numericKeys.includes(f.key)) e.target.select();
