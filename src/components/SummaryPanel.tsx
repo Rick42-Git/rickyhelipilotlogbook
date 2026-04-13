@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { LogbookEntry, numericFieldLabels, NumericField } from '@/types/logbook';
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 import { classifyAircraft, AircraftCategory, CATEGORY_LABELS } from '@/lib/aircraftCategories';
+import { LandingsMap } from '@/components/LandingsMap';
 
 interface SummaryPanelProps {
   totals: Record<NumericField, number>;
@@ -280,6 +281,11 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
             ))}
           </div>
         ))}
+      </div>
+
+      {/* Landings Map */}
+      <div className="mt-4">
+        <LandingsMap entries={entries} />
       </div>
     </div>
   );
