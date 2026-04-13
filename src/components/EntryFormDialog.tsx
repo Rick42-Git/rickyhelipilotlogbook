@@ -95,11 +95,14 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
     );
   };
 
-  const displayValue = (key: string, val: string | number) => {
+  const displayValue = (key: string, val: string | number | null) => {
+    if (key === 'latitude' || key === 'longitude') {
+      return val == null ? '' : val;
+    }
     if (numericKeys.includes(key)) {
       return val === 0 || val === '0' ? '' : val;
     }
-    return val;
+    return val ?? '';
   };
 
   const handleSave = () => { onSave(form); onOpenChange(false); };
