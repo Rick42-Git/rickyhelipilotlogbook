@@ -334,6 +334,8 @@ export function SpreadsheetImport({ onEntriesImported, templates = [] }: Spreads
         instrumentTime: Number(e.instrumentTime) || 0,
         instructorDay: Number(e.instructorDay) || 0,
         instructorNight: Number(e.instructorNight) || 0,
+        latitude: null,
+        longitude: null,
       }))
       .filter((entry) => {
         const hasHours = NUMERIC_FIELDS.some(f => (entry[f] || 0) > 0);
