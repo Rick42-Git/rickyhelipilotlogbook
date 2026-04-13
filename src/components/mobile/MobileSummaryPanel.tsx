@@ -93,7 +93,7 @@ export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummar
         <span className="font-mono text-[10px] text-muted-foreground">{entryCount} flights</span>
       </div>
 
-      {/* Helicopter section */}
+      {/* Aircraft categories — only show sections with actual hours */}
       {heliFlights > 0 && (
         <div className="bg-card border border-primary/20 rounded-lg overflow-hidden">
           <div className="flex items-center justify-between px-3 py-1.5 border-b border-primary/10">
