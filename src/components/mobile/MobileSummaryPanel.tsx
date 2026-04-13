@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { LogbookEntry, NumericField } from '@/types/logbook';
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
-import { classifyAircraft, AircraftCategory, CATEGORY_SHORT } from '@/lib/aircraftCategories';
+import { classifyAircraft, AircraftCategory } from '@/lib/aircraftCategories';
 
 interface MobileSummaryPanelProps {
   totals: Record<NumericField, number>;
@@ -53,23 +53,19 @@ function getPatternTotals(entries: LogbookEntry[], patterns: string[]) {
   return { hours, flights };
 }
 
-const CAT_ORDER: AircraftCategory[] = ['heli_piston', 'heli_turbine', 'fw_piston', 'fw_turbine', 'simulator', 'unknown'];
-const CAT_BORDER: Record<AircraftCategory, string> = {
-  heli_piston: 'border-primary/30',
-  heli_turbine: 'border-accent/30',
-  fw_piston: 'border-success/30',
-  fw_turbine: 'border-destructive/30',
-  simulator: 'border-muted-foreground/30',
-  unknown: 'border-border',
-};
-const CAT_TEXT: Record<AircraftCategory, string> = {
-  heli_piston: 'text-primary',
-  heli_turbine: 'text-accent',
-  fw_piston: 'text-success',
-  fw_turbine: 'text-destructive',
-  simulator: 'text-muted-foreground',
-  unknown: 'text-muted-foreground',
-};
+function TypeBreakdown({ types }: { types: [string, { hours: number; flights: number }][] }) {
+  if (types.length === 0) return null;
+  return (
+    <div className="pl-2 space-y-0.5 mt-0.5">
+      {types.map(([type, data]) => (
+        <div key={type} className="flex items-center justify-between">
+          <span className="font-mono text-[8px] text-muted-foreground truncate mr-1">{type}</span>
+          <span className="font-mono text-[8px] font-semibold text-foreground shrink-0">{data.hours.toFixed(1)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummaryPanelProps) {
   const grandTotal = totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot;
@@ -96,23 +92,79 @@ export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummar
         <span className="font-mono text-[10px] text-muted-foreground">{entryCount} flights</span>
       </div>
 
-      {/* Helicopter vs Fixed-Wing */}
-      <div className="grid grid-cols-2 gap-1.5">
-        {heliFlights > 0 && (
-          <div className="bg-card border border-primary/20 rounded px-2 py-1.5 text-center">
-            <p className="font-mono text-[7px] text-primary uppercase tracking-wider">🚁 Helicopter</p>
-            <span className="font-mono text-sm font-bold text-foreground leading-none">{heliTotal.toFixed(1)}</span>
-            <p className="font-mono text-[7px] text-muted-foreground">{heliFlights} flights</p>
+      {/* Helicopter section */}
+      {heliFlights > 0 && (
+        <div className="bg-card border border-primary/20 rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-1.5 border-b border-primary/10">
+            <span className="font-mono text-[8px] text-primary uppercase tracking-widest font-bold">🚁 Helicopter</span>
+            <div>
+              <span className="font-mono text-sm font-bold text-foreground">{heliTotal.toFixed(1)}</span>
+              <span className="font-mono text-[8px] text-muted-foreground ml-0.5">({heliFlights})</span>
+            </div>
           </div>
-        )}
-        {fwFlights > 0 && (
-          <div className="bg-card border border-success/20 rounded px-2 py-1.5 text-center">
-            <p className="font-mono text-[7px] text-success uppercase tracking-wider">✈ Fixed-Wing</p>
-            <span className="font-mono text-sm font-bold text-foreground leading-none">{fwTotal.toFixed(1)}</span>
-            <p className="font-mono text-[7px] text-muted-foreground">{fwFlights} flights</p>
+          <div className="divide-y divide-primary/10">
+            {cats.heli_piston.flights > 0 && (
+              <div className="px-3 py-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[7px] text-primary/60 uppercase tracking-wider">Piston</span>
+                  <span className="font-mono text-[10px] font-semibold text-foreground">{cats.heli_piston.hours.toFixed(1)}</span>
+                </div>
+                <TypeBreakdown types={Object.entries(typeByCat.heli_piston).sort((a, b) => b[1].hours - a[1].hours)} />
+              </div>
+            )}
+            {cats.heli_turbine.flights > 0 && (
+              <div className="px-3 py-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[7px] text-accent/60 uppercase tracking-wider">Turbine</span>
+                  <span className="font-mono text-[10px] font-semibold text-foreground">{cats.heli_turbine.hours.toFixed(1)}</span>
+                </div>
+                <TypeBreakdown types={Object.entries(typeByCat.heli_turbine).sort((a, b) => b[1].hours - a[1].hours)} />
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Fixed-Wing section */}
+      {fwFlights > 0 && (
+        <div className="bg-card border border-success/20 rounded-lg overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-1.5 border-b border-success/10">
+            <span className="font-mono text-[8px] text-success uppercase tracking-widest font-bold">✈ Fixed-Wing</span>
+            <div>
+              <span className="font-mono text-sm font-bold text-foreground">{fwTotal.toFixed(1)}</span>
+              <span className="font-mono text-[8px] text-muted-foreground ml-0.5">({fwFlights})</span>
+            </div>
+          </div>
+          <div className="divide-y divide-success/10">
+            {cats.fw_piston.flights > 0 && (
+              <div className="px-3 py-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[7px] text-success/60 uppercase tracking-wider">Piston</span>
+                  <span className="font-mono text-[10px] font-semibold text-foreground">{cats.fw_piston.hours.toFixed(1)}</span>
+                </div>
+                <TypeBreakdown types={Object.entries(typeByCat.fw_piston).sort((a, b) => b[1].hours - a[1].hours)} />
+              </div>
+            )}
+            {cats.fw_turbine.flights > 0 && (
+              <div className="px-3 py-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[7px] text-destructive/60 uppercase tracking-wider">Turbine/Jet</span>
+                  <span className="font-mono text-[10px] font-semibold text-foreground">{cats.fw_turbine.hours.toFixed(1)}</span>
+                </div>
+                <TypeBreakdown types={Object.entries(typeByCat.fw_turbine).sort((a, b) => b[1].hours - a[1].hours)} />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Simulator */}
+      {cats.simulator.flights > 0 && (
+        <div className="bg-card border border-muted-foreground/20 rounded px-3 py-1.5 flex items-center justify-between">
+          <span className="font-mono text-[8px] text-muted-foreground uppercase tracking-wider">🖥 Simulator</span>
+          <span className="font-mono text-xs font-bold text-foreground">{cats.simulator.hours.toFixed(1)}</span>
+        </div>
+      )}
 
       {/* Quick stats row */}
       <div className="grid grid-cols-3 gap-1.5">
@@ -127,31 +179,6 @@ export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummar
           </div>
         ))}
       </div>
-
-      {/* Category cards */}
-      {CAT_ORDER.filter(c => cats[c].flights > 0).map(cat => {
-        const typeEntries = Object.entries(typeByCat[cat]).sort((a, b) => b[1].hours - a[1].hours);
-        return (
-          <div key={cat} className={`bg-card border ${CAT_BORDER[cat]} rounded-lg px-3 py-2`}>
-            <div className="flex items-center justify-between mb-1">
-              <span className={`font-mono text-[8px] ${CAT_TEXT[cat]} uppercase tracking-widest font-semibold`}>
-                {CATEGORY_SHORT[cat]}
-              </span>
-              <span className="font-mono text-xs font-bold text-foreground">{cats[cat].hours.toFixed(1)}<span className="text-[8px] text-muted-foreground ml-0.5">({cats[cat].flights})</span></span>
-            </div>
-            {typeEntries.length > 1 && (
-              <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 border-t border-border/30 pt-1">
-                {typeEntries.map(([type, data]) => (
-                  <div key={type} className="flex items-center justify-between">
-                    <span className="font-mono text-[8px] text-muted-foreground truncate mr-1">{type}</span>
-                    <span className="font-mono text-[9px] font-semibold text-foreground shrink-0">{data.hours.toFixed(1)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
 
       {/* Breakdown */}
       <div className="bg-card border border-border rounded-lg px-3 py-2">
