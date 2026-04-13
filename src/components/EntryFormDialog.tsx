@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { MapPin } from 'lucide-react';
 
 interface EntryFormDialogProps {
   open: boolean;
@@ -26,6 +27,8 @@ const fields: { key: keyof Omit<LogbookEntry, 'id'>; label: string; type: string
   { key: 'instrumentTime', label: 'Time (13)', type: 'number', half: true, section: 'Instrument Flying' },
   { key: 'instructorDay', label: 'Day (14)', type: 'number', half: true, section: 'Flying as Instructor' },
   { key: 'instructorNight', label: 'Night (15)', type: 'number', half: true },
+  { key: 'latitude', label: 'Latitude', type: 'coord', half: true, section: 'Landing Zone (Optional)' },
+  { key: 'longitude', label: 'Longitude', type: 'coord', half: true },
 ];
 
 const numericKeys = [
@@ -69,15 +72,37 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
   const handleChange = (key: string, value: string) => {
     setForm(prev => ({
       ...prev,
-      [key]: numericKeys.includes(key) ? (value === '' ? 0 : parseFloat(value) || 0) : value,
+      [key]: numericKeys.includes(key)
+        ? (value === '' ? 0 : parseFloat(value) || 0)
+        : (key === 'latitude' || key === 'longitude')
+          ? (value === '' ? null : parseFloat(value) || null)
+          : value,
     }));
   };
 
-  const displayValue = (key: string, val: string | number) => {
+  const captureGPS = () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setForm(prev => ({
+          ...prev,
+          latitude: Math.round(pos.coords.latitude * 10000) / 10000,
+          longitude: Math.round(pos.coords.longitude * 10000) / 10000,
+        }));
+      },
+      () => {},
+      { enableHighAccuracy: true }
+    );
+  };
+
+  const displayValue = (key: string, val: string | number | null) => {
+    if (key === 'latitude' || key === 'longitude') {
+      return val == null ? '' : val;
+    }
     if (numericKeys.includes(key)) {
       return val === 0 || val === '0' ? '' : val;
     }
-    return val;
+    return val ?? '';
   };
 
   const handleSave = () => { onSave(form); onOpenChange(false); };
@@ -119,17 +144,24 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
             <div key={f.key} className={f.half ? 'col-span-1' : 'col-span-2'}>
               {f.section && (
                 <div className="col-span-2 mt-3 mb-1">
-                  <p className="font-mono text-[10px] text-accent uppercase tracking-widest border-b border-border pb-1">{f.section}</p>
+                  <div className="flex items-center justify-between border-b border-border pb-1">
+                    <p className="font-mono text-[10px] text-accent uppercase tracking-widest">{f.section}</p>
+                    {f.section.includes('Landing Zone') && (
+                      <Button type="button" variant="ghost" size="sm" className="h-5 px-2 text-[9px] font-mono gap-1" onClick={captureGPS}>
+                        <MapPin className="h-3 w-3" /> USE GPS
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
               <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">{f.label}</Label>
               <div className="relative">
                 <Input
                   ref={el => { inputRefs.current[f.key] = el; }}
-                  type={f.type}
-                  step={f.type === 'number' ? '0.1' : undefined}
-                  placeholder={numericKeys.includes(f.key) ? '0' : ''}
-                  value={displayValue(f.key, form[f.key] as string | number)}
+                  type={f.type === 'coord' ? 'number' : f.type}
+                  step={f.type === 'number' ? '0.1' : f.type === 'coord' ? '0.0001' : undefined}
+                  placeholder={f.type === 'coord' ? 'e.g. -25.7461' : numericKeys.includes(f.key) ? '0' : ''}
+                  value={displayValue(f.key, form[f.key] as string | number | null)}
                   onChange={e => handleChange(f.key, e.target.value)}
                   onFocus={e => {
                     if (numericKeys.includes(f.key)) e.target.select();

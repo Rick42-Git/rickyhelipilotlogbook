@@ -40,6 +40,8 @@ function toDbEntry(e: Omit<LogbookEntry, 'id'>, userId: string) {
     instrument_time: e.instrumentTime,
     instructor_day: e.instructorDay,
     instructor_night: e.instructorNight,
+    latitude: e.latitude ?? null,
+    longitude: e.longitude ?? null,
   };
 }
 
@@ -58,6 +60,8 @@ function fromDbEntry(row: any): LogbookEntry {
     instrumentTime: Number(row.instrument_time) || 0,
     instructorDay: Number(row.instructor_day) || 0,
     instructorNight: Number(row.instructor_night) || 0,
+    latitude: row.latitude ?? null,
+    longitude: row.longitude ?? null,
   };
 }
 

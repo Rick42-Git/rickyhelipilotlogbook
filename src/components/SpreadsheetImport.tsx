@@ -277,6 +277,7 @@ function parseRow(row: Record<string, unknown>, columnMap: Record<string, keyof 
     date: '', aircraftType: '', aircraftReg: '', pilotInCommand: '', flightDetails: '',
     seDayDual: 0, seDayPilot: 0, seNightDual: 0, seNightPilot: 0,
     instrumentTime: 0, instructorDay: 0, instructorNight: 0,
+    latitude: null, longitude: null,
   };
 
   for (const [col, field] of Object.entries(columnMap)) {
@@ -334,6 +335,8 @@ export function SpreadsheetImport({ onEntriesImported, templates = [] }: Spreads
         instrumentTime: Number(e.instrumentTime) || 0,
         instructorDay: Number(e.instructorDay) || 0,
         instructorNight: Number(e.instructorNight) || 0,
+        latitude: null,
+        longitude: null,
       }))
       .filter((entry) => {
         const hasHours = NUMERIC_FIELDS.some(f => (entry[f] || 0) > 0);

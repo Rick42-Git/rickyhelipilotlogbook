@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { LogbookEntry, NumericField } from '@/types/logbook';
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 import { classifyAircraft, AircraftCategory } from '@/lib/aircraftCategories';
+import { LandingsMap } from '@/components/LandingsMap';
 
 interface MobileSummaryPanelProps {
   totals: Record<NumericField, number>;
@@ -218,6 +219,9 @@ export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummar
           )}
         </div>
       )}
+
+      {/* Landings Map */}
+      <LandingsMap entries={entries} />
     </div>
   );
 }
