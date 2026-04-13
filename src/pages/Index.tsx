@@ -10,7 +10,7 @@ import { EntryFormDialog } from '@/components/EntryFormDialog';
 import { SummaryPanel } from '@/components/SummaryPanel';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane, List, BookOpen, Radio, Sun, Moon, Search } from 'lucide-react';
+import { Plus, Download, BarChart3, LogOut, MonitorSmartphone, ChevronDown, Clock, Undo2, Trash2, Shield, Scale, Plane, List, BookOpen, Radio, Sun, Moon, Search, FileDown } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -413,6 +413,19 @@ const Index = () => {
             >
               {viewMode === 'list' ? <BookOpen className="h-3.5 w-3.5" /> : <List className="h-3.5 w-3.5" />}
               {viewMode === 'list' ? 'SWITCH TO LOGBOOK VIEW' : 'SWITCH TO LIST VIEW'}
+            </Button>
+          )}
+          {viewMode === 'book' && entries.length > 0 && (
+            <Button
+              variant="outline" size="sm"
+              onClick={() => {
+                const bookView = document.querySelector('[data-book-export]');
+                if (bookView) (bookView as any).click();
+              }}
+              className="font-mono text-[10px] gap-1.5 h-7 px-2"
+            >
+              <FileDown className="h-3.5 w-3.5" />
+              EXPORT PAGES TO PDF
             </Button>
           )}
           <div className="flex-1 alt-line" />
