@@ -277,6 +277,7 @@ function parseRow(row: Record<string, unknown>, columnMap: Record<string, keyof 
     date: '', aircraftType: '', aircraftReg: '', pilotInCommand: '', flightDetails: '',
     seDayDual: 0, seDayPilot: 0, seNightDual: 0, seNightPilot: 0,
     instrumentTime: 0, instructorDay: 0, instructorNight: 0,
+    latitude: null, longitude: null,
   };
 
   for (const [col, field] of Object.entries(columnMap)) {
