@@ -309,6 +309,8 @@ export type Database = {
           instrument_nav_aids: number
           instrument_place: number
           instrument_time: number
+          latitude: number | null
+          longitude: number | null
           pilot_in_command: string
           se_day_dual: number
           se_day_pilot: number
@@ -328,6 +330,8 @@ export type Database = {
           instrument_nav_aids?: number
           instrument_place?: number
           instrument_time?: number
+          latitude?: number | null
+          longitude?: number | null
           pilot_in_command?: string
           se_day_dual?: number
           se_day_pilot?: number
@@ -347,6 +351,8 @@ export type Database = {
           instrument_nav_aids?: number
           instrument_place?: number
           instrument_time?: number
+          latitude?: number | null
+          longitude?: number | null
           pilot_in_command?: string
           se_day_dual?: number
           se_day_pilot?: number
