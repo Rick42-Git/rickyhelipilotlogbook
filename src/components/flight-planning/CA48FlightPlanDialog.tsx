@@ -906,13 +906,13 @@ function buildCA48HTML(f: CA48FormData): string {
       <span class="field-value">→P / ${f.pob}</span>
     </td>
     <td colspan="1" style="text-align:center"><span class="section-label">UHF</span><br>
-      <span class="field-value">${f.emergency_radio_uhf ? '☑' : '☐'} U</span>
+      <span class="field-value">${f.emergency_radio_uhf ? '☑' : '☒'} U</span>
     </td>
     <td colspan="1" style="text-align:center"><span class="section-label">VHF</span><br>
-      <span class="field-value">${f.emergency_radio_vhf ? '☑' : '☐'} V</span>
+      <span class="field-value">${f.emergency_radio_vhf ? '☑' : '☒'} V</span>
     </td>
     <td colspan="2" style="text-align:center"><span class="section-label">ELT</span><br>
-      <span class="field-value">${f.emergency_radio_elt ? '☑' : '☐'} E</span>
+      <span class="field-value">${f.emergency_radio_elt ? '☑' : '☒'} E</span>
     </td>
   </tr>
 
@@ -921,13 +921,13 @@ function buildCA48HTML(f: CA48FormData): string {
     <td colspan="1" style="border-right:none"><span class="section-label">SURVIVAL EQUIPMENT</span><br>
       <span class="field-value-sm">→S /</span>
     </td>
-    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Polar</span><br><span class="field-value">${f.survival_polar ? '☑' : '☐'} P</span></td>
-    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Desert</span><br><span class="field-value">${f.survival_desert ? '☑' : '☐'} D</span></td>
-    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Maritime</span><br><span class="field-value">${f.survival_maritime ? '☑' : '☐'} M</span></td>
-    <td style="text-align:center;border-left:none"><span class="section-label">Jungle</span><br><span class="field-value">${f.survival_jungle ? '☑' : '☐'} J</span></td>
-    <td colspan="1" style="text-align:center"><span class="section-label">Light</span><br><span class="field-value">${f.jackets_light ? '☑' : '☐'} L</span></td>
-    <td colspan="1" style="text-align:center"><span class="section-label">Fluores</span><br><span class="field-value">${f.jackets_fluores ? '☑' : '☐'} F</span></td>
-    <td colspan="1" style="text-align:center"><span class="section-label">UHF / VHF</span><br><span class="field-value">${f.jackets_uhf ? '☑' : '☐'} U ${f.jackets_vhf ? '☑' : '☐'} V</span></td>
+    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Polar</span><br><span class="field-value">${f.survival_polar ? '☑' : '☒'} P</span></td>
+    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Desert</span><br><span class="field-value">${f.survival_desert ? '☑' : '☒'} D</span></td>
+    <td style="text-align:center;border-left:none;border-right:none"><span class="section-label">Maritime</span><br><span class="field-value">${f.survival_maritime ? '☑' : '☒'} M</span></td>
+    <td style="text-align:center;border-left:none"><span class="section-label">Jungle</span><br><span class="field-value">${f.survival_jungle ? '☑' : '☒'} J</span></td>
+    <td colspan="1" style="text-align:center"><span class="section-label">Light</span><br><span class="field-value">${f.jackets_light ? '☑' : '☒'} L</span></td>
+    <td colspan="1" style="text-align:center"><span class="section-label">Fluores</span><br><span class="field-value">${f.jackets_fluores ? '☑' : '☒'} F</span></td>
+    <td colspan="1" style="text-align:center"><span class="section-label">UHF / VHF</span><br><span class="field-value">${f.jackets_uhf ? '☑' : '☒'} U ${f.jackets_vhf ? '☑' : '☒'} V</span></td>
   </tr>
 
   <!-- Dinghies -->
@@ -937,7 +937,7 @@ function buildCA48HTML(f: CA48FormData): string {
     </td>
     <td colspan="1"><span class="section-label">Number</span><br><span class="field-value">${f.dinghies_number}</span></td>
     <td colspan="1"><span class="section-label">Capacity</span><br><span class="field-value">${f.dinghies_capacity}</span></td>
-    <td colspan="1"><span class="section-label">Cover</span><br><span class="field-value">→C ${f.dinghies_cover ? '☑' : '☐'}</span></td>
+    <td colspan="1"><span class="section-label">Cover</span><br><span class="field-value">→C ${f.dinghies_cover ? '☑' : '☒'}</span></td>
     <td colspan="4"><span class="section-label">Colour</span><br><span class="field-value">${f.dinghies_colour}</span></td>
   </tr>
 
