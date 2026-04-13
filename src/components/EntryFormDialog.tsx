@@ -72,8 +72,27 @@ export function EntryFormDialog({ open, onOpenChange, entry, onSave, existingEnt
   const handleChange = (key: string, value: string) => {
     setForm(prev => ({
       ...prev,
-      [key]: numericKeys.includes(key) ? (value === '' ? 0 : parseFloat(value) || 0) : value,
+      [key]: numericKeys.includes(key)
+        ? (value === '' ? 0 : parseFloat(value) || 0)
+        : (key === 'latitude' || key === 'longitude')
+          ? (value === '' ? null : parseFloat(value) || null)
+          : value,
     }));
+  };
+
+  const captureGPS = () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setForm(prev => ({
+          ...prev,
+          latitude: Math.round(pos.coords.latitude * 10000) / 10000,
+          longitude: Math.round(pos.coords.longitude * 10000) / 10000,
+        }));
+      },
+      () => {},
+      { enableHighAccuracy: true }
+    );
   };
 
   const displayValue = (key: string, val: string | number) => {
