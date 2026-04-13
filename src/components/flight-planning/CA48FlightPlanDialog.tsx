@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,9 +8,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { FileText, Printer, RotateCcw } from 'lucide-react';
+import { FileText, Printer, RotateCcw, Eraser, PenLine, Plus } from 'lucide-react';
 import { Waypoint, calcDistanceNm, formatTime } from '@/types/flightPlan';
 import { toast } from '@/hooks/use-toast';
+import { ICAOEquipmentSelector, buildEquipmentString } from './ICAOEquipmentSelector';
 
 export interface CA48FormData {
   // Header
@@ -29,11 +30,17 @@ export interface CA48FormData {
   wake_turb: string;
   // Item 10
   equipment: string;
+  comnav_codes: string[];
+  surveillance_codes: string[];
   // Item 13
   departure_aero: string;
   departure_time: string;
   // Item 15
+  speed_prefix: string;
+  speed_value: string;
   speed: string;
+  level_prefix: string;
+  level_value: string;
   level: string;
   route: string;
   // Item 16
@@ -66,27 +73,35 @@ export interface CA48FormData {
   aircraft_colour: string;
   remarks: string;
   pic: string;
+  pic_telephone: string;
   // Filed by
   filed_by: string;
   filed_by_phone: string;
   signature_name: string;
   signature_date: string;
+  // Digital signature
+  signature_image: string;
+  signature_title: string;
 }
 
 const emptyForm: CA48FormData = {
   priority: '', addressees: '', filing_time: '', originator: '',
   aircraft_id: '', flight_rules: 'V', type_of_flight: 'G',
   number: '', aircraft_type: '', wake_turb: 'L',
-  equipment: 'S/C', departure_aero: '', departure_time: '',
-  speed: '', level: '', route: '',
+  equipment: 'S/C', comnav_codes: ['S'], surveillance_codes: ['C'],
+  departure_aero: '', departure_time: '',
+  speed_prefix: 'N', speed_value: '', speed: '',
+  level_prefix: 'A', level_value: '', level: '',
+  route: '',
   dest_aero: '', total_eet: '', altn_aero: '', altn_aero_2: '',
   other_info: '', endurance: '', pob: '',
   emergency_radio_uhf: true, emergency_radio_vhf: true, emergency_radio_elt: true,
   survival_polar: false, survival_desert: false, survival_maritime: false, survival_jungle: false,
   jackets: true, jackets_light: true, jackets_fluores: true, jackets_uhf: false, jackets_vhf: false,
   dinghies_number: '', dinghies_capacity: '', dinghies_cover: false, dinghies_colour: '',
-  aircraft_colour: '', remarks: '', pic: '',
+  aircraft_colour: '', remarks: '', pic: '', pic_telephone: '',
   filed_by: '', filed_by_phone: '', signature_name: '', signature_date: new Date().toISOString().split('T')[0],
+  signature_image: '', signature_title: '',
 };
 
 interface Props {
@@ -101,11 +116,28 @@ interface Props {
   pilotInCommand: string;
 }
 
+// Section 18 tag helpers
+const SECTION18_TAGS = [
+  { tag: 'PBN/', hint: 'e.g. A1B1C1D1' },
+  { tag: 'NAV/', hint: 'significant nav equipment' },
+  { tag: 'REG/', hint: 'registration if different' },
+  { tag: 'EET/', hint: 'e.g. FAOR0030' },
+  { tag: 'SEL/', hint: 'SELCAL code e.g. ABCD' },
+  { tag: 'DOF/', hint: 'date of flight YYMMDD' },
+  { tag: 'RMK/', hint: 'free-text remarks' },
+  { tag: 'OPR/', hint: 'operator name' },
+  { tag: 'STS/', hint: 'special status e.g. MEDEVAC' },
+];
+
 export function CA48FlightPlanDialog({
   open, onOpenChange, waypoints, groundSpeed, fuelBurnRate, fuelOnBoard,
   aircraftType, aircraftReg, pilotInCommand,
 }: Props) {
   const [form, setForm] = useState<CA48FormData>({ ...emptyForm });
+  const [showSigPad, setShowSigPad] = useState(false);
+  const sigCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [hasSigDrawn, setHasSigDrawn] = useState(false);
 
   // Auto-fill from current flight plan data when dialog opens
   useEffect(() => {
@@ -114,7 +146,6 @@ export function CA48FlightPlanDialog({
     const dest = waypoints[waypoints.length - 1];
     const routeStr = waypoints.slice(1, -1).map(w => w.icao || w.name.split(' ')[0]).join(' ');
 
-    // Calculate total EET
     let totalMin = 0;
     for (let i = 1; i < waypoints.length; i++) {
       const dist = calcDistanceNm(waypoints[i - 1].lat, waypoints[i - 1].lng, waypoints[i].lat, waypoints[i].lng);
@@ -123,13 +154,11 @@ export function CA48FlightPlanDialog({
     const eetHrs = Math.floor(totalMin / 60).toString().padStart(2, '0');
     const eetMin = Math.round(totalMin % 60).toString().padStart(2, '0');
 
-    // Endurance from fuel
     const enduranceMin = fuelOnBoard > 0 ? (fuelOnBoard / fuelBurnRate) * 60 : 0;
     const endHrs = Math.floor(enduranceMin / 60).toString().padStart(2, '0');
     const endMin = Math.round(enduranceMin % 60).toString().padStart(2, '0');
 
-    // Speed format: N + knots padded to 4
-    const speedStr = `N${groundSpeed.toString().padStart(4, '0')}`;
+    const speedVal = groundSpeed.toString().padStart(4, '0');
 
     setForm(prev => ({
       ...prev,
@@ -140,18 +169,116 @@ export function CA48FlightPlanDialog({
       dest_aero: dest?.icao || '',
       route: routeStr || 'DCT',
       total_eet: waypoints.length >= 2 ? `${eetHrs}${eetMin}` : '',
-      speed: speedStr,
+      speed_value: speedVal,
+      speed: `N${speedVal}`,
       endurance: fuelOnBoard > 0 ? `${endHrs}${endMin}` : '',
       other_info: `PBN/B2 DOF/${new Date().toISOString().slice(2, 10).replace(/-/g, '')}`,
     }));
   }, [open, waypoints, groundSpeed, fuelBurnRate, fuelOnBoard, aircraftType, aircraftReg, pilotInCommand]);
 
-  const update = (key: keyof CA48FormData, value: string | boolean) => {
+  const update = (key: keyof CA48FormData, value: string | boolean | string[]) => {
     setForm(prev => ({ ...prev, [key]: value }));
   };
 
+  // Update combined speed/level strings when prefix or value changes
+  const updateSpeed = (prefix: string, value: string) => {
+    setForm(prev => ({ ...prev, speed_prefix: prefix, speed_value: value, speed: `${prefix}${value}` }));
+  };
+  const updateLevel = (prefix: string, value: string) => {
+    setForm(prev => ({ ...prev, level_prefix: prefix, level_value: value, level: `${prefix}${value}` }));
+  };
+
+  // Update equipment string when codes change
+  const updateEquipment = (comnav: string[], surveillance: string[]) => {
+    setForm(prev => ({
+      ...prev,
+      comnav_codes: comnav,
+      surveillance_codes: surveillance,
+      equipment: buildEquipmentString(comnav, surveillance),
+    }));
+  };
+
+  // Section 18 tag insertion
+  const insertTag = (tag: string) => {
+    setForm(prev => {
+      const current = prev.other_info.trim();
+      if (current.includes(tag)) return prev;
+      return { ...prev, other_info: current ? `${current} ${tag}` : tag };
+    });
+  };
+
+  // ========== Signature Pad ==========
+  const initSigCanvas = useCallback(() => {
+    const canvas = sigCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, rect.width, rect.height);
+    ctx.strokeStyle = '#cccccc';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(20, rect.height - 20);
+    ctx.lineTo(rect.width - 20, rect.height - 20);
+    ctx.stroke();
+    ctx.strokeStyle = '#111111';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    setHasSigDrawn(false);
+  }, []);
+
+  useEffect(() => {
+    if (showSigPad) {
+      setTimeout(initSigCanvas, 100);
+    }
+  }, [showSigPad, initSigCanvas]);
+
+  const getPos = (e: React.MouseEvent | React.TouchEvent) => {
+    const canvas = sigCanvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    if ('touches' in e) {
+      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+    }
+    return { x: (e as React.MouseEvent).clientX - rect.left, y: (e as React.MouseEvent).clientY - rect.top };
+  };
+
+  const startDraw = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    setIsDrawing(true);
+    const ctx = sigCanvasRef.current?.getContext('2d');
+    if (!ctx) return;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  };
+  const draw = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const ctx = sigCanvasRef.current?.getContext('2d');
+    if (!ctx) return;
+    const pos = getPos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    setHasSigDrawn(true);
+  };
+  const endDraw = () => setIsDrawing(false);
+
+  const applySig = () => {
+    const canvas = sigCanvasRef.current;
+    if (!canvas) return;
+    const dataUrl = canvas.toDataURL('image/png');
+    update('signature_image', dataUrl);
+    setShowSigPad(false);
+    toast({ title: 'Signature applied', description: 'Digital signature added to your flight plan.' });
+  };
+
   const handleExport = () => {
-    // Build HTML that renders the CA48 form and triggers print
     const html = buildCA48HTML(form);
     const win = window.open('', '_blank');
     if (win) {
@@ -168,7 +295,7 @@ export function CA48FlightPlanDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-w-[95vw] sm:max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader className="px-3 sm:px-6 pt-4 sm:pt-6 pb-2">
           <DialogTitle className="font-mono text-primary tracking-wider flex items-center gap-2 text-xs sm:text-sm">
             <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -187,7 +314,7 @@ export function CA48FlightPlanDialog({
                   <Input value={form.priority} onChange={e => update('priority', e.target.value.toUpperCase())}
                     className="h-8 font-mono text-xs uppercase" placeholder="FF" />
                 </div>
-                <div className="col-span-3">
+                <div className="col-span-1 sm:col-span-3">
                   <Label className="font-mono text-[10px] text-muted-foreground">ADDRESSEE(S)</Label>
                   <Input value={form.addressees} onChange={e => update('addressees', e.target.value.toUpperCase())}
                     className="h-8 font-mono text-xs uppercase" placeholder="JNBXTYF" />
@@ -211,20 +338,21 @@ export function CA48FlightPlanDialog({
 
             {/* Items 7 & 8 */}
             <div className="space-y-2">
-              <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 7-8 — AIRCRAFT & FLIGHT RULES</h3>
+              <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 7-8 — AIRCRAFT ID & FLIGHT RULES</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">7 — AIRCRAFT ID</Label>
                   <Input value={form.aircraft_id} onChange={e => update('aircraft_id', e.target.value.toUpperCase())}
-                    className="h-8 font-mono text-xs uppercase" placeholder="ZS-ABC" />
+                    className="h-8 font-mono text-xs uppercase" placeholder="ZS-ABC" maxLength={7} />
+                  <span className="font-mono text-[8px] text-muted-foreground/50">Max 7 chars</span>
                 </div>
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">8 — FLIGHT RULES</Label>
                   <Select value={form.flight_rules} onValueChange={v => update('flight_rules', v)}>
                     <SelectTrigger className="h-8 font-mono text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="V">V — VFR</SelectItem>
                       <SelectItem value="I">I — IFR</SelectItem>
+                      <SelectItem value="V">V — VFR</SelectItem>
                       <SelectItem value="Y">Y — IFR then VFR</SelectItem>
                       <SelectItem value="Z">Z — VFR then IFR</SelectItem>
                     </SelectContent>
@@ -235,11 +363,11 @@ export function CA48FlightPlanDialog({
                   <Select value={form.type_of_flight} onValueChange={v => update('type_of_flight', v)}>
                     <SelectTrigger className="h-8 font-mono text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="S">S — Scheduled Air Service</SelectItem>
+                      <SelectItem value="N">N — Non-scheduled Transport</SelectItem>
                       <SelectItem value="G">G — General Aviation</SelectItem>
-                      <SelectItem value="S">S — Scheduled</SelectItem>
-                      <SelectItem value="N">N — Non-Scheduled</SelectItem>
                       <SelectItem value="M">M — Military</SelectItem>
-                      <SelectItem value="X">X — Other</SelectItem>
+                      <SelectItem value="X">X — Other (SAR, Test, etc.)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -248,10 +376,10 @@ export function CA48FlightPlanDialog({
 
             <Separator className="bg-muted/30" />
 
-            {/* Item 9 & 10 */}
+            {/* Item 9 */}
             <div className="space-y-2">
-              <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 9-10 — AIRCRAFT TYPE & EQUIPMENT</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 9 — AIRCRAFT TYPE & WAKE</h3>
+              <div className="grid grid-cols-3 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">NUMBER</Label>
                   <Input value={form.number} onChange={e => update('number', e.target.value)}
@@ -274,12 +402,20 @@ export function CA48FlightPlanDialog({
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label className="font-mono text-[10px] text-muted-foreground">10 — EQUIPMENT</Label>
-                  <Input value={form.equipment} onChange={e => update('equipment', e.target.value.toUpperCase())}
-                    className="h-8 font-mono text-xs uppercase" placeholder="S/C" />
-                </div>
               </div>
+            </div>
+
+            <Separator className="bg-muted/30" />
+
+            {/* Item 10 — Equipment & Surveillance */}
+            <div className="space-y-2">
+              <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 10 — EQUIPMENT & SURVEILLANCE</h3>
+              <ICAOEquipmentSelector
+                comnavCodes={form.comnav_codes}
+                surveillanceCodes={form.surveillance_codes}
+                onComnavChange={codes => updateEquipment(codes, form.surveillance_codes)}
+                onSurveillanceChange={codes => updateEquipment(form.comnav_codes, codes)}
+              />
             </div>
 
             <Separator className="bg-muted/30" />
@@ -291,7 +427,8 @@ export function CA48FlightPlanDialog({
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">DEPARTURE AERODROME</Label>
                   <Input value={form.departure_aero} onChange={e => update('departure_aero', e.target.value.toUpperCase())}
-                    className="h-8 font-mono text-xs uppercase" placeholder="FAGC" />
+                    className="h-8 font-mono text-xs uppercase" placeholder="FAGC" maxLength={4} />
+                  <span className="font-mono text-[8px] text-muted-foreground/50">4-letter ICAO (ZZZZ if none)</span>
                 </div>
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">TIME (UTC)</Label>
@@ -303,26 +440,53 @@ export function CA48FlightPlanDialog({
 
             <Separator className="bg-muted/30" />
 
-            {/* Item 15 */}
+            {/* Item 15 — Speed, Level & Route */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 15 — CRUISING SPEED, LEVEL & ROUTE</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
+                {/* Speed with prefix */}
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">CRUISING SPEED</Label>
-                  <Input value={form.speed} onChange={e => update('speed', e.target.value.toUpperCase())}
-                    className="h-8 font-mono text-xs uppercase" placeholder="N0110" />
+                  <div className="flex gap-1">
+                    <Select value={form.speed_prefix} onValueChange={v => updateSpeed(v, form.speed_value)}>
+                      <SelectTrigger className="h-8 font-mono text-xs w-16 shrink-0"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="N">N — Knots</SelectItem>
+                        <SelectItem value="M">M — Mach</SelectItem>
+                        <SelectItem value="K">K — km/h</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input value={form.speed_value}
+                      onChange={e => updateSpeed(form.speed_prefix, e.target.value)}
+                      className="h-8 font-mono text-xs" placeholder="0110" />
+                  </div>
+                  <span className="font-mono text-[8px] text-muted-foreground/50">e.g. N0110, M082, K0200</span>
                 </div>
+                {/* Level with prefix */}
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">LEVEL</Label>
-                  <Input value={form.level} onChange={e => update('level', e.target.value.toUpperCase())}
-                    className="h-8 font-mono text-xs uppercase" placeholder="A065" />
+                  <div className="flex gap-1">
+                    <Select value={form.level_prefix} onValueChange={v => updateLevel(v, form.level_value)}>
+                      <SelectTrigger className="h-8 font-mono text-xs w-16 shrink-0"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="F">F — Flight Level</SelectItem>
+                        <SelectItem value="A">A — Altitude (x100ft)</SelectItem>
+                        <SelectItem value="S">S — Std Metric (x10m)</SelectItem>
+                        <SelectItem value="VFR">VFR</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input value={form.level_value}
+                      onChange={e => updateLevel(form.level_prefix, e.target.value.toUpperCase())}
+                      className="h-8 font-mono text-xs uppercase" placeholder="065" />
+                  </div>
+                  <span className="font-mono text-[8px] text-muted-foreground/50">e.g. F350, A065, VFR</span>
                 </div>
-                <div className="col-span-1" />
               </div>
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">ROUTE</Label>
                 <Textarea value={form.route} onChange={e => update('route', e.target.value.toUpperCase())}
                   className="font-mono text-xs uppercase min-h-[50px]" placeholder="DCT" />
+                <span className="font-mono text-[8px] text-muted-foreground/50">DCT, airways, or waypoints</span>
               </div>
             </div>
 
@@ -335,7 +499,7 @@ export function CA48FlightPlanDialog({
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">DESTINATION</Label>
                   <Input value={form.dest_aero} onChange={e => update('dest_aero', e.target.value.toUpperCase())}
-                    className="h-8 font-mono text-xs uppercase" placeholder="FALA" />
+                    className="h-8 font-mono text-xs uppercase" placeholder="FALA" maxLength={4} />
                 </div>
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">TOTAL EET</Label>
@@ -345,23 +509,35 @@ export function CA48FlightPlanDialog({
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">ALTN AERODROME</Label>
                   <Input value={form.altn_aero} onChange={e => update('altn_aero', e.target.value.toUpperCase())}
-                    className="h-8 font-mono text-xs uppercase" placeholder="FAOR" />
+                    className="h-8 font-mono text-xs uppercase" placeholder="FAOR" maxLength={4} />
                 </div>
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">2ND ALTN</Label>
                   <Input value={form.altn_aero_2} onChange={e => update('altn_aero_2', e.target.value.toUpperCase())}
-                    className="h-8 font-mono text-xs uppercase" />
+                    className="h-8 font-mono text-xs uppercase" maxLength={4} />
                 </div>
               </div>
             </div>
 
             <Separator className="bg-muted/30" />
 
-            {/* Item 18 */}
+            {/* Item 18 — Other Information with tag helpers */}
             <div className="space-y-2">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 18 — OTHER INFORMATION</h3>
+              <div className="flex flex-wrap gap-1 mb-1">
+                {SECTION18_TAGS.map(t => (
+                  <Button key={t.tag} type="button" variant="outline" size="sm"
+                    className="h-5 px-1.5 font-mono text-[9px] gap-0.5"
+                    onClick={() => insertTag(t.tag)}
+                    title={t.hint}
+                  >
+                    <Plus className="h-2.5 w-2.5" />{t.tag}
+                  </Button>
+                ))}
+              </div>
               <Textarea value={form.other_info} onChange={e => update('other_info', e.target.value.toUpperCase())}
-                className="font-mono text-xs uppercase min-h-[50px]" placeholder="PBN/B2 DOF/260407" />
+                className="font-mono text-xs uppercase min-h-[60px]" placeholder="PBN/B2 DOF/260407" />
+              <span className="font-mono text-[8px] text-muted-foreground/50">Click tags above to insert. Common: PBN/, DOF/, NAV/, REG/, RMK/</span>
             </div>
 
             <Separator className="bg-muted/30" />
@@ -370,17 +546,17 @@ export function CA48FlightPlanDialog({
             <div className="space-y-3">
               <h3 className="font-mono text-[10px] text-primary tracking-widest">ITEM 19 — SUPPLEMENTARY INFORMATION</h3>
               <p className="font-mono text-[9px] text-muted-foreground/60">Not transmitted in FPL messages</p>
-              
+
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div>
-                  <Label className="font-mono text-[10px] text-muted-foreground">ENDURANCE (HHMM)</Label>
+                  <Label className="font-mono text-[10px] text-muted-foreground">ENDURANCE (E/HHMM)</Label>
                   <Input value={form.endurance} onChange={e => update('endurance', e.target.value)}
                     className="h-8 font-mono text-xs" placeholder="0200" maxLength={4} />
                 </div>
                 <div>
-                  <Label className="font-mono text-[10px] text-muted-foreground">PERSONS ON BOARD</Label>
+                  <Label className="font-mono text-[10px] text-muted-foreground">PERSONS ON BOARD (P/)</Label>
                   <Input value={form.pob} onChange={e => update('pob', e.target.value)}
-                    className="h-8 font-mono text-xs" placeholder="002" />
+                    className="h-8 font-mono text-xs" placeholder="002 or TBN" />
                 </div>
               </div>
 
@@ -388,19 +564,15 @@ export function CA48FlightPlanDialog({
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">EMERGENCY RADIO</Label>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                  {(['emergency_radio_uhf', 'UHF'] as const).length && (
-                    <>
-                      <label className="flex items-center gap-1.5 font-mono text-xs">
-                        <Checkbox checked={form.emergency_radio_uhf} onCheckedChange={v => update('emergency_radio_uhf', !!v)} /> UHF
-                      </label>
-                      <label className="flex items-center gap-1.5 font-mono text-xs">
-                        <Checkbox checked={form.emergency_radio_vhf} onCheckedChange={v => update('emergency_radio_vhf', !!v)} /> VHF
-                      </label>
-                      <label className="flex items-center gap-1.5 font-mono text-xs">
-                        <Checkbox checked={form.emergency_radio_elt} onCheckedChange={v => update('emergency_radio_elt', !!v)} /> ELT
-                      </label>
-                    </>
-                  )}
+                  <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
+                    <Checkbox checked={form.emergency_radio_uhf} onCheckedChange={v => update('emergency_radio_uhf', !!v)} /> U — UHF
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
+                    <Checkbox checked={form.emergency_radio_vhf} onCheckedChange={v => update('emergency_radio_vhf', !!v)} /> V — VHF
+                  </label>
+                  <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
+                    <Checkbox checked={form.emergency_radio_elt} onCheckedChange={v => update('emergency_radio_elt', !!v)} /> E — ELT
+                  </label>
                 </div>
               </div>
 
@@ -408,17 +580,17 @@ export function CA48FlightPlanDialog({
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">SURVIVAL EQUIPMENT</Label>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                  <label className="flex items-center gap-1.5 font-mono text-xs">
-                    <Checkbox checked={form.survival_polar} onCheckedChange={v => update('survival_polar', !!v)} /> Polar
+                  <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
+                    <Checkbox checked={form.survival_polar} onCheckedChange={v => update('survival_polar', !!v)} /> P — Polar
                   </label>
-                  <label className="flex items-center gap-1.5 font-mono text-xs">
-                    <Checkbox checked={form.survival_desert} onCheckedChange={v => update('survival_desert', !!v)} /> Desert
+                  <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
+                    <Checkbox checked={form.survival_desert} onCheckedChange={v => update('survival_desert', !!v)} /> D — Desert
                   </label>
-                  <label className="flex items-center gap-1.5 font-mono text-xs">
-                    <Checkbox checked={form.survival_maritime} onCheckedChange={v => update('survival_maritime', !!v)} /> Maritime
+                  <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
+                    <Checkbox checked={form.survival_maritime} onCheckedChange={v => update('survival_maritime', !!v)} /> M — Maritime
                   </label>
-                  <label className="flex items-center gap-1.5 font-mono text-xs">
-                    <Checkbox checked={form.survival_jungle} onCheckedChange={v => update('survival_jungle', !!v)} /> Jungle
+                  <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
+                    <Checkbox checked={form.survival_jungle} onCheckedChange={v => update('survival_jungle', !!v)} /> J — Jungle
                   </label>
                 </div>
               </div>
@@ -427,20 +599,17 @@ export function CA48FlightPlanDialog({
               <div>
                 <Label className="font-mono text-[10px] text-muted-foreground">JACKETS</Label>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                  <label className="flex items-center gap-1.5 font-mono text-xs">
-                    <Checkbox checked={form.jackets} onCheckedChange={v => update('jackets', !!v)} /> Jackets
+                  <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
+                    <Checkbox checked={form.jackets_light} onCheckedChange={v => update('jackets_light', !!v)} /> L — Light
                   </label>
-                  <label className="flex items-center gap-1.5 font-mono text-xs">
-                    <Checkbox checked={form.jackets_light} onCheckedChange={v => update('jackets_light', !!v)} /> Light
+                  <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
+                    <Checkbox checked={form.jackets_fluores} onCheckedChange={v => update('jackets_fluores', !!v)} /> F — Fluorescent
                   </label>
-                  <label className="flex items-center gap-1.5 font-mono text-xs">
-                    <Checkbox checked={form.jackets_fluores} onCheckedChange={v => update('jackets_fluores', !!v)} /> Fluores
+                  <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
+                    <Checkbox checked={form.jackets_uhf} onCheckedChange={v => update('jackets_uhf', !!v)} /> U — UHF
                   </label>
-                  <label className="flex items-center gap-1.5 font-mono text-xs">
-                    <Checkbox checked={form.jackets_uhf} onCheckedChange={v => update('jackets_uhf', !!v)} /> UHF
-                  </label>
-                  <label className="flex items-center gap-1.5 font-mono text-xs">
-                    <Checkbox checked={form.jackets_vhf} onCheckedChange={v => update('jackets_vhf', !!v)} /> VHF
+                  <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
+                    <Checkbox checked={form.jackets_vhf} onCheckedChange={v => update('jackets_vhf', !!v)} /> V — VHF
                   </label>
                 </div>
               </div>
@@ -460,7 +629,7 @@ export function CA48FlightPlanDialog({
                       className="h-7 font-mono text-xs" />
                   </div>
                   <div className="flex items-end pb-0.5">
-                    <label className="flex items-center gap-1.5 font-mono text-xs">
+                    <label className="flex items-center gap-1.5 font-mono text-xs cursor-pointer">
                       <Checkbox checked={form.dinghies_cover} onCheckedChange={v => update('dinghies_cover', !!v)} /> Cover
                     </label>
                   </div>
@@ -486,11 +655,18 @@ export function CA48FlightPlanDialog({
                   className="font-mono text-xs uppercase min-h-[40px]" />
               </div>
 
-              {/* PIC */}
-              <div>
-                <Label className="font-mono text-[10px] text-muted-foreground">PILOT IN COMMAND</Label>
-                <Input value={form.pic} onChange={e => update('pic', e.target.value.toUpperCase())}
-                  className="h-8 font-mono text-xs uppercase" />
+              {/* PIC + Telephone */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">PILOT IN COMMAND</Label>
+                  <Input value={form.pic} onChange={e => update('pic', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" />
+                </div>
+                <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">PIC TELEPHONE</Label>
+                  <Input value={form.pic_telephone} onChange={e => update('pic_telephone', e.target.value)}
+                    className="h-8 font-mono text-xs" placeholder="+27..." />
+                </div>
               </div>
             </div>
 
@@ -498,7 +674,7 @@ export function CA48FlightPlanDialog({
 
             {/* Filed By / Signature */}
             <div className="space-y-2">
-              <h3 className="font-mono text-[10px] text-primary tracking-widest">FILED BY</h3>
+              <h3 className="font-mono text-[10px] text-primary tracking-widest">FILED BY & AUTHORIZATION</h3>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">FILED BY</Label>
@@ -511,17 +687,72 @@ export function CA48FlightPlanDialog({
                     className="h-8 font-mono text-xs" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">NAME IN BLOCK LETTERS</Label>
                   <Input value={form.signature_name} onChange={e => update('signature_name', e.target.value.toUpperCase())}
                     className="h-8 font-mono text-xs uppercase" />
                 </div>
                 <div>
+                  <Label className="font-mono text-[10px] text-muted-foreground">TITLE / CAPACITY</Label>
+                  <Input value={form.signature_title} onChange={e => update('signature_title', e.target.value.toUpperCase())}
+                    className="h-8 font-mono text-xs uppercase" placeholder="PIC" />
+                </div>
+                <div>
                   <Label className="font-mono text-[10px] text-muted-foreground">DATE</Label>
                   <Input value={form.signature_date} onChange={e => update('signature_date', e.target.value)}
-                    className="h-8 font-mono text-xs" placeholder="2026-04-07" />
+                    className="h-8 font-mono text-xs" placeholder="2026-04-13" />
                 </div>
+              </div>
+
+              {/* Digital Signature */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="font-mono text-[10px] text-muted-foreground">DIGITAL SIGNATURE</Label>
+                  {form.signature_image ? (
+                    <Button variant="ghost" size="sm" className="h-5 text-[9px] font-mono text-destructive"
+                      onClick={() => update('signature_image', '')}>
+                      Clear
+                    </Button>
+                  ) : null}
+                </div>
+
+                {form.signature_image ? (
+                  <div className="border rounded p-2 bg-white flex items-center gap-3">
+                    <img src={form.signature_image} alt="Signature" className="h-12 object-contain" />
+                    <span className="font-mono text-[9px] text-green-600">✓ Signature applied</span>
+                  </div>
+                ) : !showSigPad ? (
+                  <Button variant="outline" size="sm" className="font-mono text-xs gap-1.5 w-full" onClick={() => setShowSigPad(true)}>
+                    <PenLine className="h-3.5 w-3.5" /> Sign Document
+                  </Button>
+                ) : (
+                  <div className="border rounded p-2 space-y-2">
+                    <canvas
+                      ref={sigCanvasRef}
+                      className="w-full border rounded cursor-crosshair touch-none bg-white"
+                      style={{ height: 120 }}
+                      onMouseDown={startDraw}
+                      onMouseMove={draw}
+                      onMouseUp={endDraw}
+                      onMouseLeave={endDraw}
+                      onTouchStart={startDraw}
+                      onTouchMove={draw}
+                      onTouchEnd={endDraw}
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <Button variant="ghost" size="sm" className="h-6 text-[10px] font-mono gap-1" onClick={initSigCanvas}>
+                        <Eraser className="h-3 w-3" />Clear
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-6 text-[10px] font-mono" onClick={() => setShowSigPad(false)}>
+                        Cancel
+                      </Button>
+                      <Button size="sm" className="h-6 text-[10px] font-mono" onClick={applySig} disabled={!hasSigDrawn}>
+                        Apply Signature
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -551,6 +782,11 @@ function buildCA48HTML(f: CA48FormData): string {
       <div style="font-size:7pt;color:#555">${label}</div>
       <div style="font-weight:bold;font-size:11pt;letter-spacing:1px;min-height:16px">${value}</div>
     </td>`;
+
+  const sigBlock = f.signature_image
+    ? `<div style="margin-top:4px"><img src="${f.signature_image}" style="max-height:50px;margin-bottom:2px" /><br>
+       <span style="font-size:7pt;color:#555">${f.signature_title ? f.signature_title : ''}</span></div>`
+    : '<br><br>';
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>ICAO Flight Plan CA48</title>
 <style>
@@ -664,7 +900,7 @@ function buildCA48HTML(f: CA48FormData): string {
   <!-- Item 19 -->
   <tr>
     <td colspan="2"><span class="section-label">19 ENDURANCE</span><br>
-      <span class="field-value-sm">- E / <span class="field-value">${f.endurance.slice(0,2) || '__'}</span> Hr <span class="field-value">${f.endurance.slice(2,4) || '__'}</span> Min</span>
+      <span class="field-value-sm">- E / <span class="field-value">${f.endurance.slice(0, 2) || '__'}</span> Hr <span class="field-value">${f.endurance.slice(2, 4) || '__'}</span> Min</span>
     </td>
     <td colspan="2"><span class="section-label">PERSONS ON BOARD</span><br>
       <span class="field-value">→P / ${f.pob}</span>
@@ -721,8 +957,11 @@ function buildCA48HTML(f: CA48FormData): string {
 
   <!-- PIC -->
   <tr>
-    <td colspan="8"><span class="section-label">PILOT IN COMMAND</span><br>
-      <span class="field-value">C / ${f.pic}</span> <span class="arrows">) &lt;&lt;≡</span>
+    <td colspan="4"><span class="section-label">PILOT IN COMMAND</span><br>
+      <span class="field-value">C / ${f.pic}</span>
+    </td>
+    <td colspan="4"><span class="section-label">PIC TELEPHONE</span><br>
+      <span class="field-value-sm">${f.pic_telephone}</span> <span class="arrows">) &lt;&lt;≡</span>
     </td>
   </tr>
 
@@ -741,7 +980,7 @@ function buildCA48HTML(f: CA48FormData): string {
 
   <!-- Signature -->
   <tr>
-    <td colspan="3" style="min-height:40px;padding:8px"><span class="section-label" style="font-weight:bold">SIGNATURE AND CAPACITY</span><br><br><br></td>
+    <td colspan="3" style="min-height:40px;padding:8px"><span class="section-label" style="font-weight:bold">SIGNATURE AND CAPACITY</span>${sigBlock}</td>
     <td colspan="3"><span class="section-label" style="font-weight:bold">NAME IN BLOCK LETTERS</span><br><div class="field-value" style="padding-top:8px">${f.signature_name}</div></td>
     <td colspan="2"><span class="section-label" style="font-weight:bold">DATE</span><br><div class="field-value" style="padding-top:8px">${f.signature_date}</div></td>
   </tr>
