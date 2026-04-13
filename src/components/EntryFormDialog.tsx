@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { MapPin } from 'lucide-react';
 
 interface EntryFormDialogProps {
   open: boolean;
@@ -26,6 +27,8 @@ const fields: { key: keyof Omit<LogbookEntry, 'id'>; label: string; type: string
   { key: 'instrumentTime', label: 'Time (13)', type: 'number', half: true, section: 'Instrument Flying' },
   { key: 'instructorDay', label: 'Day (14)', type: 'number', half: true, section: 'Flying as Instructor' },
   { key: 'instructorNight', label: 'Night (15)', type: 'number', half: true },
+  { key: 'latitude', label: 'Latitude', type: 'coord', half: true, section: 'Landing Zone (Optional)' },
+  { key: 'longitude', label: 'Longitude', type: 'coord', half: true },
 ];
 
 const numericKeys = [
