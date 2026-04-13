@@ -380,6 +380,7 @@ export function LogbookBookView({ entries, onEdit, onDelete }: LogbookBookViewPr
         <Button
           variant="ghost"
           size="sm"
+          data-book-export
           onClick={() => {
             setExportFrom(currentSpread + 1);
             setExportTo(totalSpreads);
