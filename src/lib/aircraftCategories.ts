@@ -34,7 +34,7 @@ const SIMULATOR_CODES = new Set([
 // Helicopter — Piston
 const HELI_PISTON_CODES = new Set([
   'R22', 'RH22', 'RH-22', 'R-22', 'R 22', 'RH 22',
-  'R44', 'RH44', 'RH-44', 'R-44', 'R 44', 'RH 44',
+  'R44', 'RH44', 'RH-44', 'R-44', 'R 44', 'RH 44', 'RH40',
   'H269', 'S269', 'S300', 'S-300', '269', '300C', '300CB', '300CBI',
   'CABR', 'G2CA',
   'EN28', 'E28F', 'EN480',
@@ -49,6 +49,7 @@ const HELI_PISTON_CODES = new Set([
   'SKYL',
   'RWAY',
   'G2GB', 'B47G2',
+  'RHC',
 ]);
 
 // Helicopter — Turbine
@@ -112,7 +113,7 @@ const FW_PISTON_CODES = new Set([
   'J3', 'PA11',
   'AN2', 'AN-2',
   'PTS2', 'PITTS',
-  'TC06', 'SLING', 'SLING2', 'SLING4',
+  'TC06', 'TC-06', 'TC 06', 'SLING', 'SLING2', 'SLING4',
   'AT01', 'AT-6', 'T6',
   'Z42', 'Z142', 'Z242',
   'S22T', 'SR22T',
