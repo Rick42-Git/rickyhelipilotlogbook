@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { LogbookEntry, NumericField } from '@/types/logbook';
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
+import { classifyAircraft, AircraftCategory, CATEGORY_SHORT } from '@/lib/aircraftCategories';
 
 interface MobileSummaryPanelProps {
   totals: Record<NumericField, number>;
@@ -8,78 +9,109 @@ interface MobileSummaryPanelProps {
   entries: LogbookEntry[];
 }
 
-const PISTON_TYPES = new Set(['RH-22', 'RH-44', 'H269', 'C172', 'TC06', 'FNTP II', 'FSTD I', 'FSTD II']);
-
-function getTypeTotals(entries: LogbookEntry[]) {
-  const map: Record<string, { hours: number; flights: number }> = {};
-  for (const e of entries) {
-    const type = normalizeAircraftType(e.aircraftType || 'Unknown');
-    if (!map[type]) map[type] = { hours: 0, flights: 0 };
-    map[type].flights += 1;
-    map[type].hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
-  }
-  return Object.entries(map).sort((a, b) => b[1].hours - a[1].hours);
+function getEntryHours(e: LogbookEntry) {
+  return (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
 }
 
-function getTurbineTotals(entries: LogbookEntry[]) {
-  let hours = 0, flights = 0;
+function getCategoryTotals(entries: LogbookEntry[]) {
+  const cats: Record<AircraftCategory, { hours: number; flights: number }> = {
+    heli_piston: { hours: 0, flights: 0 },
+    heli_turbine: { hours: 0, flights: 0 },
+    fw_piston: { hours: 0, flights: 0 },
+    fw_turbine: { hours: 0, flights: 0 },
+    simulator: { hours: 0, flights: 0 },
+    unknown: { hours: 0, flights: 0 },
+  };
+  const typeByCat: Record<AircraftCategory, Record<string, { hours: number; flights: number }>> = {
+    heli_piston: {}, heli_turbine: {}, fw_piston: {}, fw_turbine: {}, simulator: {}, unknown: {},
+  };
   for (const e of entries) {
-    const type = normalizeAircraftType(e.aircraftType || '');
-    if (!PISTON_TYPES.has(type.toUpperCase()) && !PISTON_TYPES.has(type)) {
-      flights += 1;
-      hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
-    }
+    const type = normalizeAircraftType(e.aircraftType || 'Unknown');
+    const cat = classifyAircraft(type);
+    const hrs = getEntryHours(e);
+    cats[cat].hours += hrs;
+    cats[cat].flights += 1;
+    if (!typeByCat[cat][type]) typeByCat[cat][type] = { hours: 0, flights: 0 };
+    typeByCat[cat][type].hours += hrs;
+    typeByCat[cat][type].flights += 1;
   }
-  return { hours, flights };
+  return { cats, typeByCat };
 }
 
 const GAME_PATTERNS = ['game', 'sgp', 'capture', 'darting', 'zebra', 'eland', 'buffalo', 'rhino', 'elephant', 'giraffe', 'hippo', 'lion', 'leopard', 'cheetah', 'wildebeest', 'kudu', 'impala', 'nyala', 'sable', 'roan', 'waterbuck', 'warthog', 'crocodile', 'wild dog', 'hyena', 'springbok', 'gemsbok', 'oryx', 'tsessebe', 'blesbok', 'bontebok', 'bushbuck', 'duiker', 'steenbok', 'klipspringer', 'hartebeest'];
-
-function getGameTotals(entries: LogbookEntry[]) {
-  let hours = 0, flights = 0;
-  for (const e of entries) {
-    const details = (e.flightDetails || '').toLowerCase();
-    if (GAME_PATTERNS.some(p => details.includes(p))) {
-      flights += 1;
-      hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
-    }
-  }
-  return { hours, flights };
-}
-
 const CROSS_COUNTRY_PATTERNS = [' to ', '->', '→', '-', 'nav', 'transnet', 'pipeline'];
 
-function getCrossCountryTotals(entries: LogbookEntry[]) {
+function getPatternTotals(entries: LogbookEntry[], patterns: string[]) {
   let hours = 0, flights = 0;
   for (const e of entries) {
     const details = (e.flightDetails || '').toLowerCase();
-    if (CROSS_COUNTRY_PATTERNS.some(p => details.includes(p))) {
+    if (patterns.some(p => details.includes(p))) {
       flights += 1;
-      hours += (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
+      hours += getEntryHours(e);
     }
   }
   return { hours, flights };
 }
+
+const CAT_ORDER: AircraftCategory[] = ['heli_piston', 'heli_turbine', 'fw_piston', 'fw_turbine', 'simulator', 'unknown'];
+const CAT_BORDER: Record<AircraftCategory, string> = {
+  heli_piston: 'border-primary/30',
+  heli_turbine: 'border-accent/30',
+  fw_piston: 'border-success/30',
+  fw_turbine: 'border-destructive/30',
+  simulator: 'border-muted-foreground/30',
+  unknown: 'border-border',
+};
+const CAT_TEXT: Record<AircraftCategory, string> = {
+  heli_piston: 'text-primary',
+  heli_turbine: 'text-accent',
+  fw_piston: 'text-success',
+  fw_turbine: 'text-destructive',
+  simulator: 'text-muted-foreground',
+  unknown: 'text-muted-foreground',
+};
 
 export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummaryPanelProps) {
   const grandTotal = totals.seDayDual + totals.seDayPilot + totals.seNightDual + totals.seNightPilot;
   const totalDay = totals.seDayDual + totals.seDayPilot;
   const totalNight = totals.seNightDual + totals.seNightPilot;
   const totalInstruction = totals.instructorDay + totals.instructorNight;
-  const typeTotals = useMemo(() => getTypeTotals(entries), [entries]);
-  const turbineTotals = useMemo(() => getTurbineTotals(entries), [entries]);
-  const gameTotals = useMemo(() => getGameTotals(entries), [entries]);
-  const crossCountryTotals = useMemo(() => getCrossCountryTotals(entries), [entries]);
+  const { cats, typeByCat } = useMemo(() => getCategoryTotals(entries), [entries]);
+  const gameTotals = useMemo(() => getPatternTotals(entries, GAME_PATTERNS), [entries]);
+  const crossCountryTotals = useMemo(() => getPatternTotals(entries, CROSS_COUNTRY_PATTERNS), [entries]);
+
+  const heliTotal = cats.heli_piston.hours + cats.heli_turbine.hours;
+  const heliFlights = cats.heli_piston.flights + cats.heli_turbine.flights;
+  const fwTotal = cats.fw_piston.hours + cats.fw_turbine.hours;
+  const fwFlights = cats.fw_piston.flights + cats.fw_turbine.flights;
 
   return (
     <div className="flex flex-col gap-2 overflow-y-auto pb-14">
-      {/* Hero total — compact */}
+      {/* Hero total */}
       <div className="bg-card border border-success/20 rounded-lg px-3 py-2 flex items-center justify-between">
         <div>
           <p className="font-mono text-[8px] text-muted-foreground uppercase tracking-widest">Total Hours</p>
           <span className="font-mono text-2xl font-bold text-success leading-none">{grandTotal.toFixed(1)}</span>
         </div>
         <span className="font-mono text-[10px] text-muted-foreground">{entryCount} flights</span>
+      </div>
+
+      {/* Helicopter vs Fixed-Wing */}
+      <div className="grid grid-cols-2 gap-1.5">
+        {heliFlights > 0 && (
+          <div className="bg-card border border-primary/20 rounded px-2 py-1.5 text-center">
+            <p className="font-mono text-[7px] text-primary uppercase tracking-wider">🚁 Helicopter</p>
+            <span className="font-mono text-sm font-bold text-foreground leading-none">{heliTotal.toFixed(1)}</span>
+            <p className="font-mono text-[7px] text-muted-foreground">{heliFlights} flights</p>
+          </div>
+        )}
+        {fwFlights > 0 && (
+          <div className="bg-card border border-success/20 rounded px-2 py-1.5 text-center">
+            <p className="font-mono text-[7px] text-success uppercase tracking-wider">✈ Fixed-Wing</p>
+            <span className="font-mono text-sm font-bold text-foreground leading-none">{fwTotal.toFixed(1)}</span>
+            <p className="font-mono text-[7px] text-muted-foreground">{fwFlights} flights</p>
+          </div>
+        )}
       </div>
 
       {/* Quick stats row */}
@@ -95,6 +127,31 @@ export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummar
           </div>
         ))}
       </div>
+
+      {/* Category cards */}
+      {CAT_ORDER.filter(c => cats[c].flights > 0).map(cat => {
+        const typeEntries = Object.entries(typeByCat[cat]).sort((a, b) => b[1].hours - a[1].hours);
+        return (
+          <div key={cat} className={`bg-card border ${CAT_BORDER[cat]} rounded-lg px-3 py-2`}>
+            <div className="flex items-center justify-between mb-1">
+              <span className={`font-mono text-[8px] ${CAT_TEXT[cat]} uppercase tracking-widest font-semibold`}>
+                {CATEGORY_SHORT[cat]}
+              </span>
+              <span className="font-mono text-xs font-bold text-foreground">{cats[cat].hours.toFixed(1)}<span className="text-[8px] text-muted-foreground ml-0.5">({cats[cat].flights})</span></span>
+            </div>
+            {typeEntries.length > 1 && (
+              <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 border-t border-border/30 pt-1">
+                {typeEntries.map(([type, data]) => (
+                  <div key={type} className="flex items-center justify-between">
+                    <span className="font-mono text-[8px] text-muted-foreground truncate mr-1">{type}</span>
+                    <span className="font-mono text-[9px] font-semibold text-foreground shrink-0">{data.hours.toFixed(1)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
 
       {/* Breakdown */}
       <div className="bg-card border border-border rounded-lg px-3 py-2">
@@ -117,30 +174,9 @@ export function MobileSummaryPanel({ totals, entryCount, entries }: MobileSummar
         </div>
       </div>
 
-      {/* Aircraft types */}
-      {typeTotals.length > 0 && (
-        <div className="bg-card border border-border rounded-lg px-3 py-2">
-          <h3 className="font-mono text-[8px] text-accent uppercase tracking-widest mb-1.5">By Type</h3>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
-            {typeTotals.map(([type, data]) => (
-              <div key={type} className="flex items-center justify-between">
-                <span className="font-mono text-[9px] text-muted-foreground truncate mr-1">{type}</span>
-                <span className="font-mono text-[10px] font-semibold text-foreground shrink-0">{data.hours.toFixed(1)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Turbine & Game in one row */}
-      {(turbineTotals.flights > 0 || gameTotals.flights > 0 || crossCountryTotals.flights > 0) && (
-        <div className="grid grid-cols-3 gap-1.5">
-          {turbineTotals.flights > 0 && (
-            <div className="bg-card border border-accent/20 rounded px-2 py-1.5 flex items-center justify-between">
-              <span className="font-mono text-[8px] text-accent uppercase">Turbine</span>
-              <span className="font-mono text-xs font-bold text-foreground">{turbineTotals.hours.toFixed(1)}</span>
-            </div>
-          )}
+      {/* Game & X-Country */}
+      {(gameTotals.flights > 0 || crossCountryTotals.flights > 0) && (
+        <div className="grid grid-cols-2 gap-1.5">
           {gameTotals.flights > 0 && (
             <div className="bg-card border border-accent/20 rounded px-2 py-1.5 flex items-center justify-between">
               <span className="font-mono text-[8px] text-accent uppercase">Game</span>
