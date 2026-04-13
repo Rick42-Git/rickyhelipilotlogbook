@@ -906,13 +906,13 @@ function buildCA48HTML(f: CA48FormData): string {
       <span class="field-value">→P / ${f.pob}</span>
     </td>
     <td colspan="1" style="text-align:center"><span class="section-label">UHF</span><br>
-      <span class="field-value">${f.emergency_radio_uhf ? '☑' : '☐'} U</span>
+      <span class="field-value">${f.emergency_radio_uhf ? '☑' : '☒'} U</span>
     </td>
     <td colspan="1" style="text-align:center"><span class="section-label">VHF</span><br>
-      <span class="field-value">${f.emergency_radio_vhf ? '☑' : '☐'} V</span>
+      <span class="field-value">${f.emergency_radio_vhf ? '☑' : '☒'} V</span>
     </td>
     <td colspan="2" style="text-align:center"><span class="section-label">ELT</span><br>
-      <span class="field-value">${f.emergency_radio_elt ? '☑' : '☐'} E</span>
+      <span class="field-value">${f.emergency_radio_elt ? '☑' : '☒'} E</span>
     </td>
   </tr>
 
