@@ -194,6 +194,9 @@ addSet(FW_TURBINE_CODES, 'fw_turbine');
 export function classifyAircraft(normalizedType: string): AircraftCategory {
   const upper = normalizedType.trim().toUpperCase();
   
+  // Skip empty / garbage entries
+  if (!upper || upper.length < 2) return 'unknown';
+
   // Direct match
   const direct = categoryMap.get(upper);
   if (direct) return direct;
@@ -203,10 +206,20 @@ export function classifyAircraft(normalizedType: string): AircraftCategory {
   const directCompact = categoryMap.get(compact);
   if (directCompact) return directCompact;
 
-  // Partial matching for common prefixes
-  for (const [code, cat] of categoryMap) {
-    if (upper.startsWith(code) || code.startsWith(upper)) {
-      return cat;
+  // Partial matching — only when the input is at least 3 chars
+  // and only match input-starts-with-code (not code-starts-with-input)
+  // to prevent short inputs from false-matching across categories
+  if (upper.length >= 3) {
+    for (const [code, cat] of categoryMap) {
+      if (upper.startsWith(code) && code.length >= 2) {
+        return cat;
+      }
+    }
+    // Reverse: code starts with input, but only if input is specific enough
+    for (const [code, cat] of categoryMap) {
+      if (code.startsWith(upper) && upper.length >= 3) {
+        return cat;
+      }
     }
   }
 
