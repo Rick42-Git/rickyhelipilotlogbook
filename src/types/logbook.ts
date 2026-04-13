@@ -20,6 +20,10 @@ export interface LogbookEntry {
   // Flying as Instructor
   instructorDay: number;   // Col 14
   instructorNight: number; // Col 15
+
+  // Landing coordinates (optional)
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export const emptyEntry: Omit<LogbookEntry, 'id'> = {
@@ -35,6 +39,8 @@ export const emptyEntry: Omit<LogbookEntry, 'id'> = {
   instrumentTime: 0,
   instructorDay: 0,
   instructorNight: 0,
+  latitude: null,
+  longitude: null,
 };
 
 export type NumericField =
