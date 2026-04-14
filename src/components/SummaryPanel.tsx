@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { LogbookEntry, numericFieldLabels, NumericField } from '@/types/logbook';
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 import { classifyAircraft, AircraftCategory, CATEGORY_LABELS } from '@/lib/aircraftCategories';
