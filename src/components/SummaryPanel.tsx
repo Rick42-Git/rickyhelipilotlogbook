@@ -3,6 +3,7 @@ import { LogbookEntry, numericFieldLabels, NumericField } from '@/types/logbook'
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 import { classifyAircraft, AircraftCategory, CATEGORY_LABELS } from '@/lib/aircraftCategories';
 import { LandingsMap } from '@/components/LandingsMap';
+import { Sun, Moon, Gauge, GraduationCap } from 'lucide-react';
 
 interface SummaryPanelProps {
   totals: Record<NumericField, number>;
