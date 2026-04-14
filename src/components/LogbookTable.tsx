@@ -82,13 +82,13 @@ const columns: ColumnDef[] = [
     className: 'w-[320px] min-w-[320px] xl:w-[420px] xl:min-w-[420px]',
     render: e => <span className="block w-full overflow-hidden truncate text-muted-foreground">{e.flightDetails}</span>,
   },
-  { key: 'seDayDual', label: 'SE Day Dual', shortLabel: 'SE D-Dual', render: e => <span className="text-primary font-semibold">{fmt(e.seDayDual)}</span> },
-  { key: 'seDayPilot', label: 'SE Day Pilot', shortLabel: 'SE D-Pilot', render: e => fmt(e.seDayPilot) },
-  { key: 'seNightDual', label: 'SE Night Dual', shortLabel: 'SE N-Dual', render: e => <span className="text-destructive font-semibold">{fmt(e.seNightDual)}</span> },
-  { key: 'seNightPilot', label: 'SE Night Pilot', shortLabel: 'SE N-Pilot', render: e => <span className="text-destructive font-semibold">{fmt(e.seNightPilot)}</span> },
-  { key: 'instrTm', label: 'Instrument Time', shortLabel: 'IFR Time', render: e => fmt(e.instrumentTime) },
-  { key: 'instDay', label: 'Instructor Day', shortLabel: 'FI Day', render: e => fmt(e.instructorDay) },
-  { key: 'instNgt', label: 'Instructor Night', shortLabel: 'FI Ngt', render: e => <span className="text-destructive font-semibold">{fmt(e.instructorNight)}</span> },
+  { key: 'seDayDual', label: 'SE Day Dual', shortLabel: 'SE D-Dual', className: 'w-[70px]', render: e => <span className="text-primary font-semibold">{fmt(e.seDayDual)}</span> },
+  { key: 'seDayPilot', label: 'SE Day Pilot', shortLabel: 'SE D-Pilot', className: 'w-[70px]', render: e => fmt(e.seDayPilot) },
+  { key: 'seNightDual', label: 'SE Night Dual', shortLabel: 'SE N-Dual', className: 'w-[70px]', render: e => <span className="text-destructive font-semibold">{fmt(e.seNightDual)}</span> },
+  { key: 'seNightPilot', label: 'SE Night Pilot', shortLabel: 'SE N-Pilot', className: 'w-[70px]', render: e => <span className="text-destructive font-semibold">{fmt(e.seNightPilot)}</span> },
+  { key: 'instrTm', label: 'Instrument Time', shortLabel: 'IFR Time', className: 'w-[65px]', render: e => fmt(e.instrumentTime) },
+  { key: 'instDay', label: 'Instructor Day', shortLabel: 'FI Day', className: 'w-[55px]', render: e => fmt(e.instructorDay) },
+  { key: 'instNgt', label: 'Instructor Night', shortLabel: 'FI Ngt', className: 'w-[55px]', render: e => <span className="text-destructive font-semibold">{fmt(e.instructorNight)}</span> },
 ];
 
 const defaultVisible = new Set(columns.map(c => c.key));
@@ -300,7 +300,7 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
       </div>
       <div className="relative overflow-x-auto">
         <img src={helicopterWatermark} alt="" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-auto opacity-[0.04] pointer-events-none select-none" />
-        <table className="w-full min-w-[1500px] text-sm table-fixed relative z-10">
+        <table className="w-full min-w-[1100px] text-sm table-fixed relative z-10">
           <thead className="sticky top-[52px] z-30 bg-card">
             <tr className="border-b border-border">
               {activeCols.map(col => {
