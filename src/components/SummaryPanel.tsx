@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { LogbookEntry, numericFieldLabels, NumericField } from '@/types/logbook';
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 import { classifyAircraft, AircraftCategory, CATEGORY_LABELS } from '@/lib/aircraftCategories';
 import { LandingsMap } from '@/components/LandingsMap';
-import { Sun, Moon, Gauge, GraduationCap } from 'lucide-react';
+import { Sun, Moon, Gauge, GraduationCap, ChevronRight } from 'lucide-react';
 
 interface SummaryPanelProps {
   totals: Record<NumericField, number>;
@@ -27,19 +27,26 @@ function getCategoryTotals(entries: LogbookEntry[]) {
   const typeByCat: Record<AircraftCategory, Record<string, { hours: number; flights: number }>> = {
     heli_piston: {}, heli_turbine: {}, fw_piston: {}, fw_turbine: {}, simulator: {}, unknown: {},
   };
+  // Per-type, per-registration breakdown
+  const regByType: Record<string, Record<string, { hours: number; flights: number }>> = {};
 
   for (const e of entries) {
     const type = normalizeAircraftType(e.aircraftType || 'Unknown');
     const cat = classifyAircraft(type);
     const hrs = getEntryHours(e);
+    const reg = (e.aircraftReg || 'Unknown').toUpperCase();
     cats[cat].hours += hrs;
     cats[cat].flights += 1;
     if (!typeByCat[cat][type]) typeByCat[cat][type] = { hours: 0, flights: 0 };
     typeByCat[cat][type].hours += hrs;
     typeByCat[cat][type].flights += 1;
+    if (!regByType[type]) regByType[type] = {};
+    if (!regByType[type][reg]) regByType[type][reg] = { hours: 0, flights: 0 };
+    regByType[type][reg].hours += hrs;
+    regByType[type][reg].flights += 1;
   }
 
-  return { cats, typeByCat };
+  return { cats, typeByCat, regByType };
 }
 
 const GAME_PATTERNS = ['game', 'sgp', 'capture', 'darting', 'zebra', 'eland', 'buffalo', 'rhino', 'elephant', 'giraffe', 'hippo', 'lion', 'leopard', 'cheetah', 'wildebeest', 'kudu', 'impala', 'nyala', 'sable', 'roan', 'waterbuck', 'warthog', 'crocodile', 'wild dog', 'hyena', 'springbok', 'gemsbok', 'oryx', 'tsessebe', 'blesbok', 'bontebok', 'bushbuck', 'duiker', 'steenbok', 'klipspringer', 'hartebeest'];
@@ -57,6 +64,40 @@ function getPatternTotals(entries: LogbookEntry[], patterns: string[]) {
   return { hours, flights };
 }
 
+function TypeRow({ type, data, regByType, expandedType, setExpandedType }: {
+  type: string; data: { hours: number; flights: number };
+  regByType: Record<string, Record<string, { hours: number; flights: number }>>;
+  expandedType: string | null; setExpandedType: (t: string | null) => void;
+}) {
+  const isExpanded = expandedType === type;
+  const regs = regByType[type] || {};
+  const hasMultipleRegs = Object.keys(regs).length > 1;
+  return (
+    <div>
+      <div
+        className={`flex items-center justify-between cursor-pointer rounded px-1 -mx-1 transition-colors ${isExpanded ? 'bg-primary/10' : 'hover:bg-muted/30'}`}
+        onClick={() => setExpandedType(isExpanded ? null : type)}
+      >
+        <span className="font-mono text-[9px] text-muted-foreground inline-flex items-center gap-1">
+          {hasMultipleRegs && <ChevronRight className={`h-2.5 w-2.5 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />}
+          {type || '(empty)'}
+        </span>
+        <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
+      </div>
+      {isExpanded && (
+        <div className="ml-4 mt-0.5 mb-1 space-y-0.5 border-l-2 border-primary/20 pl-2">
+          {Object.entries(regs).sort((a, b) => b[1].hours - a[1].hours).map(([reg, rd]) => (
+            <div key={reg} className="flex items-center justify-between">
+              <span className="font-mono text-[8px] text-accent">{reg}</span>
+              <span className="font-mono text-[8px] text-muted-foreground">{rd.hours.toFixed(1)}h <span className="opacity-60">({rd.flights})</span></span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps) {
   const groups = useMemo(() => [
     { title: 'Single Engine — Day', fields: ['seDayDual', 'seDayPilot'] as NumericField[] },
@@ -69,7 +110,8 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
   const totalDay = useMemo(() => totals.seDayDual + totals.seDayPilot, [totals]);
   const totalNight = useMemo(() => totals.seNightDual + totals.seNightPilot, [totals]);
   const totalInstruction = useMemo(() => totals.instructorDay + totals.instructorNight, [totals]);
-  const { cats, typeByCat } = useMemo(() => getCategoryTotals(entries), [entries]);
+  const { cats, typeByCat, regByType } = useMemo(() => getCategoryTotals(entries), [entries]);
+  const [expandedType, setExpandedType] = useState<string | null>(null);
   const gameTotals = useMemo(() => getPatternTotals(entries, GAME_PATTERNS), [entries]);
   const crossCountryTotals = useMemo(() => getPatternTotals(entries, CROSS_COUNTRY_PATTERNS), [entries]);
 
@@ -143,10 +185,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                     {Object.entries(pistonTypes).length > 0 && (
                       <div className="mt-1 pl-2 space-y-0.5">
                         {Object.entries(pistonTypes).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
-                          <div key={type} className="flex items-center justify-between">
-                            <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
-                            <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
-                          </div>
+                          <TypeRow key={type} type={type} data={data} regByType={regByType} expandedType={expandedType} setExpandedType={setExpandedType} />
                         ))}
                       </div>
                     )}
@@ -161,10 +200,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                     {Object.entries(turbineTypes).length > 0 && (
                       <div className="mt-1 pl-2 space-y-0.5">
                         {Object.entries(turbineTypes).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
-                          <div key={type} className="flex items-center justify-between">
-                            <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
-                            <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
-                          </div>
+                          <TypeRow key={type} type={type} data={data} regByType={regByType} expandedType={expandedType} setExpandedType={setExpandedType} />
                         ))}
                       </div>
                     )}
@@ -179,10 +215,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                     {Object.entries(typeByCat.unknown).length > 0 && (
                       <div className="mt-1 pl-2 space-y-0.5">
                         {Object.entries(typeByCat.unknown).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
-                          <div key={type} className="flex items-center justify-between">
-                            <span className="font-mono text-[9px] text-muted-foreground">{type || '(empty)'}</span>
-                            <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
-                          </div>
+                          <TypeRow key={type} type={type} data={data} regByType={regByType} expandedType={expandedType} setExpandedType={setExpandedType} />
                         ))}
                       </div>
                     )}
@@ -218,10 +251,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                     {Object.entries(typeByCat.heli_piston).length > 0 && (
                       <div className="mt-1 pl-2 space-y-0.5">
                         {Object.entries(typeByCat.heli_piston).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
-                          <div key={type} className="flex items-center justify-between">
-                            <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
-                            <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
-                          </div>
+                          <TypeRow key={type} type={type} data={data} regByType={regByType} expandedType={expandedType} setExpandedType={setExpandedType} />
                         ))}
                       </div>
                     )}
@@ -236,10 +266,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                     {Object.entries(typeByCat.heli_turbine).length > 0 && (
                       <div className="mt-1 pl-2 space-y-0.5">
                         {Object.entries(typeByCat.heli_turbine).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
-                          <div key={type} className="flex items-center justify-between">
-                            <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
-                            <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
-                          </div>
+                          <TypeRow key={type} type={type} data={data} regByType={regByType} expandedType={expandedType} setExpandedType={setExpandedType} />
                         ))}
                       </div>
                     )}
@@ -270,10 +297,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                     {Object.entries(typeByCat.fw_piston).length > 0 && (
                       <div className="mt-1 pl-2 space-y-0.5">
                         {Object.entries(typeByCat.fw_piston).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
-                          <div key={type} className="flex items-center justify-between">
-                            <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
-                            <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
-                          </div>
+                          <TypeRow key={type} type={type} data={data} regByType={regByType} expandedType={expandedType} setExpandedType={setExpandedType} />
                         ))}
                       </div>
                     )}
@@ -288,10 +312,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                     {Object.entries(typeByCat.fw_turbine).length > 0 && (
                       <div className="mt-1 pl-2 space-y-0.5">
                         {Object.entries(typeByCat.fw_turbine).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
-                          <div key={type} className="flex items-center justify-between">
-                            <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
-                            <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
-                          </div>
+                          <TypeRow key={type} type={type} data={data} regByType={regByType} expandedType={expandedType} setExpandedType={setExpandedType} />
                         ))}
                       </div>
                     )}
