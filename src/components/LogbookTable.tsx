@@ -56,7 +56,7 @@ function isUnknownEntry(entry: LogbookEntry) {
 }
 
 const columns: ColumnDef[] = [
-  { key: 'date', label: 'Date', shortLabel: 'Date', render: e => fmtDate(e.date) },
+  { key: 'date', label: 'Date', shortLabel: 'Date', className: 'w-[95px] min-w-[95px]', render: e => fmtDate(e.date) },
   {
     key: 'type',
     label: 'Class or Type',
@@ -79,7 +79,7 @@ const columns: ColumnDef[] = [
     key: 'details',
     label: 'Flight Details',
     shortLabel: 'Details',
-    className: 'w-[320px] min-w-[320px] xl:w-[420px] xl:min-w-[420px]',
+    className: 'w-[240px] min-w-[240px]',
     render: e => <span className="block w-full overflow-hidden truncate text-muted-foreground">{e.flightDetails}</span>,
   },
   { key: 'seDayDual', label: 'SE Day Dual', shortLabel: 'SE D-Dual', className: 'w-[70px]', render: e => <span className="text-primary font-semibold">{fmt(e.seDayDual)}</span> },
