@@ -82,13 +82,13 @@ const columns: ColumnDef[] = [
     className: 'w-[320px] min-w-[320px] xl:w-[420px] xl:min-w-[420px]',
     render: e => <span className="block w-full overflow-hidden truncate text-muted-foreground">{e.flightDetails}</span>,
   },
-  { key: 'seDayDual', label: 'SE Day Dual', shortLabel: 'SE D-Dual', render: e => <span className="text-primary font-semibold">{fmt(e.seDayDual)}</span> },
-  { key: 'seDayPilot', label: 'SE Day Pilot', shortLabel: 'SE D-Pilot', render: e => fmt(e.seDayPilot) },
-  { key: 'seNightDual', label: 'SE Night Dual', shortLabel: 'SE N-Dual', render: e => <span className="text-destructive font-semibold">{fmt(e.seNightDual)}</span> },
-  { key: 'seNightPilot', label: 'SE Night Pilot', shortLabel: 'SE N-Pilot', render: e => <span className="text-destructive font-semibold">{fmt(e.seNightPilot)}</span> },
-  { key: 'instrTm', label: 'Instrument Time', shortLabel: 'IFR Time', render: e => fmt(e.instrumentTime) },
-  { key: 'instDay', label: 'Instructor Day', shortLabel: 'FI Day', render: e => fmt(e.instructorDay) },
-  { key: 'instNgt', label: 'Instructor Night', shortLabel: 'FI Ngt', render: e => <span className="text-destructive font-semibold">{fmt(e.instructorNight)}</span> },
+  { key: 'seDayDual', label: 'SE Day Dual', shortLabel: 'SE D-Dual', className: 'w-[70px]', render: e => <span className="text-primary font-semibold">{fmt(e.seDayDual)}</span> },
+  { key: 'seDayPilot', label: 'SE Day Pilot', shortLabel: 'SE D-Pilot', className: 'w-[70px]', render: e => fmt(e.seDayPilot) },
+  { key: 'seNightDual', label: 'SE Night Dual', shortLabel: 'SE N-Dual', className: 'w-[70px]', render: e => <span className="text-destructive font-semibold">{fmt(e.seNightDual)}</span> },
+  { key: 'seNightPilot', label: 'SE Night Pilot', shortLabel: 'SE N-Pilot', className: 'w-[70px]', render: e => <span className="text-destructive font-semibold">{fmt(e.seNightPilot)}</span> },
+  { key: 'instrTm', label: 'Instrument Time', shortLabel: 'IFR Time', className: 'w-[65px]', render: e => fmt(e.instrumentTime) },
+  { key: 'instDay', label: 'Instructor Day', shortLabel: 'FI Day', className: 'w-[55px]', render: e => fmt(e.instructorDay) },
+  { key: 'instNgt', label: 'Instructor Night', shortLabel: 'FI Ngt', className: 'w-[55px]', render: e => <span className="text-destructive font-semibold">{fmt(e.instructorNight)}</span> },
 ];
 
 const defaultVisible = new Set(columns.map(c => c.key));
