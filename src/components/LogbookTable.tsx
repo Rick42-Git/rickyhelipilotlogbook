@@ -74,7 +74,7 @@ const columns: ColumnDef[] = [
     },
   },
   { key: 'reg', label: 'Registration', shortLabel: 'Reg', render: e => <span className="text-accent">{e.aircraftReg}</span> },
-  { key: 'pic', label: 'Pilot in Command', shortLabel: 'PIC', render: e => e.pilotInCommand },
+  { key: 'pic', label: 'Pilot in Command', shortLabel: 'PIC', className: 'w-[130px] min-w-[130px]', render: e => e.pilotInCommand },
   {
     key: 'details',
     label: 'Flight Details',
