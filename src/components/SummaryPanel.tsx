@@ -119,8 +119,8 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
           const singleTurbine = isSingleHeli ? cats.heli_turbine : cats.fw_turbine;
           const pistonTypes = isSingleHeli ? typeByCat.heli_piston : typeByCat.fw_piston;
           const turbineTypes = isSingleHeli ? typeByCat.heli_turbine : typeByCat.fw_turbine;
-          const singleTotal = isSingleHeli ? heliTotal : fwTotal;
-          const singleFlights = isSingleHeli ? heliFlights : fwFlights;
+          const singleTotal = (isSingleHeli ? heliTotal : fwTotal) + cats.unknown.hours;
+          const singleFlights = (isSingleHeli ? heliFlights : fwFlights) + cats.unknown.flights;
           const borderColor = isSingleHeli ? 'border-primary/20' : 'border-success/20';
           const bgColor = isSingleHeli ? 'bg-primary/5' : 'bg-success/5';
 
@@ -163,6 +163,24 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                         {Object.entries(turbineTypes).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
                           <div key={type} className="flex items-center justify-between">
                             <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
+                            <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {cats.unknown.flights > 0 && (
+                  <div className="px-3 py-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[9px] text-destructive/70 uppercase tracking-wider font-semibold">Uncategorised</span>
+                      <span className="font-mono text-xs font-semibold text-foreground">{cats.unknown.hours.toFixed(1)} <span className="text-[8px] text-muted-foreground">({cats.unknown.flights})</span></span>
+                    </div>
+                    {Object.entries(typeByCat.unknown).length > 0 && (
+                      <div className="mt-1 pl-2 space-y-0.5">
+                        {Object.entries(typeByCat.unknown).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
+                          <div key={type} className="flex items-center justify-between">
+                            <span className="font-mono text-[9px] text-muted-foreground">{type || '(empty)'}</span>
                             <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
                           </div>
                         ))}
