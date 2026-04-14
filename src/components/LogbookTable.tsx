@@ -119,16 +119,23 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
   const activeCols = columns.filter(c => visibleCols.has(c.key));
 
   const filteredEntries = useMemo(() => {
-    if (!search.trim()) return entries;
-    const q = search.toLowerCase();
-    return entries.filter(e =>
-      e.date.toLowerCase().includes(q) ||
-      e.aircraftType.toLowerCase().includes(q) ||
-      e.aircraftReg.toLowerCase().includes(q) ||
-      e.pilotInCommand.toLowerCase().includes(q) ||
-      e.flightDetails.toLowerCase().includes(q)
-    );
-  }, [entries, search]);
+    let result = entries;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(e =>
+        e.date.toLowerCase().includes(q) ||
+        e.aircraftType.toLowerCase().includes(q) ||
+        e.aircraftReg.toLowerCase().includes(q) ||
+        e.pilotInCommand.toLowerCase().includes(q) ||
+        e.flightDetails.toLowerCase().includes(q)
+      );
+    }
+    if (activeFilter && filterFieldMap[activeFilter]) {
+      const field = filterFieldMap[activeFilter];
+      result = result.filter(e => (e[field] as number) > 0);
+    }
+    return result;
+  }, [entries, search, activeFilter]);
 
   const sortedEntries = useMemo(() => {
     return filteredEntries.slice().sort((a, b) => {
