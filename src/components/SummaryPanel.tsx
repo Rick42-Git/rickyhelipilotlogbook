@@ -151,6 +151,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
   const totalInstruction = useMemo(() => totals.instructorDay + totals.instructorNight, [totals]);
   const { cats, typeByCat, regByType } = useMemo(() => getCategoryTotals(entries), [entries]);
   const [expandedType, setExpandedType] = useState<string | null>(null);
+  const [selectedBreakdown, setSelectedBreakdown] = useState<string | null>(null);
   const gameTotals = useMemo(() => getPatternTotals(entries, GAME_PATTERNS), [entries]);
   const crossCountryTotals = useMemo(() => getPatternTotals(entries, CROSS_COUNTRY_PATTERNS), [entries]);
 
