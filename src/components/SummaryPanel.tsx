@@ -63,14 +63,17 @@ function getCategoryTotals(entries: LogbookEntry[]) {
   const typeByCat: Record<AircraftCategory, Record<string, { hours: number; flights: number }>> = {
     heli_piston: {}, heli_turbine: {}, fw_piston: {}, fw_turbine: {}, simulator: {}, unknown: {},
   };
-  // Per-type, per-registration breakdown
+
+  // Collect all raw regs for normalization lookup
+  const allRegs = entries.map(e => (e.aircraftReg || 'Unknown'));
+
   const regByType: Record<string, Record<string, { hours: number; flights: number }>> = {};
 
   for (const e of entries) {
     const type = normalizeAircraftType(e.aircraftType || 'Unknown');
     const cat = classifyAircraft(type);
     const hrs = getEntryHours(e);
-    const reg = (e.aircraftReg || 'Unknown').toUpperCase();
+    const reg = normalizeRegistration(e.aircraftReg || 'Unknown', allRegs);
     cats[cat].hours += hrs;
     cats[cat].flights += 1;
     if (!typeByCat[cat][type]) typeByCat[cat][type] = { hours: 0, flights: 0 };
