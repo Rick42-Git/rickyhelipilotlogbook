@@ -585,6 +585,9 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
         );
       })()}
 
+      {/* Hours Over Time chart */}
+      <HoursOverTime entries={entries} />
+
       {/* Quick totals row */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
