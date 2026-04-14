@@ -24,7 +24,7 @@ const fields: { key: keyof Omit<LogbookEntry, 'id'>; label: string; type: string
   { key: 'seDayPilot', label: 'Pilot (2)', type: 'number', half: true },
   { key: 'seNightDual', label: 'Dual (3)', type: 'number', half: true, section: 'Single Engine — Night' },
   { key: 'seNightPilot', label: 'Pilot (4)', type: 'number', half: true },
-  { key: 'instrumentTime', label: 'Time (13)', type: 'number', half: true, section: 'Instrument Flying' },
+  { key: 'instrumentTime', label: 'Time (13)', type: 'number', section: 'Instrument Flying' },
   { key: 'instructorDay', label: 'Day (14)', type: 'number', half: true, section: 'Flying as Instructor' },
   { key: 'instructorNight', label: 'Night (15)', type: 'number', half: true },
   { key: 'latitude', label: 'Latitude', type: 'coord', half: true, section: 'Landing Zone (Optional)' },
