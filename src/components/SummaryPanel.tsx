@@ -403,29 +403,138 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
 
       {/* Visual Bar Graph — Vertical */}
       {(() => {
-        const bars = [
-          { label: 'Day Dual', value: totals.seDayDual, color: 'from-amber-400 to-amber-500', glow: 'shadow-amber-400/30', icon: <Sun className="h-4 w-4 text-amber-400" /> },
-          { label: 'Day PIC', value: totals.seDayPilot, color: 'from-yellow-400 to-yellow-600', glow: 'shadow-yellow-500/30', icon: <Sun className="h-4 w-4 text-yellow-500" /> },
-          { label: 'Night Dual', value: totals.seNightDual, color: 'from-indigo-400 to-indigo-600', glow: 'shadow-indigo-400/30', icon: <Moon className="h-4 w-4 text-indigo-400" /> },
-          { label: 'Night PIC', value: totals.seNightPilot, color: 'from-violet-400 to-violet-600', glow: 'shadow-violet-500/30', icon: <Moon className="h-4 w-4 text-violet-500" /> },
-          { label: 'IFR', value: totals.instrumentTime, color: 'from-cyan-400 to-cyan-600', glow: 'shadow-cyan-400/30', icon: <Gauge className="h-4 w-4 text-cyan-400" /> },
-          { label: 'Instructor', value: totalInstruction, color: 'from-emerald-400 to-emerald-600', glow: 'shadow-emerald-400/30', icon: <GraduationCap className="h-4 w-4 text-emerald-400" /> },
+        const barDefs = [
+          { label: 'Day Dual', key: 'seDayDual', value: totals.seDayDual, color: 'from-amber-400 to-amber-500', glow: 'shadow-amber-400/30', fill: '#fbbf24', icon: <Sun className="h-4 w-4 text-amber-400" /> },
+          { label: 'Day PIC', key: 'seDayPilot', value: totals.seDayPilot, color: 'from-yellow-400 to-yellow-600', glow: 'shadow-yellow-500/30', fill: '#eab308', icon: <Sun className="h-4 w-4 text-yellow-500" /> },
+          { label: 'Night Dual', key: 'seNightDual', value: totals.seNightDual, color: 'from-indigo-400 to-indigo-600', glow: 'shadow-indigo-400/30', fill: '#818cf8', icon: <Moon className="h-4 w-4 text-indigo-400" /> },
+          { label: 'Night PIC', key: 'seNightPilot', value: totals.seNightPilot, color: 'from-violet-400 to-violet-600', glow: 'shadow-violet-500/30', fill: '#8b5cf6', icon: <Moon className="h-4 w-4 text-violet-500" /> },
+          { label: 'IFR', key: 'instrumentTime', value: totals.instrumentTime, color: 'from-cyan-400 to-cyan-600', glow: 'shadow-cyan-400/30', fill: '#22d3ee', icon: <Gauge className="h-4 w-4 text-cyan-400" /> },
+          { label: 'Instructor', key: 'instructor', value: totalInstruction, color: 'from-emerald-400 to-emerald-600', glow: 'shadow-emerald-400/30', fill: '#34d399', icon: <GraduationCap className="h-4 w-4 text-emerald-400" /> },
         ];
-        const maxVal = Math.max(...bars.map(b => b.value), 1);
+        const maxVal = Math.max(...barDefs.map(b => b.value), 1);
         const chartHeight = 180;
+
+        // Compute pie data for selected breakdown
+        const selectedBar = selectedBreakdown ? barDefs.find(b => b.key === selectedBreakdown) : null;
+        let pieData: { label: string; hours: number; color: string }[] = [];
+
+        if (selectedBreakdown && selectedBar) {
+          const getHoursForKey = (e: LogbookEntry, key: string): number => {
+            if (key === 'seDayDual') return e.seDayDual || 0;
+            if (key === 'seDayPilot') return e.seDayPilot || 0;
+            if (key === 'seNightDual') return e.seNightDual || 0;
+            if (key === 'seNightPilot') return e.seNightPilot || 0;
+            if (key === 'instrumentTime') return e.instrumentTime || 0;
+            if (key === 'instructor') return (e.instructorDay || 0) + (e.instructorNight || 0);
+            return 0;
+          };
+
+          // Normalize detail strings for grouping
+          const normalizeDetail = (d: string) => {
+            return d.trim().toLowerCase()
+              .replace(/\s+/g, ' ')
+              .replace(/[→\->]+/g, '→')
+              .replace(/\b(post|pre)\s+/gi, '$1 ')
+              .replace(/\bflight\b/gi, '')
+              .replace(/\s+/g, ' ')
+              .trim();
+          };
+
+          const grouped: Record<string, { label: string; hours: number }> = {};
+          for (const e of entries) {
+            const hrs = getHoursForKey(e, selectedBreakdown);
+            if (hrs <= 0) continue;
+            const raw = (e.flightDetails || 'Unspecified').trim();
+            const key = normalizeDetail(raw) || 'unspecified';
+            if (!grouped[key]) grouped[key] = { label: raw || 'Unspecified', hours: 0 };
+            grouped[key].hours += hrs;
+          }
+
+          const PIE_COLORS = [
+            '#fbbf24', '#818cf8', '#34d399', '#f87171', '#a78bfa',
+            '#22d3ee', '#fb923c', '#e879f9', '#38bdf8', '#4ade80',
+            '#f472b6', '#facc15', '#94a3b8',
+          ];
+
+          pieData = Object.values(grouped)
+            .sort((a, b) => b.hours - a.hours)
+            .map((item, i) => ({
+              ...item,
+              color: PIE_COLORS[i % PIE_COLORS.length],
+            }));
+
+          // Collapse small slices into "Other"
+          if (pieData.length > 8) {
+            const top7 = pieData.slice(0, 7);
+            const rest = pieData.slice(7);
+            const otherHours = rest.reduce((s, d) => s + d.hours, 0);
+            pieData = [...top7, { label: `Other (${rest.length})`, hours: otherHours, color: '#64748b' }];
+          }
+        }
+
+        // SVG pie chart helper
+        const renderPie = (data: typeof pieData, size: number) => {
+          const total = data.reduce((s, d) => s + d.hours, 0);
+          if (total === 0) return null;
+          const cx = size / 2, cy = size / 2, r = size / 2 - 2;
+          let cumAngle = -Math.PI / 2;
+          const paths = data.map((d, i) => {
+            const angle = (d.hours / total) * 2 * Math.PI;
+            const x1 = cx + r * Math.cos(cumAngle);
+            const y1 = cy + r * Math.sin(cumAngle);
+            cumAngle += angle;
+            const x2 = cx + r * Math.cos(cumAngle);
+            const y2 = cy + r * Math.sin(cumAngle);
+            const large = angle > Math.PI ? 1 : 0;
+            if (data.length === 1) {
+              return <circle key={i} cx={cx} cy={cy} r={r} fill={d.color} opacity={0.85} />;
+            }
+            return (
+              <path
+                key={i}
+                d={`M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} Z`}
+                fill={d.color}
+                opacity={0.85}
+                stroke="hsl(var(--card))"
+                strokeWidth={1.5}
+              />
+            );
+          });
+          return <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>{paths}</svg>;
+        };
+
         return (
           <div className="mb-4">
-            <p className="font-mono text-[9px] text-accent uppercase tracking-widest border-b border-border pb-1 mb-4">Hours Breakdown</p>
+            <div className="flex items-center justify-between border-b border-border pb-1 mb-4">
+              <p className="font-mono text-[9px] text-accent uppercase tracking-widest">Hours Breakdown</p>
+              {selectedBreakdown && (
+                <button
+                  onClick={() => setSelectedBreakdown(null)}
+                  className="font-mono text-[8px] text-muted-foreground hover:text-foreground flex items-center gap-0.5 transition-colors"
+                >
+                  <X className="h-3 w-3" /> CLOSE
+                </button>
+              )}
+            </div>
             <div className="flex items-end justify-between gap-2 px-1" style={{ height: chartHeight }}>
-              {bars.map(b => {
+              {barDefs.map(b => {
                 const pct = Math.max((b.value / maxVal) * 100, b.value > 0 ? 4 : 0);
+                const isSelected = selectedBreakdown === b.key;
                 return (
-                  <div key={b.label} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                  <div
+                    key={b.label}
+                    className={`flex-1 flex flex-col items-center gap-1.5 h-full justify-end group cursor-pointer transition-opacity ${
+                      selectedBreakdown && !isSelected ? 'opacity-40' : ''
+                    }`}
+                    onClick={() => setSelectedBreakdown(isSelected ? null : b.key)}
+                  >
                     <span className="font-mono text-[11px] font-bold text-foreground tabular-nums opacity-80 group-hover:opacity-100 transition-opacity">
                       {b.value > 0 ? b.value.toFixed(1) : '—'}
                     </span>
                     <div
-                      className={`w-full max-w-[44px] rounded-t-lg bg-gradient-to-t ${b.color} ${b.glow} shadow-lg transition-all duration-700 ease-out group-hover:scale-x-110 group-hover:brightness-110`}
+                      className={`w-full max-w-[44px] rounded-t-lg bg-gradient-to-t ${b.color} ${b.glow} shadow-lg transition-all duration-700 ease-out group-hover:scale-x-110 group-hover:brightness-110 ${
+                        isSelected ? 'ring-2 ring-foreground/30 scale-x-110' : ''
+                      }`}
                       style={{ height: `${pct}%`, minHeight: b.value > 0 ? 6 : 0 }}
                     />
                     <div className="flex flex-col items-center gap-0.5 pt-1 border-t border-border/50 w-full">
@@ -436,6 +545,34 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                 );
               })}
             </div>
+
+            {/* Pie chart panel */}
+            {selectedBar && pieData.length > 0 && (
+              <div className="mt-4 rounded-lg border border-border/50 bg-muted/20 p-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                <p className="font-mono text-[9px] text-foreground uppercase tracking-widest mb-3 text-center">
+                  {selectedBar.label} — by Flight Details
+                </p>
+                <div className="flex gap-4 items-start">
+                  <div className="shrink-0">
+                    {renderPie(pieData, 120)}
+                  </div>
+                  <div className="flex-1 space-y-1 min-w-0">
+                    {pieData.map((d, i) => {
+                      const total = pieData.reduce((s, x) => s + x.hours, 0);
+                      const pctVal = total > 0 ? ((d.hours / total) * 100).toFixed(0) : '0';
+                      return (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: d.color }} />
+                          <span className="font-mono text-[9px] text-muted-foreground truncate flex-1 min-w-0">{d.label}</span>
+                          <span className="font-mono text-[9px] font-semibold text-foreground tabular-nums shrink-0">{d.hours.toFixed(1)}</span>
+                          <span className="font-mono text-[8px] text-muted-foreground tabular-nums shrink-0 w-7 text-right">{pctVal}%</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
       })()}
