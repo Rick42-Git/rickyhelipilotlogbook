@@ -15,6 +15,42 @@ function getEntryHours(e: LogbookEntry) {
   return (e.seDayDual || 0) + (e.seDayPilot || 0) + (e.seNightDual || 0) + (e.seNightPilot || 0);
 }
 
+/**
+ * Normalize aircraft registrations so variants like "RLU", "ZS-RLU", "ZS RLU", "ZSRLU"
+ * all resolve to the same canonical form (e.g. "ZS-RLU").
+ * Extracts the last 3+ letter suffix, groups by it, and picks the longest/most formal form.
+ */
+function normalizeRegistration(raw: string, allRegs: string[]): string {
+  const upper = raw.toUpperCase().trim();
+  if (upper.length < 3) return upper;
+
+  // Strip separators to get core letters
+  const stripped = upper.replace(/[\s\-./]/g, '');
+
+  // Extract suffix: last 3 chars (the unique identifier part)
+  const suffix = stripped.length >= 3 ? stripped.slice(-3) : stripped;
+
+  // Find all registrations in the set that share this suffix
+  const matches = allRegs.filter(r => {
+    const s = r.toUpperCase().replace(/[\s\-./]/g, '');
+    return s.length >= 3 && s.slice(-3) === suffix;
+  });
+
+  if (matches.length <= 1) return upper;
+
+  // Pick the canonical form: prefer the longest variant with a dash (e.g. "ZS-RLU")
+  const canonical = matches
+    .map(r => r.toUpperCase().trim())
+    .sort((a, b) => {
+      const aDash = a.includes('-') ? 1 : 0;
+      const bDash = b.includes('-') ? 1 : 0;
+      if (aDash !== bDash) return bDash - aDash;
+      return b.length - a.length;
+    })[0];
+
+  return canonical;
+}
+
 function getCategoryTotals(entries: LogbookEntry[]) {
   const cats: Record<AircraftCategory, { hours: number; flights: number }> = {
     heli_piston: { hours: 0, flights: 0 },
@@ -27,14 +63,17 @@ function getCategoryTotals(entries: LogbookEntry[]) {
   const typeByCat: Record<AircraftCategory, Record<string, { hours: number; flights: number }>> = {
     heli_piston: {}, heli_turbine: {}, fw_piston: {}, fw_turbine: {}, simulator: {}, unknown: {},
   };
-  // Per-type, per-registration breakdown
+
+  // Collect all raw regs for normalization lookup
+  const allRegs = entries.map(e => (e.aircraftReg || 'Unknown'));
+
   const regByType: Record<string, Record<string, { hours: number; flights: number }>> = {};
 
   for (const e of entries) {
     const type = normalizeAircraftType(e.aircraftType || 'Unknown');
     const cat = classifyAircraft(type);
     const hrs = getEntryHours(e);
-    const reg = (e.aircraftReg || 'Unknown').toUpperCase();
+    const reg = normalizeRegistration(e.aircraftReg || 'Unknown', allRegs);
     cats[cat].hours += hrs;
     cats[cat].flights += 1;
     if (!typeByCat[cat][type]) typeByCat[cat][type] = { hours: 0, flights: 0 };
