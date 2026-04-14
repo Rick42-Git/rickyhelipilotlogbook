@@ -3,6 +3,7 @@ import { LogbookEntry, numericFieldLabels, NumericField } from '@/types/logbook'
 import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
 import { classifyAircraft, AircraftCategory, CATEGORY_LABELS } from '@/lib/aircraftCategories';
 import { LandingsMap } from '@/components/LandingsMap';
+import { HoursOverTime } from '@/components/HoursOverTime';
 import { Sun, Moon, Gauge, GraduationCap, ChevronRight, X } from 'lucide-react';
 
 interface SummaryPanelProps {
