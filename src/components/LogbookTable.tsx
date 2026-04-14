@@ -56,7 +56,7 @@ function isUnknownEntry(entry: LogbookEntry) {
 }
 
 const columns: ColumnDef[] = [
-  { key: 'date', label: 'Date', shortLabel: 'Date', className: 'w-[95px] min-w-[95px]', render: e => fmtDate(e.date) },
+  { key: 'date', label: 'Date', shortLabel: 'Date', className: 'w-[82px]', render: e => fmtDate(e.date) },
   {
     key: 'type',
     label: 'Class or Type',
