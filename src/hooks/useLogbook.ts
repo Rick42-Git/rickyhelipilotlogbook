@@ -25,12 +25,18 @@ function normalizePIC(pic: string): string {
   return pic.trim().toLowerCase() === 's' ? 'Self' : pic;
 }
 
+function normalizeReg(reg: string): string {
+  const stripped = reg.replace(/[\s\-]/g, '').toUpperCase();
+  if (/^[A-Z]{3}$/.test(stripped)) return `ZS-${stripped}`;
+  return reg;
+}
+
 function toDbEntry(e: Omit<LogbookEntry, 'id'>, userId: string) {
   return {
     user_id: userId,
     date: e.date,
     aircraft_type: e.aircraftType,
-    aircraft_reg: e.aircraftReg,
+    aircraft_reg: normalizeReg(e.aircraftReg),
     pilot_in_command: normalizePIC(e.pilotInCommand),
     flight_details: e.flightDetails,
     se_day_dual: e.seDayDual,
