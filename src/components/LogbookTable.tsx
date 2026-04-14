@@ -46,18 +46,32 @@ function fmtDate(iso: string) {
   return d && m && y ? `${d}/${m}/${y}` : iso;
 }
 
+function getEntryTotalHours(entry: LogbookEntry) {
+  return (entry.seDayDual || 0) + (entry.seDayPilot || 0) + (entry.seNightDual || 0) + (entry.seNightPilot || 0);
+}
+
+function isUnknownEntry(entry: LogbookEntry) {
+  return classifyAircraft(normalizeAircraftType(entry.aircraftType || '')) === 'unknown';
+}
+
 const columns: ColumnDef[] = [
   { key: 'date', label: 'Date', shortLabel: 'Date', render: e => fmtDate(e.date) },
-  { key: 'type', label: 'Class or Type', shortLabel: 'Type', render: (e: LogbookEntry) => {
-    const cat = classifyAircraft(normalizeAircraftType(e.aircraftType || ''));
-    if (cat === 'unknown' && e.aircraftType) {
-      return <span className="flex items-center gap-1 text-destructive"><AlertTriangle className="h-3 w-3 shrink-0" />{e.aircraftType}</span>;
-    }
-    if (cat === 'unknown') {
-      return <span className="flex items-center gap-1 text-destructive/60"><AlertTriangle className="h-3 w-3 shrink-0" /><em>empty</em></span>;
-    }
-    return e.aircraftType;
-  }},
+  {
+    key: 'type',
+    label: 'Class or Type',
+    shortLabel: 'Type',
+    render: (e: LogbookEntry) => {
+      if (isUnknownEntry(e)) {
+        return (
+          <span className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/10 px-1.5 py-0.5 text-destructive">
+            <AlertTriangle className="h-3 w-3 shrink-0" />
+            {e.aircraftType || 'empty'}
+          </span>
+        );
+      }
+      return e.aircraftType;
+    },
+  },
   { key: 'reg', label: 'Registration', shortLabel: 'Reg', render: e => <span className="text-accent">{e.aircraftReg}</span> },
   { key: 'pic', label: 'Pilot in Command', shortLabel: 'PIC', render: e => e.pilotInCommand },
   { key: 'details', label: 'Flight Details', shortLabel: 'Details', render: e => <span className="text-muted-foreground max-w-[120px] truncate block">{e.flightDetails}</span> },
@@ -108,6 +122,38 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
     );
   }, [entries, search]);
 
+  const sortedEntries = useMemo(() => {
+    return filteredEntries.slice().sort((a, b) => {
+      const aUnknown = isUnknownEntry(a);
+      const bUnknown = isUnknownEntry(b);
+
+      if (aUnknown && bUnknown) {
+        const hoursDiff = getEntryTotalHours(b) - getEntryTotalHours(a);
+        if (hoursDiff !== 0) return hoursDiff;
+      }
+
+      if (aUnknown !== bUnknown) return aUnknown ? -1 : 1;
+      if (a.date === b.date) return 0;
+      return a.date > b.date ? -1 : 1;
+    });
+  }, [filteredEntries]);
+
+  const flaggedEntries = useMemo(() => {
+    return entries
+      .filter(isUnknownEntry)
+      .sort((a, b) => {
+        const hoursDiff = getEntryTotalHours(b) - getEntryTotalHours(a);
+        if (hoursDiff !== 0) return hoursDiff;
+        if (a.date === b.date) return 0;
+        return a.date > b.date ? -1 : 1;
+      });
+  }, [entries]);
+
+  const visibleFlaggedCount = useMemo(
+    () => sortedEntries.filter(isUnknownEntry).length,
+    [sortedEntries]
+  );
+
   const totals = useMemo(() => {
     const src = filteredEntries;
     return {
@@ -142,6 +188,38 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
 
   return (
     <div className="bg-card/80 backdrop-blur-sm border border-border rounded-lg relative">
+      {flaggedEntries.length > 0 && (
+        <div className="border-b border-destructive/20 bg-destructive/5 px-3 py-2">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+            <div className="min-w-0 flex-1">
+              <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-destructive">Uncategorised aircraft pinned to the top</p>
+              <p className="font-mono text-xs text-muted-foreground mt-0.5">
+                {flaggedEntries.length} flagged {flaggedEntries.length === 1 ? 'entry is' : 'entries are'} shown first for review and deletion.
+                {flaggedEntries.length > visibleFlaggedCount ? ` Clear search to see ${flaggedEntries.length - visibleFlaggedCount} hidden flagged ${flaggedEntries.length - visibleFlaggedCount === 1 ? 'entry' : 'entries'}.` : ''}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {flaggedEntries.slice(0, 3).map(entry => (
+                  <span
+                    key={entry.id}
+                    className="inline-flex items-center gap-1 rounded-md border border-destructive/25 bg-background/60 px-2 py-1 font-mono text-[10px]"
+                  >
+                    <span className="text-destructive">{entry.aircraftType || 'empty'}</span>
+                    <span className="text-muted-foreground">{fmtDate(entry.date) || 'no date'}</span>
+                    <span className="text-foreground">{getEntryTotalHours(entry).toFixed(1)}h</span>
+                  </span>
+                ))}
+                {flaggedEntries.length > 3 && (
+                  <span className="inline-flex items-center rounded-md border border-border/60 bg-background/40 px-2 py-1 font-mono text-[10px] text-muted-foreground">
+                    +{flaggedEntries.length - 3} more
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between gap-2 p-2 border-b border-border/50">
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -210,22 +288,19 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
             </tr>
           </thead>
           <tbody>
-            {filteredEntries
-              .slice()
-              .sort((a, b) => {
-                const aUnknown = classifyAircraft(normalizeAircraftType(a.aircraftType || '')) === 'unknown' ? 0 : 1;
-                const bUnknown = classifyAircraft(normalizeAircraftType(b.aircraftType || '')) === 'unknown' ? 0 : 1;
-                if (aUnknown !== bUnknown) return aUnknown - bUnknown;
-                return a.date > b.date ? -1 : 1;
-              })
-              .map(entry => (
+            {sortedEntries.map(entry => {
+              const unknown = isUnknownEntry(entry);
+
+              return (
                 <tr
                   key={entry.id}
                   onClick={() => toggleSelect(entry.id)}
                   className={`border-b border-border/50 cursor-pointer transition-all duration-200 ${
                     selectedIds.has(entry.id)
                       ? 'bg-primary/10 scale-[1.01] shadow-sm ring-1 ring-primary/30 z-10 relative'
-                      : 'hover:bg-muted/20'
+                      : unknown
+                        ? 'bg-destructive/5 hover:bg-destructive/10 ring-1 ring-inset ring-destructive/15 relative'
+                        : 'hover:bg-muted/20'
                   }`}
                 >
                   {activeCols.map(col => (
@@ -240,7 +315,8 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
                     </Button>
                   </td>
                 </tr>
-              ))}
+              );
+            })}
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-primary/30 bg-muted/30">
