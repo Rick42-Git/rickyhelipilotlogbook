@@ -21,14 +21,14 @@ const FIELD_KEYWORDS: { field: keyof Omit<LogbookEntry, 'id'>; keywords: string[
   { field: 'aircraftType', keywords: ['aircraft type', 'a/c type', 'ac type', 'class or type', 'class type', 'type', 'helicopter type', 'heli type', 'acft type', 'machine'], priority: 5 },
   { field: 'aircraftReg', keywords: ['aircraft reg', 'a/c reg', 'ac reg', 'registration', 'registration marks', 'reg marks', 'reg', 'tail', 'tail number', 'rego', 'acft reg', 'call sign'], priority: 6 },
   { field: 'pilotInCommand', keywords: ['pilot in command', 'plt in command', 'plt command', 'pic', 'captain', 'pilot', 'commander', 'p1', 'pilot name', 'crew', 'name'], priority: 4 },
-  { field: 'flightDetails', keywords: ['flight details', 'details of flight', 'details', 'route', 'remarks', 'from to', 'sector', 'notes', 'description', 'dep arr', 'departure arrival', 'place'], priority: 3 },
+  { field: 'flightDetails', keywords: ['flight details', 'details of flight', 'details of flight from', 'details of flight to', 'details', 'route', 'remarks', 'from to', 'sector', 'notes', 'description', 'dep arr', 'departure arrival', 'place'], priority: 3 },
   { field: 'seDayDual', keywords: ['se day dual', 'single engine aircraft day dual', 'single engine day dual', 'single engine aircraft day co pilot', 'single engine day co pilot', 'multi engine aircraft day dual', 'multi engine day dual', 'day dual', 'dual day', 'dual', 'day co pilot', 'co pilot day'], priority: 8 },
   { field: 'seDayPilot', keywords: ['se day pilot', 'single engine aircraft day pic', 'single engine day pic', 'single engine aircraft day picus', 'single engine day picus', 'multi engine aircraft day pic', 'multi engine aircraft day picus', 'multi engine day pic', 'multi engine day picus', 'multi engine aircraft day co pilot', 'day pilot', 'day p1', 'pilot day', 'day pic', 'day picus', 'day command', 'command', 'p1 day', 'picus day'], priority: 8 },
   { field: 'seNightDual', keywords: ['se night dual', 'single engine aircraft night dual', 'single engine night dual', 'single engine aircraft night co pilot', 'single engine night co pilot', 'multi engine aircraft night dual', 'multi engine night dual', 'night dual', 'dual night', 'night co pilot', 'co pilot night'], priority: 8 },
   { field: 'seNightPilot', keywords: ['se night pilot', 'single engine aircraft night pic', 'single engine night pic', 'single engine aircraft night picus', 'single engine night picus', 'multi engine aircraft night pic', 'multi engine aircraft night picus', 'multi engine night pic', 'multi engine night picus', 'multi engine aircraft night co pilot', 'night pilot', 'night p1', 'pilot night', 'night pic', 'night picus', 'night command', 'picus night'], priority: 8 },
-  { field: 'instrumentTime', keywords: ['instrument time', 'instr time', 'instrument actual time', 'actual tme', 'actual time', 'instrument time place co pilot', 'instrument time actual time co pilot', 'instrument time fstd time co pilot', 'instrument', 'ifr', 'ifr time', 'inst time', 'actual instrument', 'sim instrument', 'instrument flying', 'fstd time', 'fstd actual time', 'fstd actual time fstd time co pilot'], priority: 7 },
-  { field: 'instructorDay', keywords: ['instructor day', 'instructor time se', 'instructor se', 'instr day', 'instr se', 'instructing day', 'day instructor', 'instructor time fstd time co pilot'], priority: 8 },
-  { field: 'instructorNight', keywords: ['instructor night', 'instructor time me', 'instructor me', 'instr night', 'instr me', 'instructing night', 'night instructor'], priority: 8 },
+  { field: 'instrumentTime', keywords: ['instrument time', 'instr time', 'instrument actual time', 'instrument time type of flying actual', 'instrument time type of flying place', 'instrument time actual', 'actual tme', 'actual time', 'instrument time place co pilot', 'instrument time actual time co pilot', 'instrument time fstd time co pilot', 'instrument', 'ifr', 'ifr time', 'inst time', 'actual instrument', 'sim instrument', 'instrument flying', 'fstd time', 'fstd actual time', 'fstd actual time fstd time co pilot'], priority: 7 },
+  { field: 'instructorDay', keywords: ['instructor day', 'instructor time se', 'instructor se', 'instructor type of flying se', 'instructor type of flying', 'instr day', 'instr se', 'instructing day', 'day instructor', 'instructor time fstd time co pilot'], priority: 8 },
+  { field: 'instructorNight', keywords: ['instructor night', 'instructor time me', 'instructor me', 'instructor type of flying me', 'instr night', 'instr me', 'instructing night', 'night instructor'], priority: 8 },
 ];
 
 const NUMERIC_FIELDS: NumericField[] = [
@@ -134,7 +134,9 @@ const KNOWN_SKIP_PATTERNS = [
   'multi engine', 'co pilot', 'co-pilot', 'copilot', 'picus',
   'nav aids', 'fstd', 'remarks', 'instrument time place',
   'instrument time actual time', 'instrument time fstd',
-  'instructor time se', 'instructor time me', 'instructor time fstd',
+  'instructor time fstd',
+  'type of flying to', 'type of flying from',
+  'landings', 't o night', 't o day',
 ];
 
 function isKnownSkippableColumn(header: string): boolean {
@@ -557,7 +559,7 @@ export function SpreadsheetImport({ onEntriesImported, templates = [] }: Spreads
             </div>
           )}
 
-          <ScrollArea className="flex-1 max-h-[50vh]">
+          <ScrollArea className="flex-1 min-h-0">
             <table className="w-full text-xs font-mono">
               <thead>
                 <tr className="border-b border-border text-muted-foreground">
