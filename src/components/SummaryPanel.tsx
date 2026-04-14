@@ -256,6 +256,37 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
         </div>
       )}
 
+      {/* Visual Bar Graph */}
+      {(() => {
+        const bars = [
+          { label: 'Day Dual', value: totals.seDayDual, color: 'bg-amber-400', icon: <Sun className="h-3.5 w-3.5 text-amber-400" /> },
+          { label: 'Day PIC', value: totals.seDayPilot, color: 'bg-yellow-500', icon: <Sun className="h-3.5 w-3.5 text-yellow-500" /> },
+          { label: 'Night Dual', value: totals.seNightDual, color: 'bg-indigo-400', icon: <Moon className="h-3.5 w-3.5 text-indigo-400" /> },
+          { label: 'Night PIC', value: totals.seNightPilot, color: 'bg-violet-500', icon: <Moon className="h-3.5 w-3.5 text-violet-500" /> },
+          { label: 'Instrument', value: totals.instrumentTime, color: 'bg-cyan-400', icon: <Gauge className="h-3.5 w-3.5 text-cyan-400" /> },
+          { label: 'Instructor', value: totalInstruction, color: 'bg-emerald-400', icon: <GraduationCap className="h-3.5 w-3.5 text-emerald-400" /> },
+        ];
+        const maxVal = Math.max(...bars.map(b => b.value), 1);
+        return (
+          <div className="mb-4 space-y-2">
+            <p className="font-mono text-[9px] text-accent uppercase tracking-widest border-b border-border pb-1 mb-2">Hours Breakdown</p>
+            {bars.map(b => (
+              <div key={b.label} className="flex items-center gap-2">
+                {b.icon}
+                <span className="font-mono text-[10px] text-muted-foreground w-20 shrink-0">{b.label}</span>
+                <div className="flex-1 h-5 rounded-full bg-muted/30 overflow-hidden relative">
+                  <div
+                    className={`h-full rounded-full ${b.color} transition-all duration-700 ease-out`}
+                    style={{ width: `${Math.max((b.value / maxVal) * 100, b.value > 0 ? 2 : 0)}%`, opacity: 0.85 }}
+                  />
+                </div>
+                <span className="font-mono text-xs font-semibold text-foreground w-12 text-right tabular-nums">{b.value.toFixed(1)}</span>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
       {/* Quick totals row */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
