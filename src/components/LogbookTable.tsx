@@ -90,6 +90,14 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
   const [visibleCols, setVisibleCols] = useState<Set<string>>(defaultVisible);
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  const numericKeys = new Set(['seDayDual', 'seDayPilot', 'seNightDual', 'seNightPilot', 'instrTm', 'instDay', 'instNgt']);
+  const filterFieldMap: Record<string, keyof LogbookEntry> = {
+    seDayDual: 'seDayDual', seDayPilot: 'seDayPilot',
+    seNightDual: 'seNightDual', seNightPilot: 'seNightPilot',
+    instrTm: 'instrumentTime', instDay: 'instructorDay', instNgt: 'instructorNight',
+  };
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
