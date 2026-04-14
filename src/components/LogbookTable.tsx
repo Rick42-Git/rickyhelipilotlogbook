@@ -60,7 +60,7 @@ const columns: ColumnDef[] = [
   {
     key: 'type',
     label: 'Class or Type',
-    shortLabel: 'Type',
+    shortLabel: 'Type', className: 'w-[55px]',
     render: (e: LogbookEntry) => {
       if (isUnknownEntry(e)) {
         return (
@@ -79,7 +79,7 @@ const columns: ColumnDef[] = [
     key: 'details',
     label: 'Flight Details',
     shortLabel: 'Details',
-    className: 'w-[240px] min-w-[240px]',
+    className: 'w-[280px] min-w-[280px]',
     render: e => <span className="block w-full overflow-hidden truncate text-muted-foreground">{e.flightDetails}</span>,
   },
   { key: 'seDayDual', label: 'SE Day Dual', shortLabel: 'SE D-Dual', className: 'w-[70px]', render: e => <span className="text-primary font-semibold">{fmt(e.seDayDual)}</span> },
