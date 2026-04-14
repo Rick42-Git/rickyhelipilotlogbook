@@ -109,10 +109,71 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
       </div>
 
       {/* Helicopter vs Fixed-Wing — adapts to single column when only one category exists */}
-      {(heliFlights > 0 || fwFlights > 0) && (
-        <div className={`grid gap-3 mb-4 ${heliFlights > 0 && fwFlights > 0 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
-          {/* Helicopter column */}
-          {heliFlights > 0 && (
+      {(heliFlights > 0 || fwFlights > 0) && (() => {
+        const bothExist = heliFlights > 0 && fwFlights > 0;
+
+        // Single category — simplified view without helicopter/fixed-wing label
+        if (!bothExist) {
+          const isSingleHeli = heliFlights > 0;
+          const singleTypes = isSingleHeli ? heliTypes : fwTypes;
+          const singlePiston = isSingleHeli ? cats.heli_piston : cats.fw_piston;
+          const singleTurbine = isSingleHeli ? cats.heli_turbine : cats.fw_turbine;
+          const singleTotal = isSingleHeli ? heliTotal : fwTotal;
+          const singleFlights = isSingleHeli ? heliFlights : fwFlights;
+          const borderColor = isSingleHeli ? 'border-primary/20' : 'border-success/20';
+          const bgColor = isSingleHeli ? 'bg-primary/5' : 'bg-success/5';
+          const divideColor = isSingleHeli ? 'divide-primary/10' : 'divide-success/10';
+
+          return (
+            <div className={`rounded-lg border ${borderColor} ${bgColor} overflow-hidden mb-4`}>
+              <div className={`flex items-center justify-between px-3 py-2 border-b ${borderColor}`}>
+                <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Aircraft Breakdown</span>
+                <div className="text-right">
+                  <span className="font-mono text-lg font-bold text-foreground">{singleTotal.toFixed(1)}</span>
+                  <span className="font-mono text-[9px] text-muted-foreground ml-1">HRS</span>
+                </div>
+              </div>
+              <div className={`divide-y ${divideColor}`}>
+                {singlePiston.flights > 0 && (
+                  <div className="px-3 py-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">Piston</span>
+                      <span className="font-mono text-xs font-semibold text-foreground">{singlePiston.hours.toFixed(1)} <span className="text-[8px] text-muted-foreground">({singlePiston.flights})</span></span>
+                    </div>
+                  </div>
+                )}
+                {singleTurbine.flights > 0 && (
+                  <div className="px-3 py-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">Turbine</span>
+                      <span className="font-mono text-xs font-semibold text-foreground">{singleTurbine.hours.toFixed(1)} <span className="text-[8px] text-muted-foreground">({singleTurbine.flights})</span></span>
+                    </div>
+                  </div>
+                )}
+                {singleTypes.length > 0 && (
+                  <div className="px-3 py-1.5">
+                    <div className="pl-2 space-y-0.5">
+                      {singleTypes.map(([type, data]) => (
+                        <div key={type} className="flex items-center justify-between">
+                          <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
+                          <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className={`flex items-center justify-between px-3 py-1 border-t ${borderColor} ${bgColor}`}>
+                <span className="font-mono text-[8px] text-muted-foreground">{singleFlights} flights</span>
+              </div>
+            </div>
+          );
+        }
+
+        // Both categories — show split view
+        return (
+          <div className="grid gap-3 mb-4 grid-cols-1 md:grid-cols-2">
+            {/* Helicopter column */}
             <div className="rounded-lg border border-primary/20 bg-primary/5 overflow-hidden">
               <div className="flex items-center justify-between px-3 py-2 border-b border-primary/10">
                 <span className="font-mono text-[10px] text-primary uppercase tracking-widest font-bold">🚁 Helicopter</span>
@@ -121,7 +182,6 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                   <span className="font-mono text-[9px] text-muted-foreground ml-1">HRS</span>
                 </div>
               </div>
-              {/* Piston vs Turbine sub-rows */}
               <div className="divide-y divide-primary/10">
                 {cats.heli_piston.flights > 0 && (
                   <div className="px-3 py-1.5">
@@ -164,10 +224,8 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                 <span className="font-mono text-[8px] text-muted-foreground">{heliFlights} flights</span>
               </div>
             </div>
-          )}
 
-          {/* Fixed-Wing column */}
-          {fwFlights > 0 && (
+            {/* Fixed-Wing column */}
             <div className="rounded-lg border border-success/20 bg-success/5 overflow-hidden">
               <div className="flex items-center justify-between px-3 py-2 border-b border-success/10">
                 <span className="font-mono text-[10px] text-success uppercase tracking-widest font-bold">✈ Fixed-Wing</span>
@@ -218,9 +276,9 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                 <span className="font-mono text-[8px] text-muted-foreground">{fwFlights} flights</span>
               </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        );
+      })()}
 
       {/* Simulator */}
       {cats.simulator.flights > 0 && (
