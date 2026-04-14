@@ -296,9 +296,22 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
         <table className="w-full text-sm table-fixed relative z-10">
           <thead className="sticky top-[52px] z-30 bg-card">
             <tr className="border-b border-border">
-              {activeCols.map(col => (
-                <th key={col.key} className="px-2 py-2 text-left font-mono text-[10px] text-primary uppercase tracking-wider whitespace-nowrap">{col.shortLabel}</th>
-              ))}
+              {activeCols.map(col => {
+                const isNumeric = numericKeys.has(col.key);
+                const isActive = activeFilter === col.key;
+                return (
+                  <th
+                    key={col.key}
+                    onClick={isNumeric ? () => setActiveFilter(isActive ? null : col.key) : undefined}
+                    className={`px-2 py-2 text-left font-mono text-[10px] uppercase tracking-wider whitespace-nowrap transition-colors ${
+                      isNumeric ? 'cursor-pointer hover:text-accent-foreground hover:bg-muted/40 select-none' : ''
+                    } ${isActive ? 'text-accent-foreground bg-primary/15 ring-1 ring-inset ring-primary/30' : 'text-primary'}`}
+                  >
+                    {col.shortLabel}
+                    {isActive && <span className="ml-1 text-[8px] opacity-60">✕</span>}
+                  </th>
+                );
+              })}
               <th className="px-2 py-2 w-[72px]" />
             </tr>
           </thead>
