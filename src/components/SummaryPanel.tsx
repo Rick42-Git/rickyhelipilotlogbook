@@ -36,7 +36,11 @@ function normalizeRegistration(raw: string, allRegs: string[]): string {
     return s.length >= 3 && s.slice(-3) === suffix;
   });
 
-  if (matches.length <= 1) return upper;
+  if (matches.length <= 1) {
+    // If it's exactly 3 letters with no prefix, add ZS-
+    if (/^[A-Z]{3}$/.test(stripped)) return `ZS-${stripped}`;
+    return upper;
+  }
 
   // Pick the canonical form: prefer the longest variant with a dash (e.g. "ZS-RLU")
   const canonical = matches
@@ -47,6 +51,9 @@ function normalizeRegistration(raw: string, allRegs: string[]): string {
       if (aDash !== bDash) return bDash - aDash;
       return b.length - a.length;
     })[0];
+
+  // If canonical is still just 3 letters, prefix with ZS-
+  if (/^[A-Z]{3}$/.test(canonical)) return `ZS-${canonical}`;
 
   return canonical;
 }
