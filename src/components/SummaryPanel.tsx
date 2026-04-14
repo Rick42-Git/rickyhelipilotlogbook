@@ -340,33 +340,41 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
         </div>
       )}
 
-      {/* Visual Bar Graph */}
+      {/* Visual Bar Graph — Vertical */}
       {(() => {
         const bars = [
-          { label: 'Day Dual', value: totals.seDayDual, color: 'bg-amber-400', icon: <Sun className="h-3.5 w-3.5 text-amber-400" /> },
-          { label: 'Day PIC', value: totals.seDayPilot, color: 'bg-yellow-500', icon: <Sun className="h-3.5 w-3.5 text-yellow-500" /> },
-          { label: 'Night Dual', value: totals.seNightDual, color: 'bg-indigo-400', icon: <Moon className="h-3.5 w-3.5 text-indigo-400" /> },
-          { label: 'Night PIC', value: totals.seNightPilot, color: 'bg-violet-500', icon: <Moon className="h-3.5 w-3.5 text-violet-500" /> },
-          { label: 'Instrument', value: totals.instrumentTime, color: 'bg-cyan-400', icon: <Gauge className="h-3.5 w-3.5 text-cyan-400" /> },
-          { label: 'Instructor', value: totalInstruction, color: 'bg-emerald-400', icon: <GraduationCap className="h-3.5 w-3.5 text-emerald-400" /> },
+          { label: 'Day Dual', value: totals.seDayDual, color: 'from-amber-400 to-amber-500', glow: 'shadow-amber-400/30', icon: <Sun className="h-4 w-4 text-amber-400" /> },
+          { label: 'Day PIC', value: totals.seDayPilot, color: 'from-yellow-400 to-yellow-600', glow: 'shadow-yellow-500/30', icon: <Sun className="h-4 w-4 text-yellow-500" /> },
+          { label: 'Night Dual', value: totals.seNightDual, color: 'from-indigo-400 to-indigo-600', glow: 'shadow-indigo-400/30', icon: <Moon className="h-4 w-4 text-indigo-400" /> },
+          { label: 'Night PIC', value: totals.seNightPilot, color: 'from-violet-400 to-violet-600', glow: 'shadow-violet-500/30', icon: <Moon className="h-4 w-4 text-violet-500" /> },
+          { label: 'IFR', value: totals.instrumentTime, color: 'from-cyan-400 to-cyan-600', glow: 'shadow-cyan-400/30', icon: <Gauge className="h-4 w-4 text-cyan-400" /> },
+          { label: 'Instructor', value: totalInstruction, color: 'from-emerald-400 to-emerald-600', glow: 'shadow-emerald-400/30', icon: <GraduationCap className="h-4 w-4 text-emerald-400" /> },
         ];
         const maxVal = Math.max(...bars.map(b => b.value), 1);
+        const chartHeight = 180;
         return (
-          <div className="mb-4 space-y-2">
-            <p className="font-mono text-[9px] text-accent uppercase tracking-widest border-b border-border pb-1 mb-2">Hours Breakdown</p>
-            {bars.map(b => (
-              <div key={b.label} className="flex items-center gap-2">
-                {b.icon}
-                <span className="font-mono text-[10px] text-muted-foreground w-20 shrink-0">{b.label}</span>
-                <div className="flex-1 h-5 rounded-full bg-muted/30 overflow-hidden relative">
-                  <div
-                    className={`h-full rounded-full ${b.color} transition-all duration-700 ease-out`}
-                    style={{ width: `${Math.max((b.value / maxVal) * 100, b.value > 0 ? 2 : 0)}%`, opacity: 0.85 }}
-                  />
-                </div>
-                <span className="font-mono text-xs font-semibold text-foreground w-12 text-right tabular-nums">{b.value.toFixed(1)}</span>
-              </div>
-            ))}
+          <div className="mb-4">
+            <p className="font-mono text-[9px] text-accent uppercase tracking-widest border-b border-border pb-1 mb-4">Hours Breakdown</p>
+            <div className="flex items-end justify-between gap-2 px-1" style={{ height: chartHeight }}>
+              {bars.map(b => {
+                const pct = Math.max((b.value / maxVal) * 100, b.value > 0 ? 4 : 0);
+                return (
+                  <div key={b.label} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                    <span className="font-mono text-[11px] font-bold text-foreground tabular-nums opacity-80 group-hover:opacity-100 transition-opacity">
+                      {b.value > 0 ? b.value.toFixed(1) : '—'}
+                    </span>
+                    <div
+                      className={`w-full max-w-[44px] rounded-t-lg bg-gradient-to-t ${b.color} ${b.glow} shadow-lg transition-all duration-700 ease-out group-hover:scale-x-110 group-hover:brightness-110`}
+                      style={{ height: `${pct}%`, minHeight: b.value > 0 ? 6 : 0 }}
+                    />
+                    <div className="flex flex-col items-center gap-0.5 pt-1 border-t border-border/50 w-full">
+                      {b.icon}
+                      <span className="font-mono text-[8px] text-muted-foreground uppercase tracking-wide text-center leading-tight">{b.label}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         );
       })()}
