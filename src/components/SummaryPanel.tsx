@@ -184,35 +184,9 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                     </div>
                     {Object.entries(pistonTypes).length > 0 && (
                       <div className="mt-1 pl-2 space-y-0.5">
-                        {Object.entries(pistonTypes).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => {
-                          const isExpanded = expandedType === type;
-                          const regs = regByType[type] || {};
-                          const hasMultipleRegs = Object.keys(regs).length > 1;
-                          return (
-                            <div key={type}>
-                              <div
-                                className={`flex items-center justify-between cursor-pointer rounded px-1 -mx-1 transition-colors ${isExpanded ? 'bg-primary/10' : 'hover:bg-muted/30'}`}
-                                onClick={() => setExpandedType(isExpanded ? null : type)}
-                              >
-                                <span className="font-mono text-[9px] text-muted-foreground inline-flex items-center gap-1">
-                                  {hasMultipleRegs && <ChevronRight className={`h-2.5 w-2.5 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />}
-                                  {type}
-                                </span>
-                                <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
-                              </div>
-                              {isExpanded && (
-                                <div className="ml-4 mt-0.5 mb-1 space-y-0.5 border-l-2 border-primary/20 pl-2">
-                                  {Object.entries(regs).sort((a, b) => b[1].hours - a[1].hours).map(([reg, rd]) => (
-                                    <div key={reg} className="flex items-center justify-between">
-                                      <span className="font-mono text-[8px] text-accent">{reg}</span>
-                                      <span className="font-mono text-[8px] text-muted-foreground">{rd.hours.toFixed(1)}h <span className="opacity-60">({rd.flights})</span></span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
+                        {Object.entries(pistonTypes).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
+                          <TypeRow key={type} type={type} data={data} regByType={regByType} expandedType={expandedType} setExpandedType={setExpandedType} />
+                        ))}
                       </div>
                     )}
                   </div>
