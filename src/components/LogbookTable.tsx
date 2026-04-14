@@ -300,7 +300,7 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
       </div>
       <div className="relative overflow-x-auto">
         <img src={helicopterWatermark} alt="" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-auto opacity-[0.04] pointer-events-none select-none" />
-        <table className="w-full min-w-[1500px] text-sm table-fixed relative z-10">
+        <table className="w-full min-w-[1100px] text-sm table-fixed relative z-10">
           <thead className="sticky top-[52px] z-30 bg-card">
             <tr className="border-b border-border">
               {activeCols.map(col => {
