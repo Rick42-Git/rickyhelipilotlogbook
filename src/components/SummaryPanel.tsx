@@ -115,14 +115,14 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
         // Single category — simplified view without helicopter/fixed-wing label
         if (!bothExist) {
           const isSingleHeli = heliFlights > 0;
-          const singleTypes = isSingleHeli ? heliTypes : fwTypes;
           const singlePiston = isSingleHeli ? cats.heli_piston : cats.fw_piston;
           const singleTurbine = isSingleHeli ? cats.heli_turbine : cats.fw_turbine;
+          const pistonTypes = isSingleHeli ? typeByCat.heli_piston : typeByCat.fw_piston;
+          const turbineTypes = isSingleHeli ? typeByCat.heli_turbine : typeByCat.fw_turbine;
           const singleTotal = isSingleHeli ? heliTotal : fwTotal;
           const singleFlights = isSingleHeli ? heliFlights : fwFlights;
           const borderColor = isSingleHeli ? 'border-primary/20' : 'border-success/20';
           const bgColor = isSingleHeli ? 'bg-primary/5' : 'bg-success/5';
-          const divideColor = isSingleHeli ? 'divide-primary/10' : 'divide-success/10';
 
           return (
             <div className={`rounded-lg border ${borderColor} ${bgColor} overflow-hidden mb-4`}>
@@ -133,33 +133,41 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                   <span className="font-mono text-[9px] text-muted-foreground ml-1">HRS</span>
                 </div>
               </div>
-              <div className={`divide-y ${divideColor}`}>
+              <div className="divide-y divide-border/50">
                 {singlePiston.flights > 0 && (
                   <div className="px-3 py-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">Piston</span>
+                      <span className="font-mono text-[9px] text-primary/70 uppercase tracking-wider font-semibold">Piston</span>
                       <span className="font-mono text-xs font-semibold text-foreground">{singlePiston.hours.toFixed(1)} <span className="text-[8px] text-muted-foreground">({singlePiston.flights})</span></span>
                     </div>
+                    {Object.entries(pistonTypes).length > 0 && (
+                      <div className="mt-1 pl-2 space-y-0.5">
+                        {Object.entries(pistonTypes).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
+                          <div key={type} className="flex items-center justify-between">
+                            <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
+                            <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
                 {singleTurbine.flights > 0 && (
                   <div className="px-3 py-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">Turbine</span>
+                      <span className="font-mono text-[9px] text-accent/80 uppercase tracking-wider font-semibold">Turbine</span>
                       <span className="font-mono text-xs font-semibold text-foreground">{singleTurbine.hours.toFixed(1)} <span className="text-[8px] text-muted-foreground">({singleTurbine.flights})</span></span>
                     </div>
-                  </div>
-                )}
-                {singleTypes.length > 0 && (
-                  <div className="px-3 py-1.5">
-                    <div className="pl-2 space-y-0.5">
-                      {singleTypes.map(([type, data]) => (
-                        <div key={type} className="flex items-center justify-between">
-                          <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
-                          <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
-                        </div>
-                      ))}
-                    </div>
+                    {Object.entries(turbineTypes).length > 0 && (
+                      <div className="mt-1 pl-2 space-y-0.5">
+                        {Object.entries(turbineTypes).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
+                          <div key={type} className="flex items-center justify-between">
+                            <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
+                            <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
