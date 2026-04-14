@@ -36,6 +36,7 @@ type ColumnDef = {
   label: string;
   shortLabel: string;
   render: (entry: LogbookEntry) => React.ReactNode;
+  className?: string;
 };
 
 function fmt(n: number) { return n > 0 ? n.toFixed(1) : ''; }
@@ -74,7 +75,13 @@ const columns: ColumnDef[] = [
   },
   { key: 'reg', label: 'Registration', shortLabel: 'Reg', render: e => <span className="text-accent">{e.aircraftReg}</span> },
   { key: 'pic', label: 'Pilot in Command', shortLabel: 'PIC', render: e => e.pilotInCommand },
-  { key: 'details', label: 'Flight Details', shortLabel: 'Details', render: e => <span className="text-muted-foreground max-w-[240px] truncate block">{e.flightDetails}</span> },
+  {
+    key: 'details',
+    label: 'Flight Details',
+    shortLabel: 'Details',
+    className: 'w-[320px] min-w-[320px] xl:w-[420px] xl:min-w-[420px]',
+    render: e => <span className="block w-full overflow-hidden truncate text-muted-foreground">{e.flightDetails}</span>,
+  },
   { key: 'seDayDual', label: 'SE Day Dual', shortLabel: 'SE D-Dual', render: e => <span className="text-primary font-semibold">{fmt(e.seDayDual)}</span> },
   { key: 'seDayPilot', label: 'SE Day Pilot', shortLabel: 'SE D-Pilot', render: e => fmt(e.seDayPilot) },
   { key: 'seNightDual', label: 'SE Night Dual', shortLabel: 'SE N-Dual', render: e => <span className="text-destructive font-semibold">{fmt(e.seNightDual)}</span> },
@@ -293,7 +300,7 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
       </div>
       <div className="relative overflow-x-auto">
         <img src={helicopterWatermark} alt="" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-40 w-auto opacity-[0.04] pointer-events-none select-none" />
-        <table className="w-full text-sm table-fixed relative z-10">
+        <table className="w-full min-w-[1500px] text-sm table-fixed relative z-10">
           <thead className="sticky top-[52px] z-30 bg-card">
             <tr className="border-b border-border">
               {activeCols.map(col => {
@@ -303,7 +310,7 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
                   <th
                     key={col.key}
                     onClick={isNumeric ? () => setActiveFilter(isActive ? null : col.key) : undefined}
-                    className={`px-2 py-2 text-left font-mono text-[10px] uppercase tracking-wider whitespace-nowrap transition-colors ${
+                    className={`px-2 py-2 text-left font-mono text-[10px] uppercase tracking-wider whitespace-nowrap transition-colors ${col.className ?? ''} ${
                       isNumeric ? 'cursor-pointer hover:text-accent-foreground hover:bg-muted/40 select-none' : ''
                     } ${isActive ? 'text-accent-foreground bg-primary/15 ring-1 ring-inset ring-primary/30' : 'text-primary'}`}
                   >
@@ -332,7 +339,7 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
                   }`}
                 >
                   {activeCols.map(col => (
-                    <td key={col.key} className="px-2 py-2 font-mono text-xs whitespace-nowrap">{col.render(entry)}</td>
+                    <td key={col.key} className={`px-2 py-2 font-mono text-xs whitespace-nowrap ${col.className ?? ''}`}>{col.render(entry)}</td>
                   ))}
                   <td className="px-2 py-2 whitespace-nowrap w-[72px]" onClick={e => e.stopPropagation()}>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(entry)}>
@@ -349,7 +356,7 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
           <tfoot>
             <tr className="border-t-2 border-primary/30 bg-muted/30">
               {activeCols.map(col => (
-                <td key={col.key} className="px-2 py-2 font-mono text-xs font-bold whitespace-nowrap text-primary">
+                <td key={col.key} className={`px-2 py-2 font-mono text-xs font-bold whitespace-nowrap text-primary ${col.className ?? ''}`}>
                   {col.key === 'date' ? `${filteredEntries.length} flights` : totalMapping[col.key] !== undefined ? fmt(totalMapping[col.key]) : ''}
                 </td>
               ))}
