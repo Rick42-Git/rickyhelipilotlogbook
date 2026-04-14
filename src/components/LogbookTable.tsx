@@ -211,7 +211,13 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
           </thead>
           <tbody>
             {filteredEntries
-              .sort((a, b) => (a.date > b.date ? -1 : 1))
+              .slice()
+              .sort((a, b) => {
+                const aUnknown = classifyAircraft(normalizeAircraftType(a.aircraftType || '')) === 'unknown' ? 0 : 1;
+                const bUnknown = classifyAircraft(normalizeAircraftType(b.aircraftType || '')) === 'unknown' ? 0 : 1;
+                if (aUnknown !== bUnknown) return aUnknown - bUnknown;
+                return a.date > b.date ? -1 : 1;
+              })
               .map(entry => (
                 <tr
                   key={entry.id}
