@@ -312,10 +312,7 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                     {Object.entries(typeByCat.fw_turbine).length > 0 && (
                       <div className="mt-1 pl-2 space-y-0.5">
                         {Object.entries(typeByCat.fw_turbine).sort((a, b) => b[1].hours - a[1].hours).map(([type, data]) => (
-                          <div key={type} className="flex items-center justify-between">
-                            <span className="font-mono text-[9px] text-muted-foreground">{type}</span>
-                            <span className="font-mono text-[9px] font-semibold text-foreground">{data.hours.toFixed(1)}</span>
-                          </div>
+                          <TypeRow key={type} type={type} data={data} regByType={regByType} expandedType={expandedType} setExpandedType={setExpandedType} />
                         ))}
                       </div>
                     )}
