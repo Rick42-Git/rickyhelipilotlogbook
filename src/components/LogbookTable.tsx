@@ -74,7 +74,7 @@ const columns: ColumnDef[] = [
   },
   { key: 'reg', label: 'Registration', shortLabel: 'Reg', render: e => <span className="text-accent">{e.aircraftReg}</span> },
   { key: 'pic', label: 'Pilot in Command', shortLabel: 'PIC', render: e => e.pilotInCommand },
-  { key: 'details', label: 'Flight Details', shortLabel: 'Details', render: e => <span className="text-muted-foreground max-w-[120px] truncate block">{e.flightDetails}</span> },
+  { key: 'details', label: 'Flight Details', shortLabel: 'Details', render: e => <span className="text-muted-foreground max-w-[240px] truncate block">{e.flightDetails}</span> },
   { key: 'seDayDual', label: 'SE Day Dual', shortLabel: 'SE D-Dual', render: e => <span className="text-primary font-semibold">{fmt(e.seDayDual)}</span> },
   { key: 'seDayPilot', label: 'SE Day Pilot', shortLabel: 'SE D-Pilot', render: e => fmt(e.seDayPilot) },
   { key: 'seNightDual', label: 'SE Night Dual', shortLabel: 'SE N-Dual', render: e => <span className="text-destructive font-semibold">{fmt(e.seNightDual)}</span> },
