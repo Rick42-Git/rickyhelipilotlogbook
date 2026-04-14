@@ -102,7 +102,7 @@ const HELI_TURBINE_CODES = new Set([
 const FW_PISTON_CODES = new Set([
   'A22', 'A-22', 'FOXBAT',
   'C150', 'C152', 'C172', 'C182', 'C206', 'C210', 'C177', 'C170', 'C140',
-  'P28A', 'P28R', 'P32R', 'PA18', 'PA34', 'PA44', 'PA28', 'PA32', 'PA38', 'PA46',
+  'P28A', 'P28R', 'P32R', 'PA18', 'PA30', 'PA34', 'PA44', 'PA28', 'PA32', 'PA38', 'PA46',
   'SR20', 'SR22',
   'DA20', 'DA40', 'DA42', 'DA62',
   'BE36', 'BE58', 'BE35', 'BE33', 'BE55', 'BE76', 'BE23', 'BE19',
