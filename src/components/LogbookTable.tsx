@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
 import { LogbookEntry } from '@/types/logbook';
-import { Pencil, Trash2, SlidersHorizontal, Search } from 'lucide-react';
+import { Pencil, Trash2, SlidersHorizontal, Search, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import helicopterWatermark from '@/assets/helicopter-icon.png';
+import { normalizeAircraftType } from '@/lib/normalizeAircraftType';
+import { classifyAircraft } from '@/lib/aircraftCategories';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,7 +48,16 @@ function fmtDate(iso: string) {
 
 const columns: ColumnDef[] = [
   { key: 'date', label: 'Date', shortLabel: 'Date', render: e => fmtDate(e.date) },
-  { key: 'type', label: 'Class or Type', shortLabel: 'Type', render: e => e.aircraftType },
+  { key: 'type', label: 'Class or Type', shortLabel: 'Type', render: (e: LogbookEntry) => {
+    const cat = classifyAircraft(normalizeAircraftType(e.aircraftType || ''));
+    if (cat === 'unknown' && e.aircraftType) {
+      return <span className="flex items-center gap-1 text-destructive"><AlertTriangle className="h-3 w-3 shrink-0" />{e.aircraftType}</span>;
+    }
+    if (cat === 'unknown') {
+      return <span className="flex items-center gap-1 text-destructive/60"><AlertTriangle className="h-3 w-3 shrink-0" /><em>empty</em></span>;
+    }
+    return e.aircraftType;
+  }},
   { key: 'reg', label: 'Registration', shortLabel: 'Reg', render: e => <span className="text-accent">{e.aircraftReg}</span> },
   { key: 'pic', label: 'Pilot in Command', shortLabel: 'PIC', render: e => e.pilotInCommand },
   { key: 'details', label: 'Flight Details', shortLabel: 'Details', render: e => <span className="text-muted-foreground max-w-[120px] truncate block">{e.flightDetails}</span> },
@@ -200,7 +211,13 @@ export function LogbookTable({ entries, onEdit, onDelete, onClearAll }: LogbookT
           </thead>
           <tbody>
             {filteredEntries
-              .sort((a, b) => (a.date > b.date ? -1 : 1))
+              .slice()
+              .sort((a, b) => {
+                const aUnknown = classifyAircraft(normalizeAircraftType(a.aircraftType || '')) === 'unknown' ? 0 : 1;
+                const bUnknown = classifyAircraft(normalizeAircraftType(b.aircraftType || '')) === 'unknown' ? 0 : 1;
+                if (aUnknown !== bUnknown) return aUnknown - bUnknown;
+                return a.date > b.date ? -1 : 1;
+              })
               .map(entry => (
                 <tr
                   key={entry.id}
