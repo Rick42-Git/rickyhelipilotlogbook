@@ -60,7 +60,7 @@ const columns: ColumnDef[] = [
   {
     key: 'type',
     label: 'Class or Type',
-    shortLabel: 'Type',
+    shortLabel: 'Type', className: 'w-[55px]',
     render: (e: LogbookEntry) => {
       if (isUnknownEntry(e)) {
         return (
