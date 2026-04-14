@@ -27,19 +27,26 @@ function getCategoryTotals(entries: LogbookEntry[]) {
   const typeByCat: Record<AircraftCategory, Record<string, { hours: number; flights: number }>> = {
     heli_piston: {}, heli_turbine: {}, fw_piston: {}, fw_turbine: {}, simulator: {}, unknown: {},
   };
+  // Per-type, per-registration breakdown
+  const regByType: Record<string, Record<string, { hours: number; flights: number }>> = {};
 
   for (const e of entries) {
     const type = normalizeAircraftType(e.aircraftType || 'Unknown');
     const cat = classifyAircraft(type);
     const hrs = getEntryHours(e);
+    const reg = (e.aircraftReg || 'Unknown').toUpperCase();
     cats[cat].hours += hrs;
     cats[cat].flights += 1;
     if (!typeByCat[cat][type]) typeByCat[cat][type] = { hours: 0, flights: 0 };
     typeByCat[cat][type].hours += hrs;
     typeByCat[cat][type].flights += 1;
+    if (!regByType[type]) regByType[type] = {};
+    if (!regByType[type][reg]) regByType[type][reg] = { hours: 0, flights: 0 };
+    regByType[type][reg].hours += hrs;
+    regByType[type][reg].flights += 1;
   }
 
-  return { cats, typeByCat };
+  return { cats, typeByCat, regByType };
 }
 
 const GAME_PATTERNS = ['game', 'sgp', 'capture', 'darting', 'zebra', 'eland', 'buffalo', 'rhino', 'elephant', 'giraffe', 'hippo', 'lion', 'leopard', 'cheetah', 'wildebeest', 'kudu', 'impala', 'nyala', 'sable', 'roan', 'waterbuck', 'warthog', 'crocodile', 'wild dog', 'hyena', 'springbok', 'gemsbok', 'oryx', 'tsessebe', 'blesbok', 'bontebok', 'bushbuck', 'duiker', 'steenbok', 'klipspringer', 'hartebeest'];
