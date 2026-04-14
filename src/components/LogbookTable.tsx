@@ -73,8 +73,8 @@ const columns: ColumnDef[] = [
       return e.aircraftType;
     },
   },
-  { key: 'reg', label: 'Registration', shortLabel: 'Reg', render: e => <span className="text-accent">{e.aircraftReg}</span> },
-  { key: 'pic', label: 'Pilot in Command', shortLabel: 'PIC', className: 'w-[130px] min-w-[130px]', render: e => e.pilotInCommand },
+  { key: 'reg', label: 'Registration', shortLabel: 'Reg', className: 'w-[70px]', render: e => <span className="text-accent">{e.aircraftReg}</span> },
+  { key: 'pic', label: 'Pilot in Command', shortLabel: 'PIC', className: 'w-[100px]', render: e => e.pilotInCommand },
   {
     key: 'details',
     label: 'Flight Details',
