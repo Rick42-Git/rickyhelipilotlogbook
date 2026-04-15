@@ -412,15 +412,14 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
       {/* Visual Bar Graph — Vertical */}
       {(() => {
         const barDefs = [
-          { label: 'Day Dual', key: 'seDayDual', value: totals.seDayDual, color: 'from-amber-400 to-amber-500', glow: 'shadow-amber-400/30', fill: '#fbbf24', icon: <Sun className="h-4 w-4 text-amber-400" /> },
-          { label: 'Day PIC', key: 'seDayPilot', value: totals.seDayPilot, color: 'from-yellow-400 to-yellow-600', glow: 'shadow-yellow-500/30', fill: '#eab308', icon: <Sun className="h-4 w-4 text-yellow-500" /> },
-          { label: 'Night Dual', key: 'seNightDual', value: totals.seNightDual, color: 'from-indigo-400 to-indigo-600', glow: 'shadow-indigo-400/30', fill: '#818cf8', icon: <Moon className="h-4 w-4 text-indigo-400" /> },
-          { label: 'Night PIC', key: 'seNightPilot', value: totals.seNightPilot, color: 'from-violet-400 to-violet-600', glow: 'shadow-violet-500/30', fill: '#8b5cf6', icon: <Moon className="h-4 w-4 text-violet-500" /> },
-          { label: 'IFR', key: 'instrumentTime', value: totals.instrumentTime, color: 'from-cyan-400 to-cyan-600', glow: 'shadow-cyan-400/30', fill: '#22d3ee', icon: <Gauge className="h-4 w-4 text-cyan-400" /> },
-          { label: 'Instructor', key: 'instructor', value: totalInstruction, color: 'from-emerald-400 to-emerald-600', glow: 'shadow-emerald-400/30', fill: '#34d399', icon: <GraduationCap className="h-4 w-4 text-emerald-400" /> },
+          { label: 'Day Dual', key: 'seDayDual', value: totals.seDayDual, color: 'from-orange-400 to-amber-500', glow: 'shadow-orange-400/30', fill: '#fb923c', icon: <Sun className="h-4 w-4 text-orange-400" /> },
+          { label: 'Day PIC', key: 'seDayPilot', value: totals.seDayPilot, color: 'from-rose-400 to-pink-600', glow: 'shadow-rose-500/30', fill: '#fb7185', icon: <Sun className="h-4 w-4 text-rose-400" /> },
+          { label: 'Night Dual', key: 'seNightDual', value: totals.seNightDual, color: 'from-blue-400 to-blue-600', glow: 'shadow-blue-400/30', fill: '#60a5fa', icon: <Moon className="h-4 w-4 text-blue-400" /> },
+          { label: 'Night PIC', key: 'seNightPilot', value: totals.seNightPilot, color: 'from-purple-400 to-purple-600', glow: 'shadow-purple-500/30', fill: '#c084fc', icon: <Moon className="h-4 w-4 text-purple-400" /> },
+          { label: 'IFR', key: 'instrumentTime', value: totals.instrumentTime, color: 'from-teal-400 to-teal-600', glow: 'shadow-teal-400/30', fill: '#2dd4bf', icon: <Gauge className="h-4 w-4 text-teal-400" /> },
+          { label: 'Instructor', key: 'instructor', value: totalInstruction, color: 'from-lime-400 to-green-600', glow: 'shadow-lime-400/30', fill: '#a3e635', icon: <GraduationCap className="h-4 w-4 text-lime-400" /> },
         ];
         const maxVal = Math.max(...barDefs.map(b => b.value), 1);
-        const chartHeight = 180;
 
         // Compute pie data for selected breakdown
         const selectedBar = selectedBreakdown ? barDefs.find(b => b.key === selectedBreakdown) : null;
@@ -459,8 +458,8 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
           }
 
           const PIE_COLORS = [
-            '#fbbf24', '#818cf8', '#34d399', '#f87171', '#a78bfa',
-            '#22d3ee', '#fb923c', '#e879f9', '#38bdf8', '#4ade80',
+            '#fb923c', '#60a5fa', '#a3e635', '#f87171', '#c084fc',
+            '#2dd4bf', '#fb7185', '#e879f9', '#38bdf8', '#4ade80',
             '#f472b6', '#facc15', '#94a3b8',
           ];
 
@@ -524,31 +523,33 @@ export function SummaryPanel({ totals, entryCount, entries }: SummaryPanelProps)
                 </button>
               )}
             </div>
-            <div className="flex items-end justify-between gap-2 px-1" style={{ height: chartHeight }}>
+            <div className="flex flex-col gap-2 px-1">
               {barDefs.map(b => {
                 const pct = Math.max((b.value / maxVal) * 100, b.value > 0 ? 4 : 0);
                 const isSelected = selectedBreakdown === b.key;
                 return (
                   <div
                     key={b.label}
-                    className={`flex-1 flex flex-col items-center gap-1.5 h-full justify-end group cursor-pointer transition-opacity ${
+                    className={`flex items-center gap-2 group cursor-pointer transition-opacity ${
                       selectedBreakdown && !isSelected ? 'opacity-40' : ''
                     }`}
                     onClick={() => setSelectedBreakdown(isSelected ? null : b.key)}
                   >
-                    <span className="font-mono text-[11px] font-bold text-foreground tabular-nums opacity-80 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1.5 w-20 shrink-0">
+                      {b.icon}
+                      <span className="font-mono text-[9px] text-muted-foreground uppercase tracking-wide leading-tight">{b.label}</span>
+                    </div>
+                    <div className="flex-1 h-7 bg-muted/30 rounded-md overflow-hidden relative">
+                      <div
+                        className={`h-full rounded-md bg-gradient-to-r ${b.color} ${b.glow} shadow-lg transition-all duration-700 ease-out group-hover:brightness-110 ${
+                          isSelected ? 'ring-2 ring-foreground/30' : ''
+                        }`}
+                        style={{ width: `${pct}%`, minWidth: b.value > 0 ? 8 : 0 }}
+                      />
+                    </div>
+                    <span className="font-mono text-[11px] font-bold text-foreground tabular-nums w-12 text-right shrink-0">
                       {b.value > 0 ? b.value.toFixed(1) : '—'}
                     </span>
-                    <div
-                      className={`w-full max-w-[44px] rounded-t-lg bg-gradient-to-t ${b.color} ${b.glow} shadow-lg transition-all duration-700 ease-out group-hover:scale-x-110 group-hover:brightness-110 ${
-                        isSelected ? 'ring-2 ring-foreground/30 scale-x-110' : ''
-                      }`}
-                      style={{ height: `${pct}%`, minHeight: b.value > 0 ? 6 : 0 }}
-                    />
-                    <div className="flex flex-col items-center gap-0.5 pt-1 border-t border-border/50 w-full">
-                      {b.icon}
-                      <span className="font-mono text-[8px] text-muted-foreground uppercase tracking-wide text-center leading-tight">{b.label}</span>
-                    </div>
                   </div>
                 );
               })}
