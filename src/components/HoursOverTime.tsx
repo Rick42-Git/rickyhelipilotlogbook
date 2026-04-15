@@ -166,43 +166,24 @@ export function HoursOverTime({ entries }: HoursOverTimeProps) {
   ];
 
   return (
-    <div className="mb-4">
-      <div className="flex items-center justify-between border-b border-border pb-1 mb-3">
-        <p className="font-mono text-[9px] text-accent uppercase tracking-widest">Hours Over Time</p>
+    <div className="mb-3">
+      <div className="flex items-center justify-between pb-1 mb-2">
+        <p className="font-mono text-[8px] text-muted-foreground uppercase tracking-widest">Hours Over Time</p>
         <div className="flex gap-0.5">
           {periods.map(p => (
             <button
               key={p.key}
               onClick={() => setPeriod(p.key)}
-              className={`font-mono text-[8px] uppercase tracking-wider px-2 py-1 rounded transition-colors ${
+              className={`font-mono text-[7px] uppercase tracking-wider px-1.5 py-0.5 rounded transition-colors ${
                 period === p.key
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {p.label}
             </button>
           ))}
         </div>
-      </div>
-
-      {/* Summary stats */}
-      <div className="flex gap-3 mb-3">
-        {displayData.length > 0 && (
-          <>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-sm bg-gradient-to-t from-amber-400 to-amber-500" />
-              <span className="font-mono text-[8px] text-muted-foreground">Period hours</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-4 h-0.5 bg-cyan-400 rounded" />
-              <span className="font-mono text-[8px] text-muted-foreground">Cumulative</span>
-            </div>
-            <span className="font-mono text-[9px] text-foreground ml-auto tabular-nums">
-              Avg: <span className="font-semibold">{(totalHours / displayData.length).toFixed(1)}</span> hrs/{period === 'week' ? 'wk' : period === 'month' ? 'mo' : 'yr'}
-            </span>
-          </>
-        )}
       </div>
 
       {/* SVG Chart */}
@@ -213,8 +194,8 @@ export function HoursOverTime({ entries }: HoursOverTimeProps) {
             const y = padT + chartH - (t / maxHours) * chartH;
             return (
               <g key={i}>
-                <line x1={padL} y1={y} x2={width - padR} y2={y} stroke="hsl(var(--border))" strokeWidth={0.5} strokeDasharray="4,3" />
-                <text x={padL - 4} y={y + 3} textAnchor="end" className="fill-muted-foreground" style={{ fontSize: 8, fontFamily: 'ui-monospace, monospace' }}>{t}</text>
+                <line x1={padL} y1={y} x2={width - padR} y2={y} stroke="hsl(var(--border))" strokeWidth={0.3} strokeDasharray="3,3" opacity={0.5} />
+                <text x={padL - 4} y={y + 3} textAnchor="end" className="fill-muted-foreground" style={{ fontSize: 7, fontFamily: 'ui-monospace, monospace' }} opacity={0.6}>{t}</text>
               </g>
             );
           })}
@@ -225,33 +206,15 @@ export function HoursOverTime({ entries }: HoursOverTimeProps) {
             const barH = (d.hours / maxHours) * chartH;
             return (
               <g key={d.key}>
-                <defs>
-                  <linearGradient id={`bar-grad-${i}`} x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stopColor="#fbbf24" />
-                    <stop offset="100%" stopColor="#f59e0b" />
-                  </linearGradient>
-                </defs>
                 <rect
                   x={x}
                   y={padT + chartH - barH}
                   width={barW}
-                  height={Math.max(barH, d.hours > 0 ? 2 : 0)}
-                  rx={2}
-                  fill={`url(#bar-grad-${i})`}
-                  opacity={0.8}
+                  height={Math.max(barH, d.hours > 0 ? 1.5 : 0)}
+                  rx={1.5}
+                  fill="hsl(var(--muted-foreground))"
+                  opacity={0.25}
                 />
-                {/* Value on bar if big enough */}
-                {barH > 18 && (
-                  <text
-                    x={x + barW / 2}
-                    y={padT + chartH - barH + 11}
-                    textAnchor="middle"
-                    className="fill-foreground"
-                    style={{ fontSize: 7, fontFamily: 'ui-monospace, monospace', fontWeight: 600 }}
-                  >
-                    {d.hours.toFixed(1)}
-                  </text>
-                )}
                 {/* X-axis label */}
                 {i % labelEvery === 0 && (
                   <text
@@ -259,7 +222,8 @@ export function HoursOverTime({ entries }: HoursOverTimeProps) {
                     y={height - 5}
                     textAnchor="middle"
                     className="fill-muted-foreground"
-                    style={{ fontSize: 7, fontFamily: 'ui-monospace, monospace' }}
+                    style={{ fontSize: 6, fontFamily: 'ui-monospace, monospace' }}
+                    opacity={0.5}
                     transform={displayData.length > 12 ? `rotate(-45, ${x + barW / 2}, ${height - 5})` : ''}
                   >
                     {d.label}
@@ -274,22 +238,13 @@ export function HoursOverTime({ entries }: HoursOverTimeProps) {
             <polyline
               points={linePoints}
               fill="none"
-              stroke="#22d3ee"
-              strokeWidth={2}
+              stroke="hsl(var(--muted-foreground))"
+              strokeWidth={1.2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              opacity={0.7}
+              opacity={0.35}
             />
           )}
-
-          {/* Cumulative dots */}
-          {displayData.map((d, i) => {
-            const x = padL + i * (barW + gap) + barW / 2;
-            const y = padT + chartH - (d.cumulative / displayMaxCum) * chartH;
-            return (
-              <circle key={`dot-${i}`} cx={x} cy={y} r={displayData.length > 20 ? 1.5 : 2.5} fill="#22d3ee" opacity={0.9} />
-            );
-          })}
 
           {/* Cumulative value at end */}
           {displayData.length > 0 && (() => {
@@ -299,10 +254,11 @@ export function HoursOverTime({ entries }: HoursOverTimeProps) {
             return (
               <text
                 x={x}
-                y={y - 6}
+                y={y - 5}
                 textAnchor="middle"
-                fill="#22d3ee"
-                style={{ fontSize: 8, fontFamily: 'ui-monospace, monospace', fontWeight: 700 }}
+                className="fill-muted-foreground"
+                style={{ fontSize: 7, fontFamily: 'ui-monospace, monospace', fontWeight: 600 }}
+                opacity={0.6}
               >
                 {last.cumulative.toFixed(1)}
               </text>
@@ -310,7 +266,7 @@ export function HoursOverTime({ entries }: HoursOverTimeProps) {
           })()}
 
           {/* Baseline */}
-          <line x1={padL} y1={padT + chartH} x2={width - padR} y2={padT + chartH} stroke="hsl(var(--border))" strokeWidth={1} />
+          <line x1={padL} y1={padT + chartH} x2={width - padR} y2={padT + chartH} stroke="hsl(var(--border))" strokeWidth={0.5} opacity={0.4} />
         </svg>
       </div>
     </div>
