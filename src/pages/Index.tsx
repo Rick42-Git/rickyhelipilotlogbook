@@ -142,11 +142,11 @@ const Index = () => {
             {/* Main header: Logo + Title */}
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="absolute -inset-1 bg-primary/20 rounded-full blur-md" />
+                <div className="absolute -inset-1.5 bg-primary/30 rounded-full blur-md" />
                 <img src={helicopterIcon} alt="" className="relative h-9 w-auto drop-shadow-[0_0_12px_hsl(38_95%_55%/0.4)]" />
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="font-mono text-sm font-bold text-primary tracking-wider leading-none">
+                <h1 className="font-mono text-sm font-bold text-primary tracking-[0.18em] leading-none">
                   ROTORLOG
                 </h1>
                 <p className="font-mono text-[8px] text-muted-foreground/60 tracking-[0.2em] mt-0.5">
