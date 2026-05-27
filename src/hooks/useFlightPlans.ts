@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { getActivatedUser } from '@/lib/activation';
 import { Waypoint } from '@/types/flightPlan';
 import { toast } from '@/hooks/use-toast';
+import { invokeDataProxy } from '@/lib/dataProxy';
 
 export interface SavedFlightPlan {
   id: string;
@@ -31,13 +31,8 @@ export function useFlightPlans() {
     if (!userId) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('flight_plans')
-        .select('*')
-        .eq('user_id', userId)
-        .order('updated_at', { ascending: false });
-
-      if (error) throw error;
+      const { data, error } = await invokeDataProxy<any[]>('flight_plans', 'list');
+      if (error) throw new Error(error.message);
       setPlans(
         (data || []).map((d: any) => ({
           ...d,
@@ -75,10 +70,9 @@ export function useFlightPlans() {
 
     try {
       if (plan.id) {
-        // Update existing
-        const { error } = await supabase
-          .from('flight_plans')
-          .update({
+        const { error } = await invokeDataProxy('flight_plans', 'update', {
+          id: plan.id,
+          patch: {
             name: plan.name,
             aircraft_type: plan.aircraft_type,
             aircraft_reg: plan.aircraft_reg,
@@ -90,20 +84,15 @@ export function useFlightPlans() {
             waypoints: plan.waypoints as any,
             notes: plan.notes,
             updated_at: new Date().toISOString(),
-          })
-          .eq('id', plan.id)
-          .eq('user_id', userId);
-
-        if (error) throw error;
+          },
+        });
+        if (error) throw new Error(error.message);
         toast({ title: 'Plan saved', description: `"${plan.name}" updated.` });
         fetchPlans();
         return plan.id;
       } else {
-        // Insert new
-        const { data, error } = await supabase
-          .from('flight_plans')
-          .insert({
-            user_id: userId,
+        const { data, error } = await invokeDataProxy<{ id: string }>('flight_plans', 'insert', {
+          row: {
             name: plan.name,
             aircraft_type: plan.aircraft_type,
             aircraft_reg: plan.aircraft_reg,
@@ -114,11 +103,9 @@ export function useFlightPlans() {
             reserve_fuel: plan.reserve_fuel,
             waypoints: plan.waypoints as any,
             notes: plan.notes,
-          })
-          .select('id')
-          .single();
-
-        if (error) throw error;
+          },
+        });
+        if (error) throw new Error(error.message);
         toast({ title: 'Plan saved', description: `"${plan.name}" created.` });
         fetchPlans();
         return data?.id || null;
@@ -132,13 +119,8 @@ export function useFlightPlans() {
   const deletePlan = useCallback(async (id: string) => {
     if (!userId) return;
     try {
-      const { error } = await supabase
-        .from('flight_plans')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', userId);
-
-      if (error) throw error;
+      const { error } = await invokeDataProxy('flight_plans', 'delete', { id });
+      if (error) throw new Error(error.message);
       toast({ title: 'Plan deleted' });
       fetchPlans();
     } catch (err: any) {

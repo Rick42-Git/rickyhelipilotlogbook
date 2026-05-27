@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LogbookEntry } from '@/types/logbook';
 import { ExtractedDataReview, ExtractedEntry } from '@/components/ExtractedDataReview';
 import { CreditRequestDialog } from '@/components/CreditRequestDialog';
+import { invokeDataProxy } from '@/lib/dataProxy';
 
 interface PhotoUploadProps {
   onEntriesExtracted: (entries: Omit<LogbookEntry, 'id'>[]) => void;
@@ -48,13 +49,10 @@ export function PhotoUpload({ onEntriesExtracted }: PhotoUploadProps) {
       const userLimit = codeData?.extraction_limit ?? 5;
       setLimit(userLimit);
 
-      // Count usage
-      const { count } = await supabase
-        .from('ai_usage')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', activatedUser.id);
-
-      setRemaining(Math.max(0, userLimit - (count ?? 0)));
+      // Count usage via secure proxy
+      const { data } = await invokeDataProxy<{ count: number }>('ai_usage', 'count');
+      const used = data?.count ?? 0;
+      setRemaining(Math.max(0, userLimit - used));
     } catch {
       // Fail silently
     }

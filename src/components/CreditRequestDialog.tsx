@@ -3,9 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { invokeDataProxy } from '@/lib/dataProxy';
 
 interface CreditRequestDialogProps {
   open: boolean;
@@ -25,15 +25,14 @@ export function CreditRequestDialog({ open, onOpenChange, userId, userName, used
     if (amount < 1) { toast.error('Request at least 1 extraction'); return; }
     setSubmitting(true);
     try {
-      const { error } = await supabase
-        .from('credit_requests')
-        .insert({ user_id: userId, user_name: userName, requested_amount: amount } as any);
-
+      const { error } = await invokeDataProxy('credit_requests', 'insert', {
+        requested_amount: amount,
+      });
       if (error) {
         if (error.code === '23505') {
           toast.error('You already have a pending request');
         } else {
-          throw error;
+          throw new Error(error.message);
         }
       } else {
         setSubmitted(true);

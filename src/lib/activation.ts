@@ -5,6 +5,7 @@ export interface ActivatedUser {
   displayName: string;
   email: string;
   isAdmin?: boolean;
+  accessCode?: string;
 }
 
 export function getActivatedUser(): ActivatedUser | null {

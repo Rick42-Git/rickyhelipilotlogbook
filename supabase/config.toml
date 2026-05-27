@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.ourairports]
 verify_jwt = false
+
+[functions.data-proxy]
+verify_jwt = false
+
+[functions.profile-sync]
+verify_jwt = false
