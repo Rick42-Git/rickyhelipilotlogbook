@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     // Default: sync profile (display name, admin status, extraction limit)
     const { data, error } = await supabase
       .from("access_codes")
-      .select("display_name, is_admin, extraction_limit")
+      .select("display_name, is_admin, extraction_limit, code")
       .eq("id", userId)
       .maybeSingle();
 
