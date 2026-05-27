@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { invokeDataProxy } from '@/lib/dataProxy';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,12 +74,8 @@ export default function Admin() {
   };
 
   const fetchCreditRequests = async () => {
-    const { data } = await supabase
-      .from('credit_requests')
-      .select('*')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: true });
-    setCreditRequests((data as any[]) || []);
+    const { data } = await invokeDataProxy<any[]>('credit_requests', 'list_pending');
+    setCreditRequests(data || []);
   };
 
   useEffect(() => { fetchCodes(); fetchCreditRequests(); }, [adminId]);
