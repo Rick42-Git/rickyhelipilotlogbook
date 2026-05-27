@@ -36,8 +36,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.functions.invoke('profile-sync', {
         body: { userId: cached.id },
       }).then(({ data, error }) => {
-        if (!error && data?.data && data.data.display_name !== cached.displayName) {
-          const updated = { ...cached, displayName: data.data.display_name, isAdmin: data.data.is_admin };
+        if (!error && data?.data) {
+          const next = {
+            ...cached,
+            displayName: data.data.display_name ?? cached.displayName,
+            isAdmin: data.data.is_admin ?? cached.isAdmin,
+            accessCode: data.data.code ?? cached.accessCode,
+          };
+          const changed =
+            next.displayName !== cached.displayName ||
+            next.isAdmin !== cached.isAdmin ||
+            next.accessCode !== cached.accessCode;
+          if (!changed) return;
+          const updated = next;
           setActivatedUser(updated);
           setUser(updated);
         }
