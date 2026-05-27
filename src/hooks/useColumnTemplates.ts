@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { invokeDataProxy } from '@/lib/dataProxy';
 
 export interface ColumnMapping {
   sourceHeader: string;
@@ -27,11 +27,7 @@ export function useColumnTemplates() {
 
     const fetch = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('column_templates')
-        .select('*')
-        .order('created_at', { ascending: false });
-
+      const { data, error } = await invokeDataProxy<any[]>('column_templates', 'list');
       if (error) {
         console.error('Failed to load templates:', error);
       } else {
@@ -51,18 +47,14 @@ export function useColumnTemplates() {
 
   const saveTemplate = useCallback(async (name: string, mapping: ColumnMapping[], sourceHeaders: string[]) => {
     if (!user) return null;
-    const { data, error } = await supabase
-      .from('column_templates')
-      .insert({
-        user_id: user.id,
+    const { data, error } = await invokeDataProxy<any>('column_templates', 'insert', {
+      row: {
         name,
         column_mapping: mapping as any,
         source_headers: sourceHeaders as any,
-      })
-      .select()
-      .single();
-
-    if (error) { toast.error('Failed to save template'); return null; }
+      },
+    });
+    if (error || !data) { toast.error('Failed to save template'); return null; }
     const template: ColumnTemplate = {
       id: data.id,
       name: data.name,
@@ -77,11 +69,7 @@ export function useColumnTemplates() {
 
   const deleteTemplate = useCallback(async (id: string) => {
     if (!user) return;
-    const { error } = await supabase
-      .from('column_templates')
-      .delete()
-      .eq('id', id);
-
+    const { error } = await invokeDataProxy('column_templates', 'delete', { id });
     if (error) { toast.error('Failed to delete template'); return; }
     setTemplates(prev => prev.filter(t => t.id !== id));
     toast.success('Template deleted');
