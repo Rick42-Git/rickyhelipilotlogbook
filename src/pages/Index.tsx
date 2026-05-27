@@ -297,36 +297,66 @@ const Index = () => {
     <div className="min-h-screen bg-background grid-bg scanline overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Header */}
-        <div className="glass-panel hud-border p-3 md:p-4 mb-6 md:mb-8">
-          <div className="flex flex-col gap-3">
+        <div className="glass-panel hud-border p-4 md:p-5 mb-6 md:mb-8 relative overflow-hidden">
+          {/* Ambient glow */}
+          <div className="absolute -top-24 left-1/3 w-[420px] h-[220px] rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+
+          <div className="relative flex flex-col gap-4">
+            {/* Top row: brand + telemetry + controls */}
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 md:gap-4 shrink min-w-0 md:min-w-fit">
-                <img src={helicopterIcon} alt="Helicopter" className="h-8 md:h-12 w-auto opacity-80 drop-shadow-[0_0_8px_hsl(38_95%_55%/0.3)] flex-shrink-0" />
-                <div className="min-w-0 md:min-w-fit">
+              <div className="flex items-center gap-4 shrink min-w-0">
+                <div className="relative shrink-0">
+                  <div className="absolute -inset-1.5 bg-primary/25 rounded-full blur-md" />
+                  <img src={helicopterIcon} alt="Helicopter" className="relative h-10 md:h-12 w-auto drop-shadow-[0_0_12px_hsl(38_95%_55%/0.45)]" />
+                </div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h1 className="font-mono text-base md:text-2xl font-bold text-primary tracking-wider truncate md:overflow-visible md:text-clip md:whitespace-nowrap">
+                    <h1 className="font-mono text-base md:text-2xl font-bold text-primary tracking-[0.18em] truncate md:overflow-visible md:whitespace-nowrap">
                       HELI PILOT LOGBOOK
                     </h1>
                     <div className="status-dot flex-shrink-0" />
                   </div>
-                  <div className="flex items-center gap-3 mt-0.5 md:mt-1">
-                    <p className="font-mono text-[10px] md:text-xs text-muted-foreground tracking-widest truncate">
-                      PILOT: {pilotName}
-                    </p>
-                    <span className="font-mono text-[9px] text-accent/60 flex-shrink-0">▸ ACTIVE</span>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground/60">PILOT</span>
+                    <span className="font-mono text-[11px] font-semibold text-foreground tracking-wider truncate">{pilotName}</span>
+                    <span className="hidden md:inline font-mono text-[9px] text-accent/60 flex-shrink-0">▸ ACTIVE</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+
+              {/* Stat chips — desktop only */}
+              <div className="hidden lg:flex items-center gap-2 shrink-0">
+                {aviatorTime && (
+                  <div className="flex items-baseline gap-1.5 surface-inset px-3 py-1.5">
+                    <span className="font-mono text-[8px] uppercase tracking-[0.25em] text-primary/60">AVT</span>
+                    <span className="font-mono text-xs font-bold text-primary tabular-nums">{aviatorTime.years}y {aviatorTime.days}d</span>
+                  </div>
+                )}
+                <div className="flex items-baseline gap-1.5 surface-inset px-3 py-1.5">
+                  <span className="font-mono text-[8px] uppercase tracking-[0.25em] text-success/70">TTL</span>
+                  <span className="font-mono text-sm font-bold text-success tabular-nums leading-none">{grandTotal.toFixed(1)}</span>
+                  <span className="font-mono text-[8px] text-success/50">HRS</span>
+                </div>
+                <div className="flex items-baseline gap-1.5 surface-inset px-3 py-1.5">
+                  <span className="font-mono text-[8px] uppercase tracking-[0.25em] text-accent/70">FLT</span>
+                  <span className="font-mono text-xs font-bold text-accent tabular-nums">{entries.length}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1 shrink-0">
                 <Button variant="ghost" size="icon" onClick={toggleTheme} className="font-mono" title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
                   {theme === 'dark' ? <Sun className="h-4 w-4 text-primary" /> : <Moon className="h-4 w-4 text-primary" />}
                 </Button>
-                <Button variant="ghost" onClick={signOut} className="font-mono gap-2 text-muted-foreground">
+                <Button variant="ghost" size="icon" onClick={signOut} className="font-mono text-muted-foreground" title="Sign out">
                   <LogOut className="h-4 w-4" />
                 </Button>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2">
+
+            {/* Action toolbar — framed with its own surface and label */}
+            <div className="surface-inset p-2.5 flex flex-wrap items-center gap-1.5">
+              <span className="font-mono text-[8px] uppercase tracking-[0.3em] text-muted-foreground/50 px-2 hidden md:inline">COMMAND</span>
+              <div className="hidden md:block h-4 w-px bg-border/60" />
               {canInstall && (
                 <Button variant="outline" onClick={install} className="font-mono gap-2 border-primary text-primary">
                   <MonitorSmartphone className="h-4 w-4" />
