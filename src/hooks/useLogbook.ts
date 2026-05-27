@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { LogbookEntry, NumericField } from '@/types/logbook';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { invokeDataProxy } from '@/lib/dataProxy';
 import {
   getCachedEntries,
   setCachedEntries,
@@ -76,14 +76,11 @@ async function fetchAllEntriesForUser(userId: string): Promise<LogbookEntry[]> {
   const rows: any[] = [];
 
   while (true) {
-    const { data, error } = await supabase
-      .from('logbook_entries')
-      .select('*')
-      .eq('user_id', userId)
-      .order('date', { ascending: true })
-      .range(from, from + FETCH_PAGE_SIZE - 1);
-
-    if (error) throw error;
+    const { data, error } = await invokeDataProxy<any[]>('logbook_entries', 'list', {
+      from,
+      to: from + FETCH_PAGE_SIZE - 1,
+    });
+    if (error) throw new Error(error.message);
     if (!data || data.length === 0) break;
 
     rows.push(...data);
@@ -121,14 +118,11 @@ export function useLogbook() {
             continue;
           }
 
-          const { data, error } = await supabase
-            .from('logbook_entries')
-            .insert(action.entry as any)
-            .select()
-            .single();
-
-          if (!error && data) {
-            tempIdMap.set(action.tempId, data.id);
+          const { data, error } = await invokeDataProxy<any[]>('logbook_entries', 'insert', {
+            row: action.entry,
+          });
+          if (!error && data && data[0]) {
+            tempIdMap.set(action.tempId, data[0].id);
             syncedCount++;
           } else {
             remainingQueue.push(action);
@@ -142,12 +136,10 @@ export function useLogbook() {
 
           // If updating a temp entry, resolve the real id
           const realId = tempIdMap.get(action.id) || action.id;
-          const { error } = await supabase
-            .from('logbook_entries')
-            .update(action.entry)
-            .eq('id', realId)
-            .eq('user_id', userId);
-
+          const { error } = await invokeDataProxy('logbook_entries', 'update', {
+            id: realId,
+            patch: action.entry,
+          });
           if (!error) {
             syncedCount++;
           } else {
@@ -155,12 +147,9 @@ export function useLogbook() {
           }
         } else if (action.type === 'delete') {
           const realId = tempIdMap.get(action.id) || action.id;
-          const { error } = await supabase
-            .from('logbook_entries')
-            .delete()
-            .eq('id', realId)
-            .eq('user_id', userId);
-
+          const { error } = await invokeDataProxy('logbook_entries', 'delete', {
+            id: realId,
+          });
           if (!error) {
             syncedCount++;
           } else {
@@ -261,15 +250,12 @@ export function useLogbook() {
       return;
     }
 
-    const { data, error } = await supabase
-      .from('logbook_entries')
-      .insert(toDbEntry(entry, user.id))
-      .select()
-      .single();
-
-    if (error) { toast.error('Failed to add entry'); return; }
+    const { data, error } = await invokeDataProxy<any[]>('logbook_entries', 'insert', {
+      row: toDbEntry(entry, user.id),
+    });
+    if (error || !data || !data[0]) { toast.error('Failed to add entry'); return; }
     setEntries(prev => {
-      const updated = [...prev, fromDbEntry(data)];
+      const updated = [...prev, fromDbEntry(data[0])];
       setCachedEntries(updated);
       return updated;
     });
@@ -290,12 +276,10 @@ export function useLogbook() {
       return;
     }
 
-    const { error } = await supabase
-      .from('logbook_entries')
-      .update(toDbEntry(entry, user.id))
-      .eq('id', id)
-      .eq('user_id', user.id);
-
+    const { error } = await invokeDataProxy('logbook_entries', 'update', {
+      id,
+      patch: toDbEntry(entry, user.id),
+    });
     if (error) { toast.error('Failed to update entry'); return; }
     setEntries(prev => {
       const updated = prev.map(e => e.id === id ? { ...entry, id } : e);
@@ -318,12 +302,7 @@ export function useLogbook() {
       return;
     }
 
-    const { error } = await supabase
-      .from('logbook_entries')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', user.id);
-
+    const { error } = await invokeDataProxy('logbook_entries', 'delete', { id });
     if (error) { toast.error('Failed to delete entry'); return; }
     setEntries(prev => {
       const updated = prev.filter(e => e.id !== id);
@@ -354,11 +333,7 @@ export function useLogbook() {
 
     const rows = newEntries.map(e => toDbEntry(e, user.id));
     console.log('[Logbook] Inserting', rows.length, 'entries for user', user.id);
-    const { data, error } = await supabase
-      .from('logbook_entries')
-      .insert(rows)
-      .select();
-
+    const { data, error } = await invokeDataProxy<any[]>('logbook_entries', 'insert', { rows });
     if (error) { console.error('[Logbook] Insert failed:', error); toast.error('Failed to import entries: ' + error.message); return; }
     console.log('[Logbook] Inserted', data?.length, 'entries successfully');
     const imported = (data || []).map(fromDbEntry);
@@ -372,12 +347,9 @@ export function useLogbook() {
 
   const undoLastImport = useCallback(async () => {
     if (!user || !lastImportIds || lastImportIds.length === 0) return;
-    const { error } = await supabase
-      .from('logbook_entries')
-      .delete()
-      .eq('user_id', user.id)
-      .in('id', lastImportIds);
-
+    const { error } = await invokeDataProxy('logbook_entries', 'delete_many', {
+      ids: lastImportIds,
+    });
     if (error) { toast.error('Failed to undo import'); return; }
     const idsToRemove = new Set(lastImportIds);
     setEntries(prev => {
@@ -399,11 +371,7 @@ export function useLogbook() {
     const ids = unknownEntries.map(e => e.id);
     for (let i = 0; i < ids.length; i += 100) {
       const batch = ids.slice(i, i + 100);
-      const { error } = await supabase
-        .from('logbook_entries')
-        .delete()
-        .eq('user_id', user.id)
-        .in('id', batch);
+      const { error } = await invokeDataProxy('logbook_entries', 'delete_many', { ids: batch });
       if (error) { toast.error('Failed to delete unknown entries'); return; }
     }
     const idSet = new Set(ids);
@@ -420,11 +388,7 @@ export function useLogbook() {
     const ids = entries.map(e => e.id);
     for (let i = 0; i < ids.length; i += 100) {
       const batch = ids.slice(i, i + 100);
-      const { error } = await supabase
-        .from('logbook_entries')
-        .delete()
-        .eq('user_id', user.id)
-        .in('id', batch);
+      const { error } = await invokeDataProxy('logbook_entries', 'delete_many', { ids: batch });
       if (error) { toast.error('Failed to clear entries'); return; }
     }
     setEntries([]);
